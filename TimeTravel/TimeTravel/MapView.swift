@@ -16,6 +16,7 @@ class MapView: UIViewController  {
     let locationManager = CLLocationManager() // 위치정보를 처리할 인스턴스
     
     
+    // 시뮬은 현재 가상 위치이므로 나중에 info에서 설정해야 내 위치가 뜸
     /*
      Info.plist
      
@@ -42,7 +43,8 @@ class MapView: UIViewController  {
         
         
         setupMapView()
-        //        setupLocation() // 위치정보
+        setupLocation()  // 알림 자꾸 떠서 나중에 info와 같이 살리기
+//        self.mapView.mapType = .satellite
         
     }
     
@@ -72,100 +74,133 @@ class MapView: UIViewController  {
         }
         
     }
-}
     
-    // MARK: - CLLocationManagerDelegate 확장
-    extension MapView: CLLocationManagerDelegate {
-        func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-            // 위치 권한 변경 시 처리
-            // setupLocation() 함수 안에 checkLocationAuthorization()을 호출하는 로직이 있다면 여기서 다시 호출할 수 있습니다.
-            switch manager.authorizationStatus {
-            case .authorizedAlways, .authorizedWhenInUse:
-                manager.startUpdatingLocation()
-                mapView.showsUserLocation = true
-            case .denied, .restricted:
-                // 권한 없을 때 처리 (예: 알림 표시)
-                // showLocationDeniedAlert()
-                break
-            default:
-                break
-            }
-        }
-        
-        func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-            if let loc = locations.first {
-                let region = MKCoordinateRegion(center: loc.coordinate,
-                                                latitudinalMeters: 1000,
-                                                longitudinalMeters: 1000)
-                mapView.setRegion(region, animated: true)
-                manager.stopUpdatingLocation() // 초기 위치 설정 후 업데이트 멈춤
-            }
-        }
-        
-        func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-            print("위치 정보 못 가져옴: \(error.localizedDescription)")
-        }
-    }
+    
+    
+    // MARK: - 위치 권한 및 업데이트 설정
+     private func setupLocation() {
+         locationManager.delegate = self
+         // 위치 정보 사용 승인 받기
+         checkLocationAuthorization()
+     }
+     
+     private func checkLocationAuthorization() {
+         switch locationManager.authorizationStatus {
+         case .notDetermined:
+             // 앱 사용 중에만 위치 권한 요청
+             locationManager.requestWhenInUseAuthorization()
+         case .restricted, .denied:
+             // 권한 없을 때 사용자에게 알림
+             showLocationDeniedAlert()
+         case .authorizedWhenInUse, .authorizedAlways:
+             // 권한이 있다면 위치 업데이트 시작
+             locationManager.startUpdatingLocation()
+             mapView.showsUserLocation = true // 지도에 사용자 현재 위치 파란색 점 표시
+         @unknown default:
+             break
+         }
+     }
+     
+     private func showLocationDeniedAlert() {
+         let alert = UIAlertController(title: "위치 권한이 꺼져있습니다",
+                                       message: "설정 > 개인정보 보호에서 위치 서비스를 허용해주세요.",
+                                       preferredStyle: .alert)
+         alert.addAction(UIAlertAction(title: "확인", style: .default))
+         present(alert, animated: true)
+     }
+ }
 
-    // MARK: - MKMapViewDelegate 확장
+// MARK: - CLLocationManagerDelegate 확장
+extension MapView: CLLocationManagerDelegate {
+    
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        checkLocationAuthorization()
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+//        if let currentLocation = locations.first {
+//            // 현재 위치로 지도의 중심 영역을 설정하고 확대/축소 레벨을 조절합니다. - 나중에 현재위치로 할 때 주석해제
+//            let region = MKCoordinateRegion(center: currentLocation.coordinate,
+//                                            latitudinalMeters: 1000, // 1km 범위
+//                                            longitudinalMeters: 1000)
+            
+            // --- 이 부분에 익산역 가상 위치 설정 로직 추가 ---
+                 let iksanStationLatitude: CLLocationDegrees = 35.945924
+                 let iksanStationLongitude: CLLocationDegrees = 126.957748
+                 
+                 let iksanLocation = CLLocation(latitude: iksanStationLatitude, longitude: iksanStationLongitude)
+                 
+                 // 현재 위치를 익산역으로 강제 설정
+                 let region = MKCoordinateRegion(center: iksanLocation.coordinate,
+                                                 latitudinalMeters: 1000, // 1km 범위
+                                                 longitudinalMeters: 1000)
+            
+            mapView.setRegion(region, animated: true)
+            
+            // 한 번 위치를 잡은 후에는 업데이트를 중지합니다 (배터리 소모 방지).
+            // 계속해서 위치를 추적하려면 이 줄을 주석 처리하세요.
+            manager.stopUpdatingLocation()
+//        }   if의 중괄호임
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("📍 위치를 가져오지 못했습니다: \(error.localizedDescription)")
+    }
+}
+
+
+
+// MARK: - MKMapViewDelegate 확장
 extension MapView: MKMapViewDelegate {
     
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-            
-        // 1. MKUserLocation (사용자 현재 위치)에 대한 처리
-        if annotation is MKUserLocation {
-            // MKUserLocation은 기본 파란색 점으로 표시되므로, nil을 반환하여 시스템 기본값을 사용합니다.
-            return nil
-        }
-            
-        // 2. 사용자 정의 핀(annotation)에 대한 처리
-        let identifier = "spotPin"
-        // MKMarkerAnnotationView를 재사용하거나 새로 생성합니다.
-        // as? MKMarkerAnnotationView를 사용하여 타입을 명확히 합니다.
-        var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
-            
-        if annotationView == nil {
-            // 재사용 가능한 뷰가 없으면 새로 생성합니다.
-            annotationView = MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
-            annotationView?.canShowCallout = true // 핀 탭 시 정보창 표시
-            // MKMarkerAnnotationView의 애니메이션 속성은 animatesWhenAdded입니다.
-            annotationView?.animatesWhenAdded = true // 핀이 추가될 때 애니메이션 효과
-                
-            // 핀 정보창에 버튼 추가 (선택 사항)
-            let btn = UIButton(type: .detailDisclosure)
-            annotationView?.rightCalloutAccessoryView = btn
-        } else {
-            // 재사용 가능한 뷰가 있다면, 현재 주석(annotation)으로 업데이트합니다.
-            annotationView?.annotation = annotation
-        }
-            
-        // 마커 핀의 색상을 설정하는 속성은 markerTintColor입니다.
-        annotationView?.markerTintColor = .red // 지역 핀은 빨간색으로 설정
-            
-        // 최종적으로 구성된 annotationView를 반환합니다.
-        return annotationView
-    }
         
-    // 핀 버튼 클릭 이벤트 처리
-    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView,
-                    calloutAccessoryControlTapped control: UIControl) {
+        // **내 현재 위치 핀 처리 (빨간색)**
+        if let userLocation = annotation as? MKUserLocation {
+            let identifier = "userLocationPin"
+            var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
             
-        // 탭된 핀의 제목을 가져옵니다.
-        guard let annotationTitle = view.annotation?.title ?? nil else { return }
+            if annotationView == nil {
+                annotationView = MKMarkerAnnotationView(annotation: userLocation, reuseIdentifier: identifier)
+                annotationView?.canShowCallout = true
+                annotationView?.animatesWhenAdded = true
+            } else {
+                annotationView?.annotation = userLocation
+            }
+            // 사용자 현재 위치 핀을 빨간색으로 설정
+            annotationView?.markerTintColor = .red
+            return annotationView
+        }
+        
+        // **나머지 Spots 핀 처리 (파란색)**
+        if annotation is MKPointAnnotation {
+            let identifier = "spotPin"
+            var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
             
-        // 탭된 핀의 정보를 보여주는 알림창을 띄웁니다.
-        let alert = UIAlertController(title: annotationTitle,
-                                        message: "여기에 \(annotationTitle) 상세 정보를 표시하세요.",
-                                        preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "닫기", style: .default))
-        present(alert, animated: true)
+            if annotationView == nil {
+                annotationView = MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
+                annotationView?.canShowCallout = true
+                annotationView?.animatesWhenAdded = true
+                
+            } else {
+                annotationView?.annotation = annotation
+            }
+            
+            // Spots 핀은 파란색으로 설정
+            annotationView?.markerTintColor = .blue
+            
+            return annotationView
+        }
+        
+        return nil
     }
     
-    }
     
     
-
-
+    
+}
+    
+    
 
 
 #Preview {
