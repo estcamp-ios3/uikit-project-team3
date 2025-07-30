@@ -44,7 +44,7 @@ class MapView: UIViewController  {
         
         setupMapView()
         setupLocation()  // 알림 자꾸 떠서 나중에 info와 같이 살리기
-//        self.mapView.mapType = .satellite
+        //        self.mapView.mapType = .satellite
         
     }
     
@@ -78,37 +78,66 @@ class MapView: UIViewController  {
     
     
     // MARK: - 위치 권한 및 업데이트 설정
-     private func setupLocation() {
-         locationManager.delegate = self
-         // 위치 정보 사용 승인 받기
-         checkLocationAuthorization()
-     }
-     
-     private func checkLocationAuthorization() {
-         switch locationManager.authorizationStatus {
-         case .notDetermined:
-             // 앱 사용 중에만 위치 권한 요청
-             locationManager.requestWhenInUseAuthorization()
-         case .restricted, .denied:
-             // 권한 없을 때 사용자에게 알림
-             showLocationDeniedAlert()
-         case .authorizedWhenInUse, .authorizedAlways:
-             // 권한이 있다면 위치 업데이트 시작
-             locationManager.startUpdatingLocation()
-             mapView.showsUserLocation = true // 지도에 사용자 현재 위치 파란색 점 표시
-         @unknown default:
-             break
-         }
-     }
-     
-     private func showLocationDeniedAlert() {
-         let alert = UIAlertController(title: "위치 권한이 꺼져있습니다",
-                                       message: "설정 > 개인정보 보호에서 위치 서비스를 허용해주세요.",
-                                       preferredStyle: .alert)
-         alert.addAction(UIAlertAction(title: "확인", style: .default))
-         present(alert, animated: true)
-     }
- }
+    private func setupLocation() {
+        locationManager.delegate = self
+        // 위치 정보 사용 승인 받기
+        checkLocationAuthorization()
+    }
+    
+    private func checkLocationAuthorization() {
+        switch locationManager.authorizationStatus {
+        case .notDetermined:
+            // 앱 사용 중에만 위치 권한 요청
+            locationManager.requestWhenInUseAuthorization()
+        case .restricted, .denied:
+            // 권한 없을 때 사용자에게 알림
+            showLocationDeniedAlert()
+        case .authorizedWhenInUse, .authorizedAlways:
+            // 권한이 있다면 위치 업데이트 시작
+            locationManager.startUpdatingLocation()
+            mapView.showsUserLocation = true // 지도에 사용자 현재 위치 파란색 점 표시
+        @unknown default:
+            break
+        }
+    }
+    
+    private func showLocationDeniedAlert() {
+        let alert = UIAlertController(title: "위치 권한이 꺼져있습니다",
+                                      message: "설정 > 개인정보 보호에서 위치 서비스를 허용해주세요.",
+                                      preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        present(alert, animated: true)
+    }
+    
+    
+    // MARK: - 역지오코딩 후 핀 추가
+    private func reverseGeocodeAndAddPin(at location: CLLocation, title: String) {
+        let geocoder = CLGeocoder()
+        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
+            guard let self = self else { return }
+            
+            var subtitle = "Unknown Address"
+            
+            if let placemark = placemarks?.first {
+                let parts: [String?] = [
+                    placemark.name,
+                    placemark.locality,
+                    placemark.administrativeArea,
+                    placemark.country
+                ]
+                subtitle = parts.compactMap { $0 }.joined(separator: ", ")
+            }
+            
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = location.coordinate
+            annotation.title = title
+            annotation.subtitle = subtitle
+            self.mapView.addAnnotation(annotation)
+        }
+    }
+    
+    
+}
 
 // MARK: - CLLocationManagerDelegate 확장
 extension MapView: CLLocationManagerDelegate {
@@ -118,36 +147,50 @@ extension MapView: CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-//        if let currentLocation = locations.first {
-//            // 현재 위치로 지도의 중심 영역을 설정하고 확대/축소 레벨을 조절합니다. - 나중에 현재위치로 할 때 주석해제
-//            let region = MKCoordinateRegion(center: currentLocation.coordinate,
-//                                            latitudinalMeters: 1000, // 1km 범위
-//                                            longitudinalMeters: 1000)
+        //        if let currentLocation = locations.first {
+        //            // 현재 위치로 지도의 중심 영역을 설정하고 확대/축소 레벨을 조절합니다. - 나중에 현재위치로 할 때 주석해제
+        //            let region = MKCoordinateRegion(center: currentLocation.coordinate,
+        //                                            latitudinalMeters: 1000, // 1km 범위
+        //                                            longitudinalMeters: 1000)
+        
+        //            mapView.setRegion(region, animated: true)
+        
+        // 한 번 위치를 잡은 후에는 업데이트를 중지합니다 (배터리 소모 방지).
+        // 계속해서 위치를 추적하려면 이 줄을 주석 처리하세요.
+        //            manager.stopUpdatingLocation()
+        //            //        }   if의 중괄호임
+        //        }
+        //
+        //        func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        //            print("📍 위치를 가져오지 못했습니다: \(error.localizedDescription)")
+        
+        // --- 익산역 가상 위치 설정 ---
+        let iksanStationLatitude: CLLocationDegrees = 35.9458 // 익산역 위도
+        let iksanStationLongitude: CLLocationDegrees = 126.9467 // 익산역 경도
+        
+        let iksanLocation = CLLocation(latitude: iksanStationLatitude, longitude: iksanStationLongitude)
+        
+        // "You are here" 핀을 익산역 위치에 추가합니다.
+        reverseGeocodeAndAddPin(at: iksanLocation, title: "You are here (익산역)")
+        
+        // 지도의 중심을 익산역으로 설정하고 확대/축소 레벨을 조절합니다.
+        let region = MKCoordinateRegion(center: iksanLocation.coordinate,
+                                        latitudinalMeters: 1000, // 1km 범위
+                                        longitudinalMeters: 1000)
+        
+        mapView.setRegion(region, animated: true)
+        
+        // 한 번 위치를 잡은 후에는 업데이트를 중지합니다 (배터리 소모 방지).
+        // 계속해서 위치를 추적하려면 이 줄을 주석 처리하세요.
+        manager.stopUpdatingLocation()
+        
+        
+        func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+            print("📍 위치를 가져오지 못했습니다: \(error.localizedDescription)")
             
-            // --- 이 부분에 익산역 가상 위치 설정 로직 추가 ---
-                 let iksanStationLatitude: CLLocationDegrees = 35.945924
-                 let iksanStationLongitude: CLLocationDegrees = 126.957748
-                 
-                 let iksanLocation = CLLocation(latitude: iksanStationLatitude, longitude: iksanStationLongitude)
-                 
-                 // 현재 위치를 익산역으로 강제 설정
-                 let region = MKCoordinateRegion(center: iksanLocation.coordinate,
-                                                 latitudinalMeters: 1000, // 1km 범위
-                                                 longitudinalMeters: 1000)
-            
-            mapView.setRegion(region, animated: true)
-            
-            // 한 번 위치를 잡은 후에는 업데이트를 중지합니다 (배터리 소모 방지).
-            // 계속해서 위치를 추적하려면 이 줄을 주석 처리하세요.
-            manager.stopUpdatingLocation()
-//        }   if의 중괄호임
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("📍 위치를 가져오지 못했습니다: \(error.localizedDescription)")
+        }
     }
 }
-
 
 
 // MARK: - MKMapViewDelegate 확장
@@ -198,9 +241,40 @@ extension MapView: MKMapViewDelegate {
     
     
     
+    // MARK: - 핀을 탭하면 바로 SpotDetailView로 이동하는 로직 추가
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        // 맵 뷰에서 어노테이션(핀)이 선택될 때 호출됩니다.
+        
+        guard let annotation = view.annotation else { return }
+        
+        // 내 현재 위치 핀(빨간색)을 탭했을 때는 상세 뷰로 이동하지 않도록 합니다.
+        if annotation is MKUserLocation {
+            print("현재 위치 핀은 상세 뷰가 없습니다.")
+            return
+        }
+        
+        
+        // 일반 스팟 핀(파란색)이 탭되면 SpotDetailView로 이동합니다.
+        if annotation is MKPointAnnotation {
+            let detailVC = SpotDetailView()
+            
+            // 만약 SpotDetailView에 스팟 정보(제목, 좌표 등)를 전달하고 싶다면
+            // SpotDetailView 클래스에 해당 속성을 추가하고 여기서 값을 할당할 수 있습니다.
+            // 예시:
+            // detailVC.spotTitle = annotation.title
+            // detailVC.spotCoordinate = annotation.coordinate
+            
+            self.navigationController?.pushViewController(detailVC, animated: true)
+            
+            // 핀을 탭한 후 바로 상세 뷰로 이동했으니, 핀 선택 상태를 해제하여 말풍선이 사라지게 합니다.
+            mapView.deselectAnnotation(annotation, animated: true)
+        }
+    }
+    
+    
 }
-    
-    
+
+
 
 
 #Preview {
