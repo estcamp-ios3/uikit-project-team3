@@ -57,7 +57,7 @@ class StoryView: UIViewController {
     }
     
     func playBackgroundMusic() {
-        guard let url = Bundle.main.url(forResource: "market", withExtension: "mp3") else {
+        guard let url = Bundle.main.url(forResource: "market", withExtension: "mp4") else {
             print("❗️배경음악 파일을 찾을 수 없습니다.")
             return
         }
@@ -74,13 +74,13 @@ class StoryView: UIViewController {
     }
 
     func fadeInVolume() {
-        Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+        Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { timer in
             guard let player = self.bgmPlayer else {
                 timer.invalidate()
                 return
             }
             
-            if player.volume < 1.0 {
+            if player.volume < 0.7 {
                 player.volume += 0.03
             } else {
                 timer.invalidate()
