@@ -43,18 +43,15 @@ class HomeView: UIViewController {
 
     // 오른쪽 상단 미니맵
     private func setupMiniMap() {
-        // 미니맵 버튼에 기본 이미지 설정
-                miniMapButton.setImage(UIImage(named: "map_익산"), for: .normal)
-                miniMapButton.translatesAutoresizingMaskIntoConstraints = false
-                miniMapButton.addTarget(self, action: #selector(showFullMap), for: .touchUpInside)
-                view.addSubview(miniMapButton)
-
-                NSLayoutConstraint.activate([
-                    miniMapButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
-                    miniMapButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
-                    miniMapButton.widthAnchor.constraint(equalToConstant: 60),
-                    miniMapButton.heightAnchor.constraint(equalToConstant: 60)
-                ])
+        miniMapButton.translatesAutoresizingMaskIntoConstraints = false
+        miniMapButton.addTarget(self, action: #selector(showFullMap), for: .touchUpInside)
+        view.addSubview(miniMapButton)
+        NSLayoutConstraint.activate([
+            miniMapButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
+            miniMapButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+            miniMapButton.widthAnchor.constraint(equalToConstant: 60),
+            miniMapButton.heightAnchor.constraint(equalToConstant: 60)
+        ])
     }
 
     @objc private func showFullMap() {
@@ -63,6 +60,8 @@ class HomeView: UIViewController {
             
             // ② 전체 화면 모달로 띄우기 (default는 sheet 스타일이라 화면 일부만 올라올 수 있음)
             fullMapVC.modalPresentationStyle = .fullScreen
+        
+        fullMapVC.imageName = mapImageName(for: selectedRegion)
             
             // ③ 실제 프레젠트
             present(fullMapVC, animated: true, completion: nil)
@@ -98,6 +97,7 @@ class HomeView: UIViewController {
                 self.selectedRegion = region
                 self.selectedRegionButton.setTitle("📍 지역: \(region)", for: .normal)
                 self.setupMissionButtons(for: region)
+                self.updateMiniMap(for: region)
             }))
         }
 
@@ -129,7 +129,8 @@ class HomeView: UIViewController {
             button.layer.cornerRadius = 12
             button.heightAnchor.constraint(equalToConstant: 50).isActive = true
             button.addTarget(self, action: #selector(missionTapped(_:)), for: .touchUpInside)
-            missionStack.addArrangedSubview(button)
+                       missionStack.addArrangedSubview(button)
+            
         }
 
         if missionStack.superview == nil {
@@ -182,21 +183,17 @@ class HomeView: UIViewController {
     
     // ⭐️ 3) 선택된 지역에 맞춰 미니맵 이미지를 변경하는 메서드
     private func updateMiniMap(for region: String) {
-        // ⭐️ region에 따라 사용할 이미지 이름 결정
-        let imageName: String
-        switch region {
-        case "수원":
-            imageName = "testMiniMapSuWon"       // Assets.xcassets에 등록한 이름
-        case "경주":
-            imageName = "testMiniMapGyeongju"    // Assets.xcassets에 등록한 이름
-        default:
-            imageName = "testMiniMap"            // 나머지 지역에 사용할 기본 이미지
+            let name = mapImageName(for: region)
+            let img = UIImage(named: name) ?? UIImage(systemName: "map")
+            miniMapButton.setImage(img, for: .normal)
         }
-        
-        // ⭐️ 이미지가 nil이면 system map 아이콘으로 대체
-        let image = UIImage(named: imageName) ?? UIImage(systemName: "map")
-        miniMapButton.setImage(image, for: .normal)
-    }
+    private func mapImageName(for region: String) -> String {
+            switch region {
+            case "수원": return "testMiniMapSuWon"
+            case "경주": return "testMiniMapGyeongJu"
+            default:    return "testMiniMap"
+            }
+        }
     
     
     

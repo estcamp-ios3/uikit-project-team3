@@ -12,21 +12,27 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
 
+   
+   
+    
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
         window = UIWindow(windowScene: windowScene)
         
+        
         let tabbarController = UITabBarController()
         
-        let homeView = HomeView()
-        homeView.tabBarItem = UITabBarItem(title: "Home", image: UIImage(systemName: "house"), tag: 0)
         
-        let mapView = MapView()
-        mapView.tabBarItem = UITabBarItem(title: "Map", image: UIImage(systemName: "map"), tag: 1)
+        let homeView = UINavigationController(rootViewController: HomeView() )
         
-        let spotView = SpotView()
+        homeView.tabBarItem = UITabBarItem(title: "홈", image: UIImage(systemName: "house"), tag: 0)
+        
+        let mapView = UINavigationController(rootViewController: MapView() )
+        mapView.tabBarItem = UITabBarItem(title: "지도", image: UIImage(systemName: "map"), tag: 1)
+        
+        let spotView = UINavigationController(rootViewController: SpotView() )
         spotView.tabBarItem = UITabBarItem(title: "Spot", image: UIImage(systemName: "signpost.right.and.left.circle"), tag: 2)
         
         tabbarController.viewControllers = [homeView, mapView, spotView]
