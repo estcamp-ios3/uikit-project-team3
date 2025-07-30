@@ -171,12 +171,12 @@ extension MapView: CLLocationManagerDelegate {
         let iksanLocation = CLLocation(latitude: iksanStationLatitude, longitude: iksanStationLongitude)
         
         // "You are here" 핀을 익산역 위치에 추가합니다.
-        reverseGeocodeAndAddPin(at: iksanLocation, title: "You are here (익산역)")
+        reverseGeocodeAndAddPin(at: iksanLocation, title: "나의위치")
         
         // 지도의 중심을 익산역으로 설정하고 확대/축소 레벨을 조절합니다.
         let region = MKCoordinateRegion(center: iksanLocation.coordinate,
-                                        latitudinalMeters: 1000, // 1km 범위
-                                        longitudinalMeters: 1000)
+                                        latitudinalMeters: 2000, // 1km 범위
+                                        longitudinalMeters: 2000)
         
         mapView.setRegion(region, animated: true)
         
@@ -229,8 +229,14 @@ extension MapView: MKMapViewDelegate {
                 annotationView?.annotation = annotation
             }
             
-            // Spots 핀은 파란색으로 설정
-            annotationView?.markerTintColor = .blue
+            // spot 핀이 나의 위치일 경우 색깔 빨간색
+            if annotation.title == "나의위치" {
+                annotationView?.markerTintColor = .red
+            }
+            else {
+                // Spots 핀은 파란색으로 설정
+                annotationView?.markerTintColor = .blue
+            }
             
             return annotationView
         }
