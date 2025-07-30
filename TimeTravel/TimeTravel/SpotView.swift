@@ -179,7 +179,7 @@ extension SpotView: UICollectionViewDelegate {
         }
 
         //let detailVC = SpotDetailView(spot: selectedData)
-        //navigationController?.pushViewController(detailVC, animated: true)
+        navigationController?.pushViewController(SpotDetailView(), animated: true)
     }
 }
 
