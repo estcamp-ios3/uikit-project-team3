@@ -22,5 +22,5 @@ Licensed under the [MIT](LICENSE) license.
 
 # BGM 출처
 ㈜넥슨 (NEXON Corporation) : 
-테일즈위버 OST - Song of Beach
+테일즈위버 OST - Song of Beach, 
 테일즈위버 OST - MOTIVITY
