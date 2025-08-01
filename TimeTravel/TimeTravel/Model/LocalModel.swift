@@ -39,17 +39,60 @@ class LocalModel {
             Theme(
                 local: "익산",
                 theme: "잊혀진 유적",
-                color: .systemYellow,
-                imgCourse: "iksan_course1",
+                color: .systemBlue,
+                imgCourse: "courseone",
                 arrCourse: [
-                    Course(courseName: "미륵사지4층석탑",
-                           coordinate: CLLocationCoordinate2D(latitude: 36.010917, longitude: 127.030800)),
-                    Course(courseName: "익산역",
-                           coordinate: CLLocationCoordinate2D(latitude: 35.940658, longitude: 126.946303)),
-                    Course(courseName: "왕궁리 유적",
-                           coordinate: CLLocationCoordinate2D(latitude: 35.973905, longitude: 127.054394))
+                    Course(courseName: "미륵사지", coordinate: CLLocationCoordinate2D(latitude: 36.010937, longitude: 127.030684)),
+                    Course(courseName: "아가페정원", coordinate: CLLocationCoordinate2D(latitude: 36.019836, longitude: 126.957924)),
+                    Course(courseName: "왕궁리 유적", coordinate: CLLocationCoordinate2D(latitude: 35.972969, longitude: 127.054877)),
+                ]
+            ),
+            
+            Theme(
+                local: "익산",
+                theme: "사라진 유적",
+                color: .systemYellow,
+                imgCourse: "courseone",
+                arrCourse: [
+                    Course(courseName: "나바위 성당", coordinate: CLLocationCoordinate2D(latitude: 36.138465, longitude: 126.999489)),
+                    Course(courseName: "익산아트센터", coordinate: CLLocationCoordinate2D(latitude: 35.938774, longitude: 126.948141)),
+                    Course(courseName: "웅포 곰개나루길", coordinate: CLLocationCoordinate2D(latitude: 36.067527, longitude: 126.878010)),
+                    
+                ]
+            ),
+            
+            Theme(
+                local: "익산",
+                theme: "우우 유적",
+                color: .systemYellow,
+                imgCourse: "courseone",
+                arrCourse: [
+                    Course(courseName: "서동공원", coordinate: CLLocationCoordinate2D(latitude: 36.0015063, longitude: 126.9022638)),
+                    Course(courseName: "익산근대역사관", coordinate: CLLocationCoordinate2D(latitude: 35.938258, longitude: 126.947985)),
+                    Course(courseName: "보석박물관", coordinate: CLLocationCoordinate2D(latitude: 35.990711, longitude: 127.103185)),
+                    
+                    
+                ]
+            ),
+            
+            Theme(
+                local: "익산",
+                theme: "우우 유적",
+                color: .systemYellow,
+                imgCourse: "courseone",
+                arrCourse: [
+                    Course(courseName: "입점리 고분", coordinate: CLLocationCoordinate2D(latitude: 36.046018, longitude: 126.870314)),
+                    Course(courseName: "교도소 세트장", coordinate: CLLocationCoordinate2D(latitude: 36.069729, longitude: 126.931253)),
+                    
+                    
                 ]
             )
+            
+            
+            
+            
+            
+            
         ]
     }
 }
