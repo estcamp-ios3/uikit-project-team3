@@ -44,6 +44,9 @@ class StoryView: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        try? AVAudioSession.sharedInstance().setCategory(.playback)
+        try? AVAudioSession.sharedInstance().setActive(true)
+        
         setupLayout()
         updateDialogue()
         playBackgroundMusic()
@@ -74,16 +77,17 @@ class StoryView: UIViewController {
     }
 
     func fadeInVolume() {
-        Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { timer in
+        Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { timer in
             guard let player = self.bgmPlayer else {
                 timer.invalidate()
                 return
             }
             
-            if player.volume < 0.7 {
-                player.volume += 0.03
+            if player.volume < 0.3 {
+                player.volume += 0.02
             } else {
                 timer.invalidate()
+                player.volume = 0.3
             }
         }
     }
@@ -93,7 +97,7 @@ class StoryView: UIViewController {
             bgmPlayer?.pause()
             musicToggleButton.setImage(UIImage(systemName: "headphones.slash"), for: .normal)
         } else {
-            bgmPlayer?.play()
+            playBackgroundMusic()
             musicToggleButton.setImage(UIImage(systemName: "headphones"), for: .normal)
         }
         isMusicOn.toggle()
@@ -222,35 +226,35 @@ class StoryView: UIViewController {
         let dialogue = dialogues[currentDialogueIndex]
         nameLabel.text = dialogue.speaker
         dialogueLabel.text = dialogue.line
+        
+        prevButton.isHidden = currentDialogueIndex == 0
+        
+        if currentDialogueIndex == dialogues.count - 1 {
+            nextButton.isHidden = true
+            startQuestButton.isHidden = false
+        } else {
+            nextButton.isHidden = false
+            startQuestButton.isHidden = true
+        }
     }
     
     @objc func prevDialogue() {
         guard currentDialogueIndex > 0 else { return }
         currentDialogueIndex -= 1
         updateDialogue()
-        
-        //이전 대사로 돌아가면 버튼 상태 복구
-        startQuestButton.isHidden = true
-        nextButton.isHidden = false
     }
     
     @objc func nextDialogue() {
-        if currentDialogueIndex < dialogues.count - 1 {
-            currentDialogueIndex += 1
-            updateDialogue()
-        } else {
-            // 버튼 전환 처리
-            //prevButton.isHidden = true
-            nextButton.isHidden = true
-            startQuestButton.isHidden = false
-        }
+        guard currentDialogueIndex < dialogues.count - 1 else { return }
+        currentDialogueIndex += 1
+        updateDialogue()
     }
     
     @objc func startQuest() {
         bgmPlayer?.stop()
         
         // 퀘스트 맵 또는 다음 화면으로 이동
-        let questVC = QuestMapView() // 또는 QuestMapViewController()
+        let questVC = QuestMapView()
         questVC.modalPresentationStyle = .fullScreen
         present(questVC, animated: true)
     }

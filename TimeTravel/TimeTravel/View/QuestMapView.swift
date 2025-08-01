@@ -84,8 +84,8 @@ class QuestMapView: UIViewController {
                 return
             }
             
-            if player.volume < 1.0 {
-                player.volume += 0.03
+            if player.volume < 0.6 {
+                player.volume += 0.02
             } else {
                 player.volume = 1.0
                 timer.invalidate()

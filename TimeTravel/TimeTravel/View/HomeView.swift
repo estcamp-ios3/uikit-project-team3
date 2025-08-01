@@ -203,3 +203,11 @@ class HomeView: UIViewController {
 //#Preview {
 //    HomeView()
 //}
+
+// let arr = LocalModel.share.themeData
+
+// for i in arr { let label:UILabel = UILabel{ label.title }
+
+// let arrLocal = LocalModel.share.themeData.filter{ $0.local == "익산" }
+
+// let arrTheme = LocalModel.share.themeData.filter{ $0.local == "잊혀진 유적" }
