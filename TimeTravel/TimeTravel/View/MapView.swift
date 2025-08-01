@@ -16,7 +16,7 @@ class MapView: UIViewController  {
     let locationManager = CLLocationManager() // 위치정보를 처리할 인스턴스
     
     // let arrTheme = LocalModel.share.themeData.filter{ $0.local == "잊혀진 유적" }
-
+    
     // 시뮬은 현재 가상 위치이므로 나중에 info에서 설정해야 내 위치가 뜸
     /*
      Info.plist
@@ -25,6 +25,15 @@ class MapView: UIViewController  {
      <string>이 앱은 현재 위치를 지도에 표시하기 위해 위치 권한이 필요합니다.</string>
      
      */
+    
+    let courseImage: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(named: "courseone")
+        imageView.contentMode = .scaleToFill
+        return imageView
+    }()
+    
+    
     
     let spots = [
         ("미륵사지", 36.010937, 127.030684),
@@ -42,6 +51,24 @@ class MapView: UIViewController  {
     
     
     
+    // 버튼 스크롤
+    let horizontalScrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.showsHorizontalScrollIndicator = false
+        return scrollView
+    }()
+    
+    let stackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
+        stackView.spacing = 10
+        stackView.distribution = .fillEqually
+        stackView.alignment = .center
+        return stackView
+    }()
+    
+    
+    
     override func viewDidLoad() {
         
         super.viewDidLoad()
@@ -49,26 +76,61 @@ class MapView: UIViewController  {
         self.view.backgroundColor = .systemBackground
         
         
-        setupMapView()
+        setupMapUI()
+        setupButtons()
         setupLocation()  // 알림 자꾸 떠서 나중에 info와 같이 살리기
-        //        self.mapView.mapType = .satellite
+        self.mapView.mapType = .standard
         
     }
     
     
     
     
-    private func setupMapView() {
+    private func setupMapUI() {
+        
+        courseImage.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(courseImage)
+        
+        horizontalScrollView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(horizontalScrollView)
         
         mapView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(mapView)
         
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        horizontalScrollView.addSubview(stackView)
+        
+        
+        
         NSLayoutConstraint.activate([
-            mapView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            courseImage.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            courseImage.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            courseImage.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            courseImage.heightAnchor.constraint(equalToConstant: 150)
+        ])
+        
+        NSLayoutConstraint.activate([
+            horizontalScrollView.topAnchor.constraint(equalTo: courseImage.bottomAnchor),
+            horizontalScrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
+            horizontalScrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+            horizontalScrollView.heightAnchor.constraint(equalToConstant: 50)
+        ])
+        
+        
+        NSLayoutConstraint.activate([
+            stackView.topAnchor.constraint(equalTo: horizontalScrollView.topAnchor),
+            stackView.leadingAnchor.constraint(equalTo: horizontalScrollView.leadingAnchor),
+            stackView.trailingAnchor.constraint(equalTo: horizontalScrollView.trailingAnchor),
+            stackView.bottomAnchor.constraint(equalTo: horizontalScrollView.bottomAnchor)
+        ])
+        
+        NSLayoutConstraint.activate([
+            mapView.topAnchor.constraint(equalTo: horizontalScrollView.bottomAnchor),
             mapView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             mapView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            mapView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.6)
+            mapView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
+        
         
         mapView.delegate = self
         
@@ -81,6 +143,60 @@ class MapView: UIViewController  {
         }
         
     }
+    
+    private func setupButtons() {
+        
+        for (index, spot) in spots.enumerated() {
+            // UIButton.Configuration을 사용해 버튼 생성
+            var config = UIButton.Configuration.plain()
+            config.title = spot.0
+            config.titlePadding = 0
+            
+            // contentInsets를 사용하여 패딩 설정
+            config.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12)
+            
+            let button = UIButton(configuration: config, primaryAction: nil)
+            
+            button.titleLabel?.font = UIFont.systemFont(ofSize: 15)
+            button.tag = index // 버튼 태그를 스팟 배열의 인덱스로 설정
+            button.addTarget(self, action: #selector(spotButtonTapped(_:)), for: .touchUpInside)
+            
+            // 버튼 스타일링
+            button.layer.cornerRadius = 15
+            button.layer.borderWidth = 1
+            button.layer.borderColor = UIColor.systemBlue.cgColor
+            button.backgroundColor = .systemBackground
+            button.setTitleColor(.systemBlue, for: .normal)
+            
+            stackView.addArrangedSubview(button)
+        }
+    }
+    
+    
+    @objc private func spotButtonTapped(_ sender: UIButton) {
+        let spotIndex = sender.tag
+        let selectedSpot = spots[spotIndex]
+        
+        let coordinate = CLLocationCoordinate2D(latitude: selectedSpot.1, longitude: selectedSpot.2)
+        
+        // 지도의 중심을 선택된 스팟으로 이동
+        let region = MKCoordinateRegion(center: coordinate, latitudinalMeters: 500, longitudinalMeters: 500)
+        mapView.setRegion(region, animated: true)
+        
+        // 해당 스팟 핀을 선택하여 콜아웃 표시
+        if let annotation = mapView.annotations.first(where: {
+            $0.title == selectedSpot.0 &&
+            $0.coordinate.latitude == selectedSpot.1 &&
+            $0.coordinate.longitude == selectedSpot.2
+        }) {
+            mapView.selectAnnotation(annotation, animated: true)
+        }
+    }
+    
+    
+    
+    
+    
     
     
     
@@ -108,6 +224,7 @@ class MapView: UIViewController  {
         }
     }
     
+    
     private func showLocationDeniedAlert() {
         let alert = UIAlertController(title: "위치 권한이 꺼져있습니다",
                                       message: "설정 > 개인정보 보호에서 위치 서비스를 허용해주세요.",
@@ -115,6 +232,7 @@ class MapView: UIViewController  {
         alert.addAction(UIAlertAction(title: "확인", style: .default))
         present(alert, animated: true)
     }
+    
     
     
     // MARK: - 역지오코딩 후 핀 추가
@@ -145,6 +263,8 @@ class MapView: UIViewController  {
     
     
 }
+
+
 
 // MARK: - CLLocationManagerDelegate 확장
 extension MapView: CLLocationManagerDelegate {
@@ -177,13 +297,13 @@ extension MapView: CLLocationManagerDelegate {
         
         let iksanLocation = CLLocation(latitude: iksanStationLatitude, longitude: iksanStationLongitude)
         
-        // "You are here" 핀을 익산역 위치에 추가합니다.
+        // 핀에 label 달아주기
         reverseGeocodeAndAddPin(at: iksanLocation, title: "나의위치")
         
         // 지도의 중심을 익산역으로 설정하고 확대/축소 레벨을 조절합니다.
         let region = MKCoordinateRegion(center: iksanLocation.coordinate,
-                                        latitudinalMeters: 2000, // 1km 범위
-                                        longitudinalMeters: 2000)
+                                        latitudinalMeters: 3000,
+                                        longitudinalMeters: 3000)
         
         mapView.setRegion(region, animated: true)
         
@@ -200,58 +320,63 @@ extension MapView: CLLocationManagerDelegate {
 }
 
 
+
 // MARK: - MKMapViewDelegate 확장
 extension MapView: MKMapViewDelegate {
     
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         
-        // **내 현재 위치 핀 처리 (빨간색)**
-        if let userLocation = annotation as? MKUserLocation {
-            let identifier = "userLocationPin"
-            var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
-            
-            if annotationView == nil {
-                annotationView = MKMarkerAnnotationView(annotation: userLocation, reuseIdentifier: identifier)
-                annotationView?.canShowCallout = true
-                annotationView?.animatesWhenAdded = true
-            } else {
-                annotationView?.annotation = userLocation
-            }
-            // 사용자 현재 위치 핀을 빨간색으로 설정
-            annotationView?.markerTintColor = .red
-            return annotationView
+        // MKUserLocation (시스템의 파란색 사용자 위치 점)은 기본 뷰를 사용
+        if annotation is MKUserLocation {
+            return nil
         }
         
-        // **나머지 Spots 핀 처리 (파란색)**
+        // 나의위치 핀 (MKPointAnnotation으로 추가된 경우) 및 다른 스팟 핀 처리
         if annotation is MKPointAnnotation {
             let identifier = "spotPin"
             var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
             
             if annotationView == nil {
                 annotationView = MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
-                annotationView?.canShowCallout = true
+                annotationView?.canShowCallout = false // 콜아웃 비활성화
                 annotationView?.animatesWhenAdded = true
-                
             } else {
                 annotationView?.annotation = annotation
+                // 뷰 재사용 시 기존에 추가된 pulseView를 찾아 제거하고 새로 시작합니다.
+                annotationView?.subviews.filter { $0.tag == 999 }.forEach { $0.removeFromSuperview() }
             }
             
-            // spot 핀이 나의 위치일 경우 색깔 빨간색
+            
+            // "나의위치" 핀은 빨간색, 그 외 스팟 핀은 파란색
             if annotation.title == "나의위치" {
                 annotationView?.markerTintColor = .red
-            }
-            else {
-                // Spots 핀은 파란색으로 설정
+            } else {
                 annotationView?.markerTintColor = .blue
             }
             
+            // 모든 MKPointAnnotation에 지속적인 맥박 애니메이션 추가
+            // pulseView를 새로 생성하여 핀 뷰의 서브뷰로 추가합니다.
+            let size: CGFloat = annotationView!.bounds.width * 1.8 // 핀 크기의 약 1.8배
+            let pulseView = UIView(frame: CGRect(x: 0, y: 0, width: size, height: size))
+            pulseView.center = CGPoint(x: annotationView!.bounds.midX, y: annotationView!.bounds.midY - annotationView!.bounds.height / 4) // 핀의 아래쪽에 위치
+            pulseView.layer.cornerRadius = size / 2 // 원형으로
+            pulseView.backgroundColor = UIColor.blue.withAlphaComponent(0.3) // 투명한 파란색
+            pulseView.alpha = 0.0 // 초기 투명
+            pulseView.tag = 999 // 나중에 이 뷰를 쉽게 찾아서 제거하기 위한 태그
+            
+            annotationView?.insertSubview(pulseView, at: 0) // 핀 아래에 추가
+            
+            // 애니메이션 적용
+            UIView.animate(withDuration: 1.5, delay: 0, options: [.repeat, .autoreverse, .allowUserInteraction], animations: {
+                pulseView.transform = CGAffineTransform(scaleX: 1.3, y: 1.3) // 커지는 효과
+                pulseView.alpha = 0.6 // 투명도 (더 잘 보이게)
+            }, completion: nil)
+            
             return annotationView
         }
-        
         return nil
+        
     }
-    
-    
     
     
     // MARK: - 핀을 탭하면 바로 SpotDetailView로 이동하는 로직 추가
@@ -266,6 +391,12 @@ extension MapView: MKMapViewDelegate {
             return
         }
         
+        // MKPointAnnotation 중 "나의위치" 핀은 상세 뷰로 이동하지 않도록 처리
+        if let pointAnnotation = annotation as? MKPointAnnotation, pointAnnotation.title == "나의위치" {
+            print("나의위치 핀은 상세 뷰가 없습니다.")
+            mapView.deselectAnnotation(annotation, animated: true)
+            return
+        }
         
         // 일반 스팟 핀(파란색)이 탭되면 SpotDetailView로 이동합니다.
         if annotation is MKPointAnnotation {
@@ -289,8 +420,8 @@ extension MapView: MKMapViewDelegate {
 
 
 
-
 #Preview {
     
     UINavigationController(rootViewController: MapView())
+    //    MapView()
 }
