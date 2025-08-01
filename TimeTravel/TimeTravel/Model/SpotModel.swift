@@ -35,24 +35,26 @@ class SpotModel {
     }
     
     private init() {
-        Spot(spotName: "미륵사지",
-             spotImage: [
-                "미륵사지1",
-                "미륵사지2",
-                "미륵사지3",
-             ],
-             spotDetail: "미륵사지 설명",
-             coordinate: CLLocationCoordinate2D(latitude: 36.010917, longitude: 127.030800),
-             info: Infomation(address: "경기도 용인시 기흥구 미륵사로 123", phone: "031-751-1234", website: "www.naver.com", cost: "Free", openTime: "10:00-20:00")
-        )
-        
-        Spot(spotName: "왕궁리 유적", spotImage: [
-            "왕궁리 유적1",
-            "왕궁리 유적2",
-            "왕궁리 유적3",
-        ], spotDetail: "왕궁리유적 설명",
-             coordinate: CLLocationCoordinate2D(latitude: 35.973905, longitude: 127.054394),
-             info: Infomation(address: "경기도 용인시 기흥구 미륵사로 123", phone: "031-751-1234", website: "www.naver.com", cost: "Free", openTime: "10:00-20:00")
-        )
+        innerArrSpot = [
+            Spot(spotName: "미륵사지",
+                 spotImage: [
+                    "미륵사지1",
+                    "미륵사지2",
+                    "미륵사지3",
+                 ],
+                 spotDetail: "미륵사지 설명",
+                 coordinate: CLLocationCoordinate2D(latitude: 36.010917, longitude: 127.030800),
+                 info: Infomation(address: "경기도 용인시 기흥구 미륵사로 123", phone: "031-751-1234", website: "www.naver.com", cost: "Free", openTime: "10:00-20:00")
+                ),
+            
+            Spot(spotName: "왕궁리 유적", spotImage: [
+                "왕궁리 유적1",
+                "왕궁리 유적2",
+                "왕궁리 유적3",
+            ], spotDetail: "왕궁리유적 설명",
+                 coordinate: CLLocationCoordinate2D(latitude: 35.973905, longitude: 127.054394),
+                 info: Infomation(address: "경기도 용인시 기흥구 미륵사로 123", phone: "031-751-1234", website: "www.naver.com", cost: "Free", openTime: "10:00-20:00")
+                )
+        ]
     }
 }
