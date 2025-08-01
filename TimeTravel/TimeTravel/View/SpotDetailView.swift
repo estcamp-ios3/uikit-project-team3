@@ -253,9 +253,14 @@ class SpotDetailView: UIViewController {
     // MARK: - Actions (실제 기능 구현)
 
     @objc private func navigateButtonTapped() {
+        
+        let spot = SpotModel.shared.arrSpot.filter{
+            $0.spotName == self.siteNameLabel.text ?? ""
+        }[0]
+        
         let siteName = siteNameLabel.text ?? "익산 미륵사지"
-        let latitude: CLLocationDegrees = 36.0076 // 익산 미륵사지 대략적인 위도
-        let longitude: CLLocationDegrees = 127.0375 // 익산 미륵사지 대략적인 경도
+        let latitude: Double = spot.coordinate.latitude // spotmodel에서 불러온 해당 유적지에 맞는 위도
+        let longitude: Double = spot.coordinate.latitude // 해당 유적지에 맞는 경도
 
         // 1. 카카오맵 앱 시도
         if let kakaoMapURL = URL(string: "kakaomap://look?p=\(latitude),\(longitude)") {
