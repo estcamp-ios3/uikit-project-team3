@@ -29,6 +29,20 @@ class LocalModel {
     // 우리 식구들만 사용하는 데이터
     private var innerthemeData: [Theme] = []
     
+    // 0804 추가: 지역별 전체 노선도 이미지 이름 매핑 ─────
+        /// 지역(key)에 대응하는 전체 노선도(이미지명) 값
+        private let fullRouteImagesByLocal: [String: String] = [
+            "익산":  "iksanAllroute", //에셋에 저장한 이름
+            "수원":  "suwonAllroute",
+           // "경주":  "gyeongju_fullRoute",
+            // 필요하면 다른 지역도 추가...
+        ]
+        /// 전체 노선도 이미지 이름을 가져오는 헬퍼 메서드
+        func fullRouteImageName(for local: String) -> String? {
+            return fullRouteImagesByLocal[local]
+        }
+    
+    
     // 외부에서 접근 가능한 읽기 전용 데이터
     var themeData: [Theme] {
         return innerthemeData
@@ -36,11 +50,21 @@ class LocalModel {
     
     private init() {
         innerthemeData = [
+            //전체 노선도 추가
+            Theme(
+                    local: "익산",
+                    theme: "전체 노선도",
+                    color: .systemBlue,
+                    imgCourse: "iksanAllroute",
+                    arrCourse: []               // 코스 핀은 필요 없으면 빈 배열
+                ),
+            
+            
             Theme(
                 local: "익산",
                 theme: "잊혀진 유적",
-                color: .systemBlue,
-                imgCourse: "iksanAroute",
+                color: .systemYellow,
+                imgCourse: "courseone",
                 arrCourse: [
                     Course(courseName: "미륵사지", coordinate: CLLocationCoordinate2D(latitude: 36.010937, longitude: 127.030684)),
                     Course(courseName: "아가페정원", coordinate: CLLocationCoordinate2D(latitude: 36.019836, longitude: 126.957924)),
@@ -76,10 +100,18 @@ class LocalModel {
             ),
             
             Theme(
+                    local: "수원",
+                    theme: "전체 노선도",
+                    color: .systemBlue,
+                    imgCourse: "suwonallcourse",
+                    arrCourse: []               // 코스 핀은 필요 없으면 빈 배열
+                ),
+            
+            Theme(
                 local: "수원",
                 theme: "수원화성1",
-                color: .systemBlue,
-                imgCourse: "suwonAroute",
+                color: .systemYellow,
+                imgCourse: "suwon1course",
                 arrCourse: [
                     Course(courseName: "수원화성", coordinate: CLLocationCoordinate2D(latitude: 37.287342, longitude: 127.011884)),
                     Course(courseName: "수원박물관", coordinate: CLLocationCoordinate2D(latitude: 37.298497, longitude: 127.035483)),
@@ -90,8 +122,8 @@ class LocalModel {
             Theme(
                 local: "수원",
                 theme: "수원화성2",
-                color: .systemBlue,
-                imgCourse: "suwonBroute",
+                color: .systemYellow,
+                imgCourse: "suwon2course",
                 arrCourse: [
                     Course(courseName: "미륵사지", coordinate: CLLocationCoordinate2D(latitude: 36.010937, longitude: 127.030684)),
                     Course(courseName: "아가페정원", coordinate: CLLocationCoordinate2D(latitude: 36.019836, longitude: 126.957924)),
@@ -102,8 +134,8 @@ class LocalModel {
             Theme(
                 local: "수원",
                 theme: "수원화성3",
-                color: .systemBlue,
-                imgCourse: "suwonCroute",
+                color: .systemYellow,
+                imgCourse: "suwon3course",
                 arrCourse: [
                     Course(courseName: "미륵사지", coordinate: CLLocationCoordinate2D(latitude: 36.010937, longitude: 127.030684)),
                     Course(courseName: "아가페정원", coordinate: CLLocationCoordinate2D(latitude: 36.019836, longitude: 126.957924)),
