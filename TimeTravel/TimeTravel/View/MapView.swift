@@ -16,13 +16,14 @@ class MapView: UIViewController  {
        // HomeView에서 이 변수에 테마를 할당하고, MapView는 이 변수를 사용합니다.
        static var sharedTheme: Theme?
     
+    var stackSubviews: [UIView] = []
     // HomeView에서 넘어온 title을 받기 위한 변수
-    var theme: Theme? {
-        didSet {
-            // theme 변수가 설정되면 sharedTheme에도 저장
-            MapView.sharedTheme = theme
-        }
-    }
+//    var theme: Theme? {
+//        didSet {
+//            // theme 변수가 설정되면 sharedTheme에도 저장
+//            MapView.sharedTheme = theme
+//        }
+//    }
     
     let mapView = MKMapView()
     
@@ -71,28 +72,25 @@ class MapView: UIViewController  {
         super.viewDidLoad()
         self.view.backgroundColor = .systemBackground
         
-                
+                print("didload")
         // viewDidLoad 시점에 theme이 nil이면 sharedTheme을 사용합니다.
                // 이렇게 하면 다른 탭을 갔다가 돌아왔을 때 이전에 선택된 테마를 복원할 수 있습니다.
-               if self.theme == nil {
-                   self.theme = MapView.sharedTheme
-               }
-               
-               guard let currentTheme = self.theme else {
-                   print("Error: No theme data found.")
-                   showNoThemeAlert()
-                   return
-               }
+             
+//        if self.theme == nil {
+//            self.theme = MapView.sharedTheme
+//            print("\(self.theme)", #line)
+//        }
         
-        
-        self.title = currentTheme.theme
-        self.courseImage.image = UIImage(named: currentTheme.imgCourse)
-        
-        
-        
-        setupMapUI(with: currentTheme)
-        setupButtons(with: currentTheme)
+        guard let currentTheme = MapView.sharedTheme else {
+            print("Error: No theme data found.")
+            
+            return
+        }
+//        self.title = currentTheme.theme
         setupLocation()
+        setupMapUI(with: currentTheme)
+       
+       
         self.mapView.mapType = .standard
         
     }
@@ -100,10 +98,39 @@ class MapView: UIViewController  {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-                
-        // 뷰가 화면에 나타날 때마다 핀 애니메이션을 시작합니다.
-        startPinAnimation()
-    }
+            
+            // 📌 1. 맵 뷰의 모든 핀을 제거합니다.
+            mapView.removeAnnotations(mapView.annotations)
+            
+            // 📌 2. 스택뷰의 버튼들을 모두 제거합니다.
+            stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+            stackSubviews.removeAll()
+            
+            guard let currentTheme = MapView.sharedTheme else {
+                showNoThemeAlert()
+                return
+            }
+        print(currentTheme)
+        
+        self.title = currentTheme.theme
+            self.courseImage.image = UIImage(named: currentTheme.imgCourse)
+            setupButtons(with: currentTheme)
+            
+        // TODO: - MapView annotation 초기화하기
+        for spot in currentTheme.arrCourse {
+                let annotation = MKPointAnnotation()
+                annotation.coordinate = spot.coordinate
+                annotation.title = spot.courseName
+                mapView.addAnnotation(annotation)
+            }
+            
+            
+            checkLocationAuthorization()
+            startPinAnimation()
+        
+        }
+    
+    
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
@@ -111,6 +138,8 @@ class MapView: UIViewController  {
         // 뷰가 화면에서 사라질 때 핀 애니메이션을 중지합니다.
         stopPinAnimation()
     }
+    
+    
     
     
     private func setupMapUI(with theme: Theme) {
@@ -160,20 +189,14 @@ class MapView: UIViewController  {
         mapView.delegate = self
         
         
-        // 🔧 ④ 기존 static spots 대신, theme 기반 spots 사용
-        for spot in theme.arrCourse {
-            let annotation = MKPointAnnotation()
-            annotation.coordinate = spot.coordinate
-            annotation.title = spot.courseName
-            mapView.addAnnotation(annotation)
-            
-        }
+  
         
     }
     
     
     private func setupButtons(with theme: Theme) {
         
+        stackSubviews.forEach { stackView.removeArrangedSubview($0) }
         // 내 위치 버튼
         var myLocationConfig = UIButton.Configuration.plain()
         myLocationConfig.title = "현재 위치"
@@ -194,6 +217,7 @@ class MapView: UIViewController  {
         
         
         stackView.addArrangedSubview(myLocationButton)
+        stackSubviews.append(myLocationButton)
         
         
         // 스팟들 버튼
@@ -220,6 +244,8 @@ class MapView: UIViewController  {
             button.backgroundColor = .white
             
             stackView.addArrangedSubview(button)
+            stackSubviews.append(button)
+            
         }
         
     }
@@ -227,7 +253,7 @@ class MapView: UIViewController  {
     // 나중에 현재위치로 할 시 사용
     @objc private func spotButtonTapped(_ sender: UIButton) {
         
-        guard let theme = self.theme else { return }
+        guard let theme = MapView.sharedTheme else { return }
         
         let spotIndex = sender.tag
         
@@ -526,7 +552,7 @@ extension MapView: MKMapViewDelegate {
                 annotationView?.subviews.filter { $0.tag == 999 }.forEach { $0.removeFromSuperview() }
             }
             
-            guard let theme = self.theme else { return nil }
+            guard let theme = MapView.sharedTheme else { return nil }
             
             // 핀 색상 설정
             if pointAnnotation.title == "현재 위치" {

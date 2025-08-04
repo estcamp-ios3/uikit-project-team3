@@ -209,9 +209,15 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     
     @objc private func didTapGoToTheme() {
       let theme = themesForRegion[selectedThemeIndex]
-      let vc = MapView() // 커스텀 init 가정
-        vc.theme = theme
-      navigationController?.pushViewController(vc, animated: true)
+      
+        
+        MapView.sharedTheme = theme
+        
+//      navigationController?.pushViewController(vc, animated: true)
+        
+        self.tabBarController?.selectedIndex = 1
+                
+        
     }
     
     
