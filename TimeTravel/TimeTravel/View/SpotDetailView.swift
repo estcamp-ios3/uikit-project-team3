@@ -10,7 +10,7 @@ import UIKit
 // 이 클래스는 순수하게 뷰(UI) 역할을 담당합니다.
 // 화면에 보이는 모든 UI 컴포넌트와 그 레이아웃을 정의합니다.
 // 데이터나 비즈니스 로직은 포함하지 않습니다.
-class SpotDetailView: UIView {
+class SpotDetailView: UIView, UIScrollViewDelegate {
     
     // MARK: - UI Components
     
@@ -18,7 +18,7 @@ class SpotDetailView: UIView {
     let imageScrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.isPagingEnabled = true // 페이지 단위로 스크롤되도록 설정
-        scrollView.showsHorizontalScrollIndicator = false
+        scrollView.showsHorizontalScrollIndicator = false//가로 스크롤 바 숨김
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         return scrollView
     }()
@@ -27,9 +27,20 @@ class SpotDetailView: UIView {
     let pageControl: UIPageControl = {
         let pageControl = UIPageControl()
         pageControl.translatesAutoresizingMaskIntoConstraints = false
-        pageControl.currentPageIndicatorTintColor = .white
+        pageControl.currentPageIndicatorTintColor = .white //.black
         pageControl.pageIndicatorTintColor = .lightGray
         return pageControl
+    }()
+    
+    // 자동 스크롤 시작/정지 버튼
+    let playPauseButton: UIButton = {
+        let button = UIButton(type: .system)
+        let config = UIImage.SymbolConfiguration(pointSize: 30, weight: .regular, scale: .large)
+        button.setImage(UIImage(systemName: "pause.circle.fill", withConfiguration: config), for: .normal)
+        button.tintColor = .white
+        button.alpha = 0.7
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
     }()
     
     // 상세 정보 텍스트가 담기는 컨테이너 뷰. 위로 드래그하여 확장 가능합니다.
@@ -68,8 +79,8 @@ class SpotDetailView: UIView {
     
     let siteNameLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 28, weight: .bold)
-        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 24)
+        label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -137,6 +148,9 @@ class SpotDetailView: UIView {
         return button
     }()
     
+    // 이미지 이름 배열을 저장할 변수
+    var imageNames: [String] = []
+    
     // MARK: - Initializers
     
     // 코드로 뷰를 생성할 때 호출되는 초기화 메서드
@@ -148,8 +162,7 @@ class SpotDetailView: UIView {
     // 스토리보드 또는 XIB로 뷰를 생성할 때 호출되는 초기화 메서드
     // UIView를 상속받는 클래스에는 이 두 초기화 메서드가 반드시 필요합니다.
     required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupUI()
+        fatalError("init(coder:) has not been implemented")
     }
     
     // MARK: - UI Setup
@@ -162,12 +175,37 @@ class SpotDetailView: UIView {
         self.addSubview(imageScrollView)
         self.addSubview(textContainerView)
         
+        // 페이지 컨트롤과 재생/ 정지 버튼 추가
+        self.addSubview(pageControl)
+        self.addSubview(playPauseButton)
+        
         // Auto Layout 설정
         NSLayoutConstraint.activate([
+            // ✅ 수정: imageScrollView의 높이를 뷰 높이의 절반으로 설정
             imageScrollView.topAnchor.constraint(equalTo: self.topAnchor),
             imageScrollView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
             imageScrollView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-            imageScrollView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
+            imageScrollView.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.5),
+            
+            // ✅ 수정: textContainerView를 imageScrollView 바로 아래에 위치
+            textContainerView.topAnchor.constraint(equalTo: imageScrollView.bottomAnchor),
+            textContainerView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            textContainerView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+            textContainerView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
+            
+        ])
+        // pageControl 레이아웃 설정
+        NSLayoutConstraint.activate([
+            pageControl.centerXAnchor.constraint(equalTo: imageScrollView.centerXAnchor),
+            pageControl.bottomAnchor.constraint(equalTo: imageScrollView.bottomAnchor, constant: -10),
+        ])
+        
+        // playPauseButton 레이아웃 설정
+        NSLayoutConstraint.activate([
+            playPauseButton.trailingAnchor.constraint(equalTo: imageScrollView.trailingAnchor, constant: -16),
+            playPauseButton.bottomAnchor.constraint(equalTo: imageScrollView.bottomAnchor, constant: -10),
+            playPauseButton.widthAnchor.constraint(equalToConstant: 44),
+            playPauseButton.heightAnchor.constraint(equalToConstant: 44)
         ])
         
         textContainerView.addSubview(grabberView)
@@ -201,7 +239,7 @@ class SpotDetailView: UIView {
         contentView.addSubview(visitorInfoTitleLabel)
         contentView.addSubview(visitorInfoDetailLabel)
         contentView.addSubview(startButton)
-
+        
         NSLayoutConstraint.activate([
             siteNameLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 15),
             siteNameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
@@ -225,23 +263,68 @@ class SpotDetailView: UIView {
             visitorInfoDetailLabel.topAnchor.constraint(equalTo: visitorInfoTitleLabel.bottomAnchor, constant: 5),
             visitorInfoDetailLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             visitorInfoDetailLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-
+            
             startButton.topAnchor.constraint(equalTo: visitorInfoDetailLabel.bottomAnchor, constant: 40),
             startButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             startButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             startButton.heightAnchor.constraint(equalToConstant: 50),
             startButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -40)
         ])
+    }
+    // MARK: - Data Binding
+    
+    // ✅ 추가: 뷰 컨트롤러로부터 이미지 배열을 받아와서 UI에 표시하는 메서드
+    func setupImages(with imageNames: [String]) {
+        self.imageNames = imageNames
+        pageControl.numberOfPages = imageNames.count
+        updateScrollViewContent()
+    }
+    
+    // 뷰의 레이아웃이 설정된 후 호출되어야 이미지가 올바르게 표시됩니다.
+    func updateScrollViewContent() {
+        // 기존 이미지를 모두 삭제
+        imageScrollView.subviews.forEach { $0.removeFromSuperview() }
         
-        // 텍스트 컨테이너의 초기 높이 설정
-        let initialTextHeight: CGFloat = UIScreen.main.bounds.height * 0.5
+        let viewWidth = self.bounds.width
+        guard viewWidth > 0 else { return }
         
-        let textContainerHeightConstraint = textContainerView.heightAnchor.constraint(equalToConstant: initialTextHeight)
-        NSLayoutConstraint.activate([
-            textContainerView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-            textContainerView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-            textContainerView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
-            textContainerHeightConstraint
-        ])
+        for (index, imageName) in imageNames.enumerated() {
+            let imageView = UIImageView()
+            imageView.image = UIImage(named: imageName)
+            imageView.contentMode = .scaleAspectFill
+            imageView.clipsToBounds = true
+            imageView.translatesAutoresizingMaskIntoConstraints = false
+            imageScrollView.addSubview(imageView)
+            
+            // 이미지뷰의 레이아웃 설정
+            NSLayoutConstraint.activate([
+                imageView.widthAnchor.constraint(equalToConstant: viewWidth),
+                imageView.heightAnchor.constraint(equalTo: imageScrollView.heightAnchor),
+                imageView.topAnchor.constraint(equalTo: imageScrollView.topAnchor),
+                imageView.leadingAnchor.constraint(equalTo: imageScrollView.leadingAnchor, constant: CGFloat(index) * viewWidth),
+            ])
+            
+            if index == imageNames.count - 1 {
+                imageView.trailingAnchor.constraint(equalTo: imageScrollView.trailingAnchor).isActive = true
+            }
+        }
+        
+        // 스크롤 뷰의 전체 너비를 설정
+        imageScrollView.contentSize = CGSize(width: viewWidth * CGFloat(imageNames.count), height: 0)
     }
 }
+    // MARK: - UIScrollViewDelegate
+
+    // 부모 뷰 컨트롤러를 찾는 확장만 남겨둡니다.
+    extension UIView {
+        var parentViewController: UIViewController? {
+            var parentResponder: UIResponder? = self
+            while parentResponder != nil {
+                parentResponder = parentResponder!.next
+                if let viewController = parentResponder as? UIViewController {
+                    return viewController
+                }
+            }
+            return nil
+        }
+    }

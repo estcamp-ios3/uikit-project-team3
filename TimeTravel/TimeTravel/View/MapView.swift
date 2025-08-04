@@ -474,9 +474,11 @@ extension MapView: CLLocationManagerDelegate {
             }
             
             // 일반 스팟 핀(파란색)이 탭되면 SpotDetailView로 이동합니다.
-            if annotation is MKPointAnnotation {
-                let detailVC = SpotDetailView()
+            if let pointAnnotation = annotation as? MKPointAnnotation, let spotName = pointAnnotation.title {
+                let detailVC = SpotDetailViewController()
                 
+                // 핀의 제목(spotName)을 상세 화면으로 전달
+                detailVC.spotName = spotName
                 // 만약 SpotDetailView에 스팟 정보(제목, 좌표 등)를 전달하고 싶다면
                 // SpotDetailView 클래스에 해당 속성을 추가하고 여기서 값을 할당할 수 있습니다.
                 // 예시:

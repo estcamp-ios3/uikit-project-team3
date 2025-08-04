@@ -28,12 +28,12 @@ struct Spot: Identifiable {
 }
 
 // 데이터 관리 클래스
-class SpotModel: ObservableObject {
+class SpotModel {
     static let shared = SpotModel()
 
     let arrSpot: [Spot] = [
         Spot(
-            spotName: "익산 미륵사지",
+            spotName: "미륵사지",
             spotImage: ["miruksa1", "miruksa2", "miruksa3", "miruksa4", "miruksa5"],
             spotDetail: """
             익산 미륵사지는 백제 무왕이 선화공주와 함께 용화산 사자사를 향하던 중 연못에서 미륵삼존이 나타나자 왕비의 간청으로 창건했다는 전설이 깃든 장대한 규모의 사찰 터입니다.
@@ -53,7 +53,7 @@ class SpotModel: ObservableObject {
             )
         ),
         Spot(
-            spotName: "왕궁리유적",
+            spotName: "왕궁리 유적",
             spotImage: ["wanggungri1", "wanggungri2", "wanggungri3", "wanggungri4", "wanggungri5"],
             spotDetail: """
             익산 왕궁리유적은 백제 무왕이 도읍을 옮기기 위해 건설한 왕궁 터이자, 이후 사찰로 용도가 변경된 독특한 역사를 가진 장소입니다. 발굴 조사를 통해 확인된 궁궐 건물지, 공방, 정원 시설 등은 백제 왕궁의 구조와 생활상을 연구하는 데 귀중한 자료가 되고 있습니다.
@@ -146,4 +146,9 @@ class SpotModel: ObservableObject {
             )
         )
     ]
+    
+    // 메서드 이름을 getSpotData로 변경하고, 반환 타입을 옵셔널(Spot?)로 변경
+    public func getSpotData(spot: String) -> Spot? {
+        return arrSpot.filter { $0.spotName == spot }.first
+    }
 }

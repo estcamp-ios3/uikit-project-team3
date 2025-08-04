@@ -45,11 +45,18 @@ class SpotDetailViewController: UIViewController {
 
     // MARK: - Properties
     var spotData: Spot? // 외부에서 전달받을 데이터
+    var theme: String? // 테마 가져오기
+    var spotName: String? //
+    
     private var isDescriptionExpanded = false
     
     // 뷰(View) 인스턴스를 생성하고 컨트롤러의 view로 설정합니다.
     private let spotDetailView = SpotDetailView()
-
+    
+    // 자동 스크롤을 위한 타이머와 상태변수
+    private var imageTimer: Timer?
+    private var isAutoScrolling = true
+    
     // MARK: - View Lifecycle
     
     // 뷰 컨트롤러의 뷰를 로드할 때 호출됩니다.
@@ -63,11 +70,34 @@ class SpotDetailViewController: UIViewController {
         super.viewDidLoad()
         setupActions()
         
-        // spotData에 데이터가 있으면 UI를 설정하는 메서드 호출
-        if let spot = spotData {
+        // 뷰의 델리케이트를 컨트롤러 자신으로 설정
+        spotDetailView.imageScrollView.delegate = self
+        
+        
+        // getSpotData 메서드 호출로 변경하고 옵셔널 바인딩을 사용
+        if let spotName = self.spotName, let spot = SpotModel.shared.getSpotData(spot: spotName) {
+            spotData = spot
             configure(with: spot)
+            
+
+            let imageTapGesture = UITapGestureRecognizer(target: self, action: #selector(imageTapped))
+            spotDetailView.imageScrollView.addGestureRecognizer(imageTapGesture)
         }
+        }
+    
+    
+    // 뷰의 레이아웃이 설정된 후에 호출. 오류가 안남
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // 뷰의 프레임이 확정된 후에 이미지 레이아웃 다시 설정
+        spotDetailView.updateScrollViewContent()
     }
+    
+    // 뷰 컨트롤러가 사라질 떄 타이머를 멈춤
+    deinit {
+        imageTimer?.invalidate()
+    }
+    
     
     // MARK: - Data Configuration
     
@@ -83,26 +113,8 @@ class SpotDetailViewController: UIViewController {
         운영시간: \(spot.info.openTime)
         """
         
-        let images = spot.spotImage
-        spotDetailView.pageControl.numberOfPages = images.count
-        
-        // 이미지 스크롤뷰에 이미지들을 동적으로 추가
-        for (index, imageName) in images.enumerated() {
-            let imageView = UIImageView()
-            imageView.contentMode = .scaleAspectFill
-            imageView.clipsToBounds = true
-            imageView.image = UIImage(named: imageName)
-            imageView.translatesAutoresizingMaskIntoConstraints = false
-            spotDetailView.imageScrollView.addSubview(imageView)
-            
-            // 이미지뷰의 레이아웃 설정
-            NSLayoutConstraint.activate([
-                imageView.widthAnchor.constraint(equalTo: spotDetailView.widthAnchor),
-                imageView.heightAnchor.constraint(equalTo: spotDetailView.imageScrollView.heightAnchor),
-                imageView.topAnchor.constraint(equalTo: spotDetailView.imageScrollView.topAnchor),
-                imageView.leadingAnchor.constraint(equalTo: spotDetailView.imageScrollView.leadingAnchor, constant: view.frame.width * CGFloat(index))
-            ])
-        }
+        //setupImages 메서드 호출
+        spotDetailView.setupImages(with: spot.spotImage)
     }
     
     // MARK: - Setup Actions
@@ -113,12 +125,8 @@ class SpotDetailViewController: UIViewController {
         spotDetailView.moreButton.addTarget(self, action: #selector(moreButtonTapped), for: .touchUpInside)
         spotDetailView.startButton.addTarget(self, action: #selector(storyButtonTapped), for: .touchUpInside)
         
-        // 이미지 탭 제스처 추가
-        let imageTapGesture = UITapGestureRecognizer(target: self, action: #selector(imageTapped))
-        spotDetailView.imageScrollView.addGestureRecognizer(imageTapGesture)
-
-        // 이미지 스크롤뷰의 델리게이트 설정
-        spotDetailView.imageScrollView.delegate = self
+        // 재생/정지 버튼 액션 연결
+        spotDetailView.playPauseButton.addTarget(self, action: #selector(playPauseButtonTapped), for: .touchUpInside)
     }
 
     // MARK: - Button Actions
@@ -127,6 +135,9 @@ class SpotDetailViewController: UIViewController {
     @objc private func imageTapped() {
         guard let images = spotData?.spotImage else { return }
         let tappedIndex = Int(spotDetailView.imageScrollView.contentOffset.x / view.frame.width)
+        
+        //뷰에서 이미지 이름 배열을 받아 UITmage 배열로 변환 후 전달
+        let uiImages = images.compactMap { UIImage(named: $0) }
         
         let galleryVC = ImageGalleryViewController(images: images, initialIndex: tappedIndex)
         galleryVC.modalPresentationStyle = .fullScreen
@@ -167,15 +178,61 @@ class SpotDetailViewController: UIViewController {
             present(alert, animated: true, completion: nil)
         }
     }
+    
+    // MARK: - Auto Scroll Actions
+    
+    // 자동 스크롤 타이머 시작 메서드
+    private func startImageTimer() {
+        imageTimer?.invalidate()
+        imageTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            self?.autoScrollImages()
+        }
+    }
+    
+    // 타이머에 의해 이미지를 스크롤하는 메서드
+    private func autoScrollImages() {
+        // 페이지가 0개면 함수를 바로 종료
+        guard spotDetailView.pageControl.numberOfPages > 0 else { return }
+        
+        let currentPage = spotDetailView.pageControl.currentPage
+        let nextPage = (currentPage + 1) % spotDetailView.pageControl.numberOfPages
+        
+        let offsetX = CGFloat(nextPage) * spotDetailView.bounds.width
+        spotDetailView.imageScrollView.setContentOffset(CGPoint(x: offsetX, y: 0), animated: true)
+    }
+    
+    // 재생/정지 버튼 탭 액션
+    @objc private func playPauseButtonTapped() {
+        // 이미지가 1개 이하일 떄 버튼 동작 x
+        guard spotData?.spotImage.count ?? 0 > 1 else { return }
+        
+        isAutoScrolling.toggle()
+        let config = UIImage.SymbolConfiguration(pointSize: 30, weight: .regular, scale: .large)
+        if isAutoScrolling {
+            startImageTimer()
+            spotDetailView.playPauseButton.setImage(UIImage(systemName: "pause.circle.fill", withConfiguration: config), for: .normal)
+        } else {
+            imageTimer?.invalidate()
+            spotDetailView.playPauseButton.setImage(UIImage(systemName: "play.circle.fill", withConfiguration: config), for: .normal)
+        }
+    }
+    
 }
 
 // MARK: - UIScrollViewDelegate
 extension SpotDetailViewController: UIScrollViewDelegate {
-    // 스크롤이 끝날 때마다 페이지 컨트롤의 현재 페이지를 업데이트
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+    // 수동 스크롤이 멈췄을 때 호출되어 페이지 컨트롤만 업데이트합니다.
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         if scrollView == spotDetailView.imageScrollView {
-            let pageIndex = round(scrollView.contentOffset.x / view.frame.width)
+            let pageIndex = round(scrollView.contentOffset.x / scrollView.frame.width)
             spotDetailView.pageControl.currentPage = Int(pageIndex)
+        }
+    }
+
+    // 수동 스크롤이 시작되면 자동 스크롤 타이머를 중지합니다.
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        if scrollView == spotDetailView.imageScrollView {
+            imageTimer?.invalidate()
         }
     }
 }
