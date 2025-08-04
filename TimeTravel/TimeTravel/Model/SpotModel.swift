@@ -147,8 +147,7 @@ class SpotModel {
         )
     ]
     
-    // 메서드 이름을 getSpotData로 변경하고, 반환 타입을 옵셔널(Spot?)로 변경
-    public func getSpotData(spot: String) -> Spot? {
-        return arrSpot.filter { $0.spotName == spot }.first
+    public func getSpotData(spot: String) -> Spot {
+        return arrSpot.filter { $0.spotName == spot }.first ?? arrSpot[0]
     }
 }

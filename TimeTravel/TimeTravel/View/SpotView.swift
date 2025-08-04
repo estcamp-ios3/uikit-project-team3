@@ -179,7 +179,7 @@ extension SpotView: UICollectionViewDelegate {
         }
 
         //let detailVC = SpotDetailView(spot: selectedData)
-        navigationController?.pushViewController(SpotDetailViewController(), animated: true)
+        navigationController?.pushViewController(SpotDetailViewController(themeName: "잊혀진 유적", spotName: "미륵사지"), animated: true)
     }
 }
 
