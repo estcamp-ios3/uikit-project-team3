@@ -169,7 +169,7 @@ class SpotDetailViewController: UIViewController {
     
     // 퀘스트 시작 버튼 탭 액션
     @objc private func storyButtonTapped() {
-        let storyVC = StoryView() // StoryView는 다른 화면의 뷰 컨트롤러라고 가정
+        let storyVC = StoryView(themeName: "잊혀진 유적", spotName: "미륵사지") // StoryView는 다른 화면의 뷰 컨트롤러라고 가정
         if let navigationController = self.navigationController {
             navigationController.pushViewController(storyVC, animated: true)
         } else {

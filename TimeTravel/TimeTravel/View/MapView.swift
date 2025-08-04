@@ -15,7 +15,7 @@ class MapView: UIViewController  {
     // 이전에 선택된 테마를 저장하는 정적(static) 변수
        // HomeView에서 이 변수에 테마를 할당하고, MapView는 이 변수를 사용합니다.
        static var sharedTheme: Theme?
-    
+
     var stackSubviews: [UIView] = []
     // HomeView에서 넘어온 title을 받기 위한 변수
 //    var theme: Theme? {
