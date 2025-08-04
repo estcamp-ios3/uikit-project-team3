@@ -34,7 +34,7 @@ class SpotModel: ObservableObject {
     let arrSpot: [Spot] = [
         Spot(
             spotName: "익산 미륵사지",
-            spotImage: ["miruksa1", "miruksa2"], // 예시 이미지 파일명
+            spotImage: ["miruksa1", "miruksa2", "miruksa3", "miruksa4", "miruksa5"],
             spotDetail: """
             익산 미륵사지는 백제 무왕이 선화공주와 함께 용화산 사자사를 향하던 중 연못에서 미륵삼존이 나타나자 왕비의 간청으로 창건했다는 전설이 깃든 장대한 규모의 사찰 터입니다.
 
@@ -43,7 +43,7 @@ class SpotModel: ObservableObject {
             2015년 유네스코 세계문화유산에 등재되었으며, 미륵사지 석탑의 해체 보수 과정에서 사리장엄구 등 귀중한 유물들이 발견되어 백제 시대의 문화와 역사를 생생하게 증언하고 있습니다. 넓은 터를 걸으며 천년의 시간을 거슬러 올라가는 듯한 깊은 감동을 느낄 수 있습니다.
             """ ,
             
-            coordinate: CLLocationCoordinate2D(latitude: 36.0108, longitude: 127.0305),
+            coordinate: CLLocationCoordinate2D(latitude: 36.010969, longitude: 127.030704),
             info: SpotInfo(
                 address: "전북특별자치도 익산시 금마면 미륵사지로 362",
                 phone: "063-830-0900",
@@ -53,8 +53,8 @@ class SpotModel: ObservableObject {
             )
         ),
         Spot(
-            spotName: "익산 왕궁리유적",
-            spotImage: ["wanggungri1", "wanggungri2"], // 예시 이미지 파일명
+            spotName: "왕궁리유적",
+            spotImage: ["wanggungri1", "wanggungri2", "wanggungri3", "wanggungri4", "wanggungri5"],
             spotDetail: """
             익산 왕궁리유적은 백제 무왕이 도읍을 옮기기 위해 건설한 왕궁 터이자, 이후 사찰로 용도가 변경된 독특한 역사를 가진 장소입니다. 발굴 조사를 통해 확인된 궁궐 건물지, 공방, 정원 시설 등은 백제 왕궁의 구조와 생활상을 연구하는 데 귀중한 자료가 되고 있습니다.
 
@@ -62,7 +62,7 @@ class SpotModel: ObservableObject {
 
             특히, 해 질 녘 노을이 석탑을 비추는 풍경은 많은 방문객에게 잊지 못할 감동을 선사합니다. 왕궁리유적전시관에서는 발굴 유물과 함께 자세한 유적의 역사를 만나볼 수 있습니다.
             """,
-            coordinate: CLLocationCoordinate2D(latitude: 35.9736, longitude: 127.0530),
+            coordinate: CLLocationCoordinate2D(latitude: 35.972960, longitude: 127.054845),
             info: SpotInfo(
                 address: "전북특별자치도 익산시 왕궁면 궁성로 666",
                 phone: "063-859-4631",
@@ -73,7 +73,7 @@ class SpotModel: ObservableObject {
         ),
         Spot(
             spotName: "익산 보석박물관",
-            spotImage: ["jewelrymuseum1", "jewelrymuseum2"], // 예시 이미지 파일명
+            spotImage: ["jewelrymuseum1", "jewelrymuseum2", "jewelrymuseum3", "jewelrymuseum4", "jewelrymuseum5"],
             spotDetail: """
             익산 보석박물관은 보석 가공 산업의 중심지였던 익산의 역사를 기리고, 보석의 아름다움을 널리 알리기 위해 건립된 곳입니다. 내부에는 세계 각지에서 수집된 진귀한 보석과 원석들이 전시되어 있습니다.
 
@@ -81,7 +81,7 @@ class SpotModel: ObservableObject {
 
             보석박물관과 함께 운영되는 익산공룡테마공원은 다양한 공룡 조형물과 체험 시설을 갖추고 있어, 아이를 동반한 가족 방문객에게 큰 인기를 끌고 있습니다. 보석의 찬란함과 공룡의 웅장함을 동시에 경험할 수 있는 복합 문화 공간입니다.
             """,
-            coordinate: CLLocationCoordinate2D(latitude: 35.9818, longitude: 127.0544),
+            coordinate: CLLocationCoordinate2D(latitude: 35.990806, longitude: 127.102563),
             info: SpotInfo(
                 address: "전북특별자치도 익산시 왕궁면 호반로 8",
                 phone: "063-859-4641",
@@ -92,7 +92,7 @@ class SpotModel: ObservableObject {
         ),
         Spot(
             spotName: "익산 교도소세트장",
-            spotImage: ["prisonset1", "prisonset2"], // 예시 이미지 파일명
+            spotImage: ["prisonset1", "prisonset2", "prisonset3", "prisonset4", "prisonset5"],
             spotDetail: """
             폐교 부지를 활용하여 조성된 익산 교도소세트장은 국내에서 유일한 교도소 전문 영화 촬영지입니다. 이곳은 영화 '홀리데이', '7번방의 선물', 드라마 '아이리스' 등 수많은 인기 작품의 배경이 되었으며, 실제 교도소와 흡사한 독방, 면회실, 취조실 등의 시설을 생생하게 체험할 수 있습니다.
 
@@ -100,7 +100,7 @@ class SpotModel: ObservableObject {
 
             영화와 드라마를 좋아한다면, 이곳에서 작품 속 주인공이 되어보는 특별한 경험을 할 수 있습니다.
             """,
-            coordinate: CLLocationCoordinate2D(latitude: 36.0353, longitude: 126.9632),
+            coordinate: CLLocationCoordinate2D(latitude: 36.069755, longitude: 126.931221),
             info: SpotInfo(
                 address: "전북특별자치도 익산시 성당면 함낭로 207",
                 phone: "063-859-3836",
@@ -110,16 +110,15 @@ class SpotModel: ObservableObject {
             )
         ),
         Spot(
-            spotName: "익산 서동공원",
-            spotImage: ["seodongpark1", "seodongpark2"], // 예시 이미지 파일명
-            spotDetail:"""
+            spotName: "서동공원",
+            spotImage: ["seodongpark1", "seodongpark2", "seodongpark3", "seodongpark4"],            spotDetail:"""
             익산 서동공원은 백제 무왕의 어린 시절 이름인 서동과 신라 선화공주의 애틋한 사랑 이야기가 담긴 '서동요'를 테마로 조성된 곳입니다. 금마저수지를 끼고 있어 아름다운 수변 풍경을 자랑하며, 공원 곳곳에는 서동과 선화공주의 조각상을 비롯해 다양한 조형물들이 세워져 있습니다.
 
             봄에는 화려한 철쭉이 만개하고, 시원한 호수 주변을 따라 걷는 산책로는 익산 시민들과 방문객들에게 편안한 휴식과 힐링을 제공합니다. 매년 5월에는 서동요를 주제로 한 익산서동축제가 열려, 더욱 풍성한 볼거리와 즐길 거리를 제공합니다.
 
             역사적 이야기를 담고 있는 아름다운 자연 속에서 평화로운 시간을 보낼 수 있는 익산의 대표적인 관광 명소입니다.
             """,
-            coordinate: CLLocationCoordinate2D(latitude: 36.0015, longitude: 126.9022),
+            coordinate: CLLocationCoordinate2D(latitude: 36.001114, longitude: 127.057518),
             info: SpotInfo(
                 address: "전북특별자치도 익산시 금마면 고도9길 41-14",
                 phone: "063-859-4633",
@@ -129,15 +128,15 @@ class SpotModel: ObservableObject {
             )
         ),
         Spot(
-            spotName: "익산 서동시장",
-            spotImage: ["seodongmarket1", "seodongmarket2"], // 예시 이미지 파일명
+            spotName: "서동시장",
+            spotImage: ["seodongmarket1", "seodongmarket2", "seodongmarket3", "seodongmarket4", "seodongmarket5"],
             spotDetail:"""
             익산 서동시장은 익산의 활기찬 정취를 느낄 수 있는 대표적인 전통시장입니다. 신선한 농산물, 해산물, 다양한 먹거리들이 풍부하게 갖춰져 있어, 지역 주민들의 삶과 밀접한 공간입니다.
 
             특히 시장에서만 맛볼 수 있는 특별한 먹거리와 익산의 지역 특산품을 저렴하게 구매할 수 있으며, 상인들의 따뜻한 인심과 활기 넘치는 분위기 속에서 시장의 매력을 제대로 느껴볼 수 있습니다.
 
             익산의 역사와 함께해 온 서동시장은 단순한 쇼핑 공간을 넘어, 지역 문화와 전통을 체험할 수 있는 소중한 장소로 자리매김하고 있습니다. 전통시장의 정겨움을 느끼고 싶은 분들께 추천합니다.
-            """,            coordinate: CLLocationCoordinate2D(latitude: 35.9491, longitude: 126.9535),
+            """,            coordinate: CLLocationCoordinate2D(latitude: 35.946904, longitude: 126.950516),
             info: SpotInfo(
                 address: "전북특별자치도 익산시 중앙로3길 39-1",
                 phone: "063-842-0063",
