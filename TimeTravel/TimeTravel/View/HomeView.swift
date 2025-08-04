@@ -84,11 +84,14 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         setupLayout()
         updateRegionUI()
         
+        updateThemeUI() // selectedThemeIndex == 0 이면 disabled 로 세팅
+  
+        
         // ───── ★ ① 초기 버튼 상태 설정 ─────
                // viewDidLoad 직후에 넣어주세요.
-               goToThemeButton.isEnabled = true
-               goToThemeButton.backgroundColor = .systemOrange
-               goToThemeButton.setTitleColor(.white, for: .normal)
+//               goToThemeButton.isEnabled = true
+//               goToThemeButton.backgroundColor = .systemOrange
+//               goToThemeButton.setTitleColor(.white, for: .normal)
                // ───────────────────────────────────
         
         
@@ -110,6 +113,10 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         super.viewWillAppear(animated)
         // HomeView가 화면에 나올 때 탭 바 숨기기
         tabBarController?.tabBar.isHidden = true
+        
+        // ★ 전체 노선도(인덱스 0) 상태로 리셋
+          selectedThemeIndex = 0
+        updateThemeUI()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -158,12 +165,12 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
               let local = regions[selectedRegionIndex]
               regionButton.setTitle("📍 지역: \(local)", for: .normal)
               setupThemeButtons()
-              selectedThemeIndex = 0
+              selectedThemeIndex = 0 // didSet에서 자동으로 updateThemeUI() 호출
       
       // ───── ★ ② 지역 변경 시에도 버튼 활성·색상 초기화 ─────
-              goToThemeButton.isEnabled = true
-              goToThemeButton.backgroundColor = .systemOrange
-              goToThemeButton.setTitleColor(.white, for: .normal)
+//              goToThemeButton.isEnabled = true
+//              goToThemeButton.backgroundColor = .systemOrange
+//              goToThemeButton.setTitleColor(.white, for: .normal)
               // ───────────────────────────────────────────────────────
       
   }
@@ -196,6 +203,20 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
               btn.layer.borderWidth = (i == selectedThemeIndex ? 2 : 0)
               btn.layer.borderColor = UIColor.white.cgColor
           }
+      // ───── ★ 여기부터 추가 ─────
+          if selectedThemeIndex == 0 {
+              // 전체 노선도 선택 시: 버튼 비활성화
+              goToThemeButton.isEnabled = false
+              goToThemeButton.backgroundColor = .white
+              goToThemeButton.setTitleColor(.lightGray, for: .disabled)
+          } else {
+              // 그 외 테마 선택 시: 버튼 활성화
+              goToThemeButton.isEnabled = true
+              goToThemeButton.backgroundColor = .systemOrange
+              goToThemeButton.setTitleColor(.white, for: .normal)
+          }
+      
+      
   }
 
   // MARK: – 액션 핸들러
