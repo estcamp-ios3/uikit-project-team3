@@ -6,208 +6,277 @@
 //
 
 import UIKit
+import MapKit
+import CoreLocation // 🔧 1) 위치 정보를 사용하기 위해 CoreLocation 추가
 
-class HomeView: UIViewController {
-
-    private var selectedRegion: String = "익산"  // 기본 지역
-    private let missionStack = UIStackView()
-    private let selectedRegionButton = UIButton() // ⭐️ 지역 선택용 버튼
-
-    // ⭐️ 1) 미니맵 버튼을 프로퍼티로 선언해서 다른 메서드에서도 접근 가능하게 합니다.
-       private let miniMapButton = UIButton()
+class HomeViewController: UIViewController, CLLocationManagerDelegate {
+    // MARK: – 모델 & 상태
+    private let regions = Array(Set(LocalModel.shared.themeData.map { $0.local })).sorted()
+    private var selectedRegionIndex = 0 { didSet { updateRegionUI() } }
+    private var selectedThemeIndex  = 0 { didSet { updateThemeUI() } }
+    private var themesForRegion: [Theme] {
+        LocalModel.shared.themeData.filter { $0.local == regions[selectedRegionIndex] }
+    }
     
+    // 🔧 2) 위치 매니저 프로퍼티 추가
+        private let locationManager = CLLocationManager()
+    
+    // MARK: – UI 컴포넌트 선언
+    private let mascotImageView: UIImageView = {
+        let iv = UIImageView()
+        iv.image = UIImage(named: "mascotLoci")
+        iv.contentMode = .scaleAspectFit
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
+    }()
+    private let regionButton: UIButton = {
+        let btn = UIButton(type: .system)
+        btn.backgroundColor = .systemOrange
+        btn.setTitleColor(.white, for: .normal)
+        btn.layer.cornerRadius = 8
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        btn.addTarget(nil, action: #selector(didTapRegion), for: .touchUpInside)
+        return btn
+    }()
+    private let miniMapView: UIImageView = {
+        let iv = UIImageView()
+        iv.contentMode = .scaleAspectFit
+        iv.clipsToBounds = true
+        iv.layer.cornerRadius = 12
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
+    }()
+    private let themeStackView: UIStackView = {
+        let sv = UIStackView()
+        sv.axis = .horizontal
+        sv.distribution = .fillEqually
+        sv.spacing = 8
+        sv.translatesAutoresizingMaskIntoConstraints = false
+        return sv
+    }()
+    private let goToThemeButton: UIButton = {
+        let btn = UIButton(type: .system)
+        btn.setTitle("선택된 테마로 이동", for: .normal)
+        btn.backgroundColor = .systemOrange
+        btn.setTitleColor(.white, for: .normal)
+        btn.layer.cornerRadius = 8
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        btn.addTarget(nil, action: #selector(didTapGoToTheme), for: .touchUpInside)
+        return btn
+    }()
+    private var themeButtons: [UIButton] = []
+    
+    // MARK: – 라이프사이클
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemTeal
-
-        setupMascotImage()
-        setupMiniMap()
-        setupRegionDropdownButton()  // ⭐️ 지역 선택 버튼 추가
-        setupMissionButtons(for: selectedRegion)
-        updateMiniMap(for: selectedRegion) // ⭐️ 기본 지역(익산)에 맞춰 미니맵도 갱신
-    }
-
-    // 마스코트 이미지
-    private func setupMascotImage() {
-        let mascotImage = UIImageView(image: UIImage(named: "testMascot"))
-        mascotImage.contentMode = .scaleAspectFit
-        mascotImage.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(mascotImage)
-
-        NSLayoutConstraint.activate([
-            mascotImage.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            mascotImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            mascotImage.heightAnchor.constraint(equalToConstant: 100)
-        ])
-    }
-
-    // 오른쪽 상단 미니맵
-    private func setupMiniMap() {
-        miniMapButton.translatesAutoresizingMaskIntoConstraints = false
-        miniMapButton.addTarget(self, action: #selector(showFullMap), for: .touchUpInside)
+        view.backgroundColor = .systemBackground
         
-        view.addSubview(miniMapButton)
-        NSLayoutConstraint.activate([
-            miniMapButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
-            miniMapButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
-            miniMapButton.widthAnchor.constraint(equalToConstant: 60),
-            miniMapButton.heightAnchor.constraint(equalToConstant: 60)
-        ])
-    }
-
-    @objc private func showFullMap() {
-        // ① FullMapViewController 인스턴스로 바꿔서 생성
-            let fullMapVC = FullMapViewController()
-            
-            // ② 전체 화면 모달로 띄우기 (default는 sheet 스타일이라 화면 일부만 올라올 수 있음)
-            fullMapVC.modalPresentationStyle = .fullScreen
+        // 🔧 4) 위치 권한 요청 설정
+        locationManager.delegate = self
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.requestLocation() // 단발성 위치 요청
         
-        fullMapVC.imageName = mapImageName(for: selectedRegion)
-            
-            // ③ 실제 프레젠트
-            present(fullMapVC, animated: true, completion: nil)
-    }
-
-    // ⭐️ 지역 선택 버튼 (클릭 시 리스트 표시)
-    private func setupRegionDropdownButton() {
-        selectedRegionButton.setTitle("📍 지역: \(selectedRegion)", for: .normal)
-        selectedRegionButton.setTitleColor(.white, for: .normal)
-        selectedRegionButton.backgroundColor = .orange
-        selectedRegionButton.layer.cornerRadius = 10
-        selectedRegionButton.translatesAutoresizingMaskIntoConstraints = false
-        selectedRegionButton.addTarget(self, action: #selector(showRegionList), for: .touchUpInside)
-
-        view.addSubview(selectedRegionButton)
-
-        NSLayoutConstraint.activate([
-            selectedRegionButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 140),
-            selectedRegionButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            selectedRegionButton.heightAnchor.constraint(equalToConstant: 45),
-            selectedRegionButton.widthAnchor.constraint(equalToConstant: 200)
-        ])
-    }
-
-    // ⭐️ 버튼 누르면 UIAlertController로 지역 선택
-    @objc private func showRegionList() {
-        let alert = UIAlertController(title: "지역 선택", message: nil, preferredStyle: .actionSheet)
-
-        let regions = ["익산", "경주", "수원", "공주", "부여", "서울", "고양","김천","안산","대전", "용인", "화성"]
-
-        for region in regions {
-            alert.addAction(UIAlertAction(title: region, style: .default, handler: { _ in
-                self.selectedRegion = region
-                self.selectedRegionButton.setTitle("📍 지역: \(region)", for: .normal)
-                self.setupMissionButtons(for: region)
-                self.updateMiniMap(for: region)
-            }))
-        }
-
-        alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
-
-        // iPad 대응
-        if let popover = alert.popoverPresentationController {
-            popover.sourceView = selectedRegionButton
-            popover.sourceRect = selectedRegionButton.bounds
-        }
-
-        present(alert, animated: true)
-    }
-
-    // 미션 버튼 생성
-    private func setupMissionButtons(for region: String) {
-        missionStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        missionStack.axis = .vertical
-        missionStack.spacing = 20
-        missionStack.translatesAutoresizingMaskIntoConstraints = false
-
-        let titles = missions(for: region)
-
-        for title in titles {
-            let button = UIButton(type: .system)
-            button.setTitle("〈가제〉 \(title)", for: .normal)
-            button.setTitleColor(.white, for: .normal)
-            button.backgroundColor = .orange
-            button.layer.cornerRadius = 12
-            button.heightAnchor.constraint(equalToConstant: 50).isActive = true
-            button.addTarget(self, action: #selector(missionTapped(_:)), for: .touchUpInside)
-                       missionStack.addArrangedSubview(button)
-            
-        }
-
-        if missionStack.superview == nil {
-            view.addSubview(missionStack)
-            NSLayoutConstraint.activate([
-                missionStack.topAnchor.constraint(equalTo: selectedRegionButton.bottomAnchor, constant: 30),
-                missionStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
-                missionStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40)
-            ])
-        }
-    }
-
-    // 미션 선택 시 MapView로 이동
-    @objc private func missionTapped(_ sender: UIButton) {
-        let mapVC = MapView()
-        mapVC.title = sender.currentTitle
-        navigationController?.pushViewController(mapVC, animated: true)
-    }
-
-    // 지역별 미션 목록 반환
-    private func missions(for region: String) -> [String] {
-        switch region {
-        case "경주":
-            return ["신라 유적 1", "신라 유적 2", "신라 유적 3"]
-        case "수원":
-            return ["수원화성탐방 1", "수원화성탐방 2", "수원화성 3"]
-        case "공주":
-            return ["무령왕릉의 비밀", "공산성 이야기", "백제의 흔적"]
-        case "부여":
-            return ["정림사지 유물", "부소산성 탐방", "백제 금동대향로"]
-        case "서울":
-            return ["서울1", "서울2","서울3"]
-        case "고양":
-            return ["고양1", "고양2", "고양3"]
-        case "김천":
-            return ["김천1", "김천2", "김천3"]
-        case "안산":
-            return ["안산1", "안산2", "안산3"]
-        case "화성":
-            return ["화성1", "화성2", "화성3"]
-        case "용인":
-            return ["용인1", "용인2", "용인3"]
-        case "대전":
-            return ["대전1", "대전2","대전3"]
-
-        default:
-            return ["숨겨진 왕의 흔적", "잊혀진 시간 조각", "석탑의 수수께끼"]
-        }
-    }
-    
-    // ⭐️ 3) 선택된 지역에 맞춰 미니맵 이미지를 변경하는 메서드
-    private func updateMiniMap(for region: String) {
-            let name = mapImageName(for: region)
-            let img = UIImage(named: name) ?? UIImage(systemName: "map")
-            miniMapButton.setImage(img, for: .normal)
-        }
-    private func mapImageName(for region: String) -> String {
-            switch region {
-            case "수원": return "testMiniMapSuWon"
-            case "경주": return "testMiniMapGyeongJu"
-            default:    return "testMiniMap"
+        // 🔧 [여기를 수정] 기본 지역을 "익산"으로 설정
+        if let defaultIndex = regions.firstIndex(of: "익산") {
+                selectedRegionIndex = defaultIndex
             }
+        
+        setupLayout()
+        updateRegionUI()
+        
+        // ───── ★ ① 초기 버튼 상태 설정 ─────
+               // viewDidLoad 직후에 넣어주세요.
+               goToThemeButton.isEnabled = true
+               goToThemeButton.backgroundColor = .systemOrange
+               goToThemeButton.setTitleColor(.white, for: .normal)
+               // ───────────────────────────────────
+        
+        
+        // ① 미니맵 이미지를 탭 가능하도록 설정
+        miniMapView.isUserInteractionEnabled = true
+        let tap = UITapGestureRecognizer(target: self, action: #selector(didTapMapImage))
+        miniMapView.addGestureRecognizer(tap)
+    }
+    
+    // ② 탭 핸들러: 전체 화면으로 이미지 보여 주기
+    @objc private func didTapMapImage() {
+        guard let image = miniMapView.image else { return }
+        let previewVC = ImagePreviewViewController(image: image)
+        previewVC.modalPresentationStyle = .fullScreen    // 전체 화면 모달
+        present(previewVC, animated: true)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // HomeView가 화면에 나올 때 탭 바 숨기기
+        tabBarController?.tabBar.isHidden = true
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        // HomeView가 사라질 때 (다른 화면으로 갈 때) 탭 바 다시 보이기
+        tabBarController?.tabBar.isHidden = false
+    }
+
+
+  // MARK: – 레이아웃 구성
+  private func setupLayout() {
+    [mascotImageView, regionButton, miniMapView, themeStackView, goToThemeButton].forEach {
+      view.addSubview($0)
+    }
+    NSLayoutConstraint.activate([
+      mascotImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+      mascotImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+      mascotImageView.widthAnchor.constraint(equalToConstant: 100),
+      mascotImageView.heightAnchor.constraint(equalToConstant: 100),
+
+      regionButton.topAnchor.constraint(equalTo: mascotImageView.bottomAnchor, constant: 16),
+      regionButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 32),
+      regionButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -32),
+      regionButton.heightAnchor.constraint(equalToConstant: 44),
+
+      miniMapView.topAnchor.constraint(equalTo: regionButton.bottomAnchor, constant: 20),
+      miniMapView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+      miniMapView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+      miniMapView.heightAnchor.constraint(equalTo: miniMapView.widthAnchor, multiplier: 0.99),
+
+      themeStackView.topAnchor.constraint(equalTo: miniMapView.bottomAnchor, constant: 12),
+      themeStackView.leadingAnchor.constraint(equalTo: miniMapView.leadingAnchor),
+      themeStackView.trailingAnchor.constraint(equalTo: miniMapView.trailingAnchor),
+      themeStackView.heightAnchor.constraint(equalToConstant: 44),
+
+      goToThemeButton.topAnchor.constraint(equalTo: themeStackView.bottomAnchor, constant: 16),
+      goToThemeButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 32),
+      goToThemeButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -32),
+      goToThemeButton.heightAnchor.constraint(equalToConstant: 44)
+    ])
+  }
+
+  // MARK: – UI 업데이트
+  private func updateRegionUI() {
+      guard regions.indices.contains(selectedRegionIndex) else { return }
+              let local = regions[selectedRegionIndex]
+              regionButton.setTitle("📍 지역: \(local)", for: .normal)
+              setupThemeButtons()
+              selectedThemeIndex = 0
+      
+      // ───── ★ ② 지역 변경 시에도 버튼 활성·색상 초기화 ─────
+              goToThemeButton.isEnabled = true
+              goToThemeButton.backgroundColor = .systemOrange
+              goToThemeButton.setTitleColor(.white, for: .normal)
+              // ───────────────────────────────────────────────────────
+      
+  }
+  private func setupThemeButtons() {
+    themeStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+    themeButtons.removeAll()
+    for (i, theme) in themesForRegion.enumerated() {
+      let btn = UIButton(type: .system)
+      btn.setTitle(theme.theme, for: .normal)
+      btn.backgroundColor = theme.color
+      btn.setTitleColor(.white, for: .normal)
+      btn.layer.cornerRadius = 6
+      btn.tag = i
+      btn.addTarget(self, action: #selector(handleThemeTap(_:)), for: .touchUpInside)
+      btn.translatesAutoresizingMaskIntoConstraints = false
+      themeStackView.addArrangedSubview(btn)
+      themeButtons.append(btn)
+    }
+  }
+  private func updateThemeUI() {
+      // 선택된 테마 가져오기
+          let theme = themesForRegion[selectedThemeIndex]
+
+          // MKMapView 관련 코드는 모두 제거하고…
+          // miniMapImageView에 미리 지정해 둔 코스 이미지 세팅
+          miniMapView.image = UIImage(named: theme.imgCourse)
+
+          // (나머지 버튼 테두리 표시 로직은 그대로)
+          for (i, btn) in themeButtons.enumerated() {
+              btn.layer.borderWidth = (i == selectedThemeIndex ? 2 : 0)
+              btn.layer.borderColor = UIColor.white.cgColor
+          }
+  }
+
+  // MARK: – 액션 핸들러
+  @objc private func didTapRegion() {
+    let regionVC = RegionSelectionViewController(regions: regions)
+      
+      // 🔧 5) 일반 지역 선택 콜백 설정
+    regionVC.didSelectRegion = { [weak self] idx in
+      self?.selectedRegionIndex = idx
+      self?.dismiss(animated: true)
+    }
+      // 🔧 6) 내 근처 선택 콜백 설정
+      regionVC.didSelectRegionForNearby = { [weak self] in
+                  guard let self = self else { return }
+          // 위치를 한 번 가져오고 가장 가까운 테마로 인덱스 변경
+                      self.locationManager.requestLocation()
+                  }
+      
+    let nav = UINavigationController(rootViewController: regionVC)
+    nav.modalPresentationStyle = .pageSheet
+    present(nav, animated: true)
+  }
+    @objc private func handleThemeTap(_ sender: UIButton) {
+      selectedThemeIndex = sender.tag
+        // ───── ★ ③ “전체 노선도” 일 때 버튼 비활성화/색 변경 ─────
+               // sender.tag == 0 으로 “전체 노선도” 버튼을 구분하셨다면,
+               // 이렇게 넣어주세요.
+               if sender.tag == 0 {
+                   goToThemeButton.isEnabled = false
+                   goToThemeButton.backgroundColor = .white
+                   // 비활성화 상태 텍스트 색도 연하게 변경
+                   goToThemeButton.setTitleColor(.lightGray, for: .disabled)
+               } else {
+                   // 나머지 테마 선택 시 복원
+                   goToThemeButton.isEnabled = true
+                   goToThemeButton.backgroundColor = .systemOrange
+                   goToThemeButton.setTitleColor(.white, for: .normal)
+               }
+               // ───────────────────────────────────────────────────────────
+        
+        
+    }
+    
+    @objc private func didTapGoToTheme() {
+        let theme = themesForRegion[selectedThemeIndex]
+           
+             
+             MapView.sharedTheme = theme
+             
+     //      navigationController?.pushViewController(vc, animated: true)
+             
+             self.tabBarController?.selectedIndex = 1
+    }
+    
+    
+    // 🔧 7) CLLocationManagerDelegate 메서드 구현
+      @objc func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+            guard let userLoc = locations.first else { return }
+            // 모든 테마의 모든 코스를 플랫하게 모은 뒤 거리 계산
+            var nearestThemeIndex: Int = 0
+            var minDist = CLLocationDistanceMax
+          for theme in LocalModel.shared.themeData {
+              for course in theme.arrCourse {
+                  // CLLocationCoordinate2D를 CLLocation으로 변환 후 거리 계산
+                  let courseLoc = CLLocation(latitude: course.coordinate.latitude,
+                                             longitude: course.coordinate.longitude)
+                  let dist = courseLoc.distance(from: userLoc)
+                  if dist < minDist {
+                      minDist = dist
+                      if let idx = regions.firstIndex(of: theme.local) {
+                          nearestThemeIndex = idx
+                      }
+                  }
+              }
+          }
+            // 가장 가까운 지역으로 선택
+            selectedRegionIndex = nearestThemeIndex
+            manager.stopUpdatingLocation()
+            dismiss(animated: true)
         }
-    
-    
-    
+    @objc func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+            print("위치 정보를 가져올 수 없습니다: \(error.localizedDescription)")
+        }
 }
-//
-//#Preview {
-//    HomeView()
-//}
-
-// let arr = LocalModel.share.themeData
-
-// for i in arr { let label:UILabel = UILabel{ label.title }
-
-// let arrLocal = LocalModel.share.themeData.filter{ $0.local == "익산" }
-
-// let arrTheme = LocalModel.share.themeData.filter{ $0.local == "잊혀진 유적" }
