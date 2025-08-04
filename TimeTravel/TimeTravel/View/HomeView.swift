@@ -40,7 +40,7 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     }()
     private let miniMapView: UIImageView = {
         let iv = UIImageView()
-        iv.contentMode = .scaleAspectFill
+        iv.contentMode = .scaleAspectFit
         iv.clipsToBounds = true
         iv.layer.cornerRadius = 12
         iv.translatesAutoresizingMaskIntoConstraints = false
@@ -69,7 +69,7 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     // MARK: – 라이프사이클
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(red: 117/255, green: 189/255, blue: 206/255, alpha: 1)
+        view.backgroundColor = .systemBackground
         
         // 🔧 4) 위치 권한 요청 설정
         locationManager.delegate = self
@@ -83,6 +83,14 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         
         setupLayout()
         updateRegionUI()
+        
+        // ───── ★ ① 초기 버튼 상태 설정 ─────
+               // viewDidLoad 직후에 넣어주세요.
+               goToThemeButton.isEnabled = true
+               goToThemeButton.backgroundColor = .systemOrange
+               goToThemeButton.setTitleColor(.white, for: .normal)
+               // ───────────────────────────────────
+        
         
         // ① 미니맵 이미지를 탭 가능하도록 설정
         miniMapView.isUserInteractionEnabled = true
@@ -151,6 +159,13 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
               regionButton.setTitle("📍 지역: \(local)", for: .normal)
               setupThemeButtons()
               selectedThemeIndex = 0
+      
+      // ───── ★ ② 지역 변경 시에도 버튼 활성·색상 초기화 ─────
+              goToThemeButton.isEnabled = true
+              goToThemeButton.backgroundColor = .systemOrange
+              goToThemeButton.setTitleColor(.white, for: .normal)
+              // ───────────────────────────────────────────────────────
+      
   }
   private func setupThemeButtons() {
     themeStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
@@ -205,13 +220,34 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
   }
     @objc private func handleThemeTap(_ sender: UIButton) {
       selectedThemeIndex = sender.tag
+        // ───── ★ ③ “전체 노선도” 일 때 버튼 비활성화/색 변경 ─────
+               // sender.tag == 0 으로 “전체 노선도” 버튼을 구분하셨다면,
+               // 이렇게 넣어주세요.
+               if sender.tag == 0 {
+                   goToThemeButton.isEnabled = false
+                   goToThemeButton.backgroundColor = .white
+                   // 비활성화 상태 텍스트 색도 연하게 변경
+                   goToThemeButton.setTitleColor(.lightGray, for: .disabled)
+               } else {
+                   // 나머지 테마 선택 시 복원
+                   goToThemeButton.isEnabled = true
+                   goToThemeButton.backgroundColor = .systemOrange
+                   goToThemeButton.setTitleColor(.white, for: .normal)
+               }
+               // ───────────────────────────────────────────────────────────
+        
+        
     }
     
     @objc private func didTapGoToTheme() {
-      let theme = themesForRegion[selectedThemeIndex]
-      let vc = MapView() // 커스텀 init 가정
-        vc.theme = theme
-      navigationController?.pushViewController(vc, animated: true)
+        let theme = themesForRegion[selectedThemeIndex]
+           
+             
+             MapView.sharedTheme = theme
+             
+     //      navigationController?.pushViewController(vc, animated: true)
+             
+             self.tabBarController?.selectedIndex = 1
     }
     
     
