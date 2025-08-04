@@ -36,6 +36,15 @@ class LocalModel {
     
     private init() {
           innerthemeData = [
+            //전체 노선도 추가
+             Theme(
+                     local: "익산",
+                     theme: "전체 노선도",
+                     color: .systemBlue,
+                     imgCourse: "iksanAllroute",
+                     arrCourse: []               // 코스 핀은 필요 없으면 빈 배열
+                 ),
+             
               Theme(
                   local: "익산",
                   theme: "잊혀진 유적",
