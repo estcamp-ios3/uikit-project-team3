@@ -244,3 +244,6 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
             print("위치 정보를 가져올 수 없습니다: \(error.localizedDescription)")
         }
 }
+
+
+
