@@ -11,6 +11,21 @@ import CoreLocation
 import AVFoundation
 
 class QuestMapView: UIViewController {
+    var themeName: String
+    var spotName: String
+    var quest: Quest
+    
+    init(themeName: String, spotName: String) {
+        self.themeName = themeName
+        self.spotName = spotName
+        self.quest = ScenarioModel.shared.getQuest(themeName: themeName, spotName: spotName)
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     //bgm
     var bgmPlayer: AVAudioPlayer?
     let musicToggleButton = UIButton()
@@ -60,7 +75,7 @@ class QuestMapView: UIViewController {
     }
     
     func playBackgroundMusic() {
-        guard let url = Bundle.main.url(forResource: "motivity", withExtension: "mp3") else {
+        guard let url = Bundle.main.url(forResource: quest.bgm, withExtension: "mp3") else {
             print("❗️배경음악 파일을 찾을 수 없습니다.")
             return
         }
@@ -124,10 +139,10 @@ extension QuestMapView {
         musicToggleButton.addTarget(self, action: #selector(toggleMusic), for: .touchUpInside)
 
         
-        titleLabel.text = "퀘스트: 금가락지 소동"
+        titleLabel.text = "퀘스트: \(quest.questName)"
         titleLabel.font = .boldSystemFont(ofSize: 24)
         
-        descriptionLabel.text = "익산 북부시장 주변에 떨어진 금가락지를 찾아보세요!"
+        descriptionLabel.text = quest.questDetail
         descriptionLabel.font = .systemFont(ofSize: 18)
         descriptionLabel.numberOfLines = 0
         
@@ -191,10 +206,11 @@ extension QuestMapView: MKMapViewDelegate, CLLocationManagerDelegate {
     
     //퀘스트 아이템 위치 생성
     func setupItems() {
-        for (coord, id) in itemLocations {
+        for (i, item)in quest.item.enumerated() {
             let annotation = MKPointAnnotation()
-            annotation.coordinate = coord
-            annotation.title = "보물상자 \(id)"
+            annotation.coordinate.longitude = item.itemLongtitude
+            annotation.coordinate.latitude = item.itemLatitude
+            annotation.title = "\(item.itemName) \(i)"
             mapView.addAnnotation(annotation)
         }
     }
@@ -221,7 +237,7 @@ extension QuestMapView: MKMapViewDelegate, CLLocationManagerDelegate {
             return view
         }
         
-        if let title = annotation.title, title?.starts(with: "보물상자") == true {
+        if let title = annotation.title, title?.starts(with: quest.item[0].itemName) == true {
             let id = "item"
             var view = mapView.dequeueReusableAnnotationView(withIdentifier: id) as? MKMarkerAnnotationView
             if view == nil {
@@ -257,5 +273,5 @@ extension QuestMapView: MKMapViewDelegate, CLLocationManagerDelegate {
 }
 
 #Preview {
-    QuestMapView()
+    QuestMapView(themeName: "잊혀진 유적", spotName: "미륵사지")
 }

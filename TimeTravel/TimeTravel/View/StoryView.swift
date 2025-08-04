@@ -13,6 +13,9 @@ class StoryView: UIViewController {
     let musicToggleButton = UIButton()
     var isMusicOn = true
     
+    var themeName: String
+    var spotName: String
+    
     // MARK: - UI 구성요소
     let backgroundImageView = UIImageView()
     let characterImageView = UIImageView()
@@ -25,22 +28,22 @@ class StoryView: UIViewController {
     let startQuestButton = UIButton()
     
     // MARK: - 대사 데이터
-    let dialogues: [(speaker: String, line: String)] = [
-        ("선화", "자아~~! 골라골라~!! 여기 질 좋은 비단있어요~!"),
-        ("선화", "어휴.. 덥다 더워.. 날씨가 더우니 장사도 잘안되고.."),
-        ("아주머니1", "고생 많구나 선화야~ 어서 여기 시~~원한 수박 먹어라"),
-        ("선화", "역시 우리 이모~! 이렇게 더운 여름엔 수박이 최고지~!"),
-        ("선화", "응? 왜 이렇게 사람들이 웅성대지?"),
-        ("아주머니2", "아이고!! 나는 망했네~ 망했어 우리 딸 혼수품으로 줄 금가락지를 잃어버리다니~!!"),
-        ("선화", "아주머니 진정하세요. 제가 도와드릴게요. 혹시 기억나는게 있으세요?"),
-        ("아주머니2", "사물놀이패 장단에 맞춰 정신없이 엉덩이를 흔들다 보니 금가락지가 도망간 모양이야"),
-        ("아주머니2", "장담컨데 분명 그전까진 있었다고. 이 근처 어딘가에 떨어졌을것 같긴한데.. "),
-        ("선화", "(이 아줌마.. 정상아니군..) 걱정마세요~! ^^ 제가 도와드릴게요. 이 근방은 제가 빠삭하게 잘아니까 얼른 찾아드릴께요~!"),
-        ("선화", "(히히 찾으면 내꺼라구~!!    \\(^,^)/")
-    ]
-    
+    var scenario: Scenario
+    var dialogues: [(speaker: String, line: String)]
     var currentDialogueIndex = 0
-
+    
+    init(themeName: String, spotName: String){
+        self.themeName = themeName
+        self.spotName = spotName
+        self.scenario = ScenarioModel.shared.getScenarios(themeName: themeName, spotName: spotName)
+        self.dialogues = self.scenario.arrScenario
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -60,7 +63,7 @@ class StoryView: UIViewController {
     }
     
     func playBackgroundMusic() {
-        guard let url = Bundle.main.url(forResource: "market", withExtension: "mp4") else {
+        guard let url = Bundle.main.url(forResource: scenario.bgm, withExtension: "mp4") else {
             print("❗️배경음악 파일을 찾을 수 없습니다.")
             return
         }
@@ -75,7 +78,7 @@ class StoryView: UIViewController {
             print("🎵 음악 재생 오류:", error)
         }
     }
-
+    
     func fadeInVolume() {
         Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { timer in
             guard let player = self.bgmPlayer else {
@@ -102,18 +105,18 @@ class StoryView: UIViewController {
         }
         isMusicOn.toggle()
     }
-
+    
     func setupLayout() {
         view.backgroundColor = .black
         
         // 1. 배경 이미지
-        backgroundImageView.image = UIImage(named: "background") // 예: "background.png"
+        backgroundImageView.image = UIImage(named: scenario.scenarioImage) // 예: "background.png"
         backgroundImageView.contentMode = .scaleAspectFill
         backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(backgroundImageView)
-
+        
         // 2. 캐릭터 이미지 (오른쪽 하단 고정)
-        characterImageView.image = UIImage(named: "girl") // 예: "yuna.png"
+        characterImageView.image = UIImage(named: scenario.characterImage) // 예: "yuna.png"
         characterImageView.contentMode = .scaleAspectFit
         characterImageView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(characterImageView)
@@ -161,7 +164,7 @@ class StoryView: UIViewController {
             dialogueBoxView.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
-
+        
         // MARK: - AutoLayout 설정
         NSLayoutConstraint.activate([
             // 배경
@@ -172,9 +175,9 @@ class StoryView: UIViewController {
             
             //배경음악 토글 버튼
             musicToggleButton.topAnchor.constraint(equalTo: dialogueBoxView.topAnchor, constant: 10),
-                musicToggleButton.trailingAnchor.constraint(equalTo: dialogueBoxView.trailingAnchor, constant: -16),
-                musicToggleButton.widthAnchor.constraint(equalToConstant: 30),
-                musicToggleButton.heightAnchor.constraint(equalToConstant: 30),
+            musicToggleButton.trailingAnchor.constraint(equalTo: dialogueBoxView.trailingAnchor, constant: -16),
+            musicToggleButton.widthAnchor.constraint(equalToConstant: 30),
+            musicToggleButton.heightAnchor.constraint(equalToConstant: 30),
             
             // 캐릭터 이미지
             characterImageView.bottomAnchor.constraint(equalTo: dialogueBoxView.topAnchor, constant: 20),
@@ -209,9 +212,9 @@ class StoryView: UIViewController {
             
             // 퀘스트시작 버튼
             startQuestButton.centerXAnchor.constraint(equalTo: dialogueBoxView.centerXAnchor),
-                startQuestButton.bottomAnchor.constraint(equalTo: dialogueBoxView.bottomAnchor, constant: -12),
-                startQuestButton.heightAnchor.constraint(equalToConstant: 40),
-                startQuestButton.widthAnchor.constraint(equalToConstant: 120),
+            startQuestButton.bottomAnchor.constraint(equalTo: dialogueBoxView.bottomAnchor, constant: -12),
+            startQuestButton.heightAnchor.constraint(equalToConstant: 40),
+            startQuestButton.widthAnchor.constraint(equalToConstant: 120),
             
             //음악 재생 버튼
             musicToggleButton.topAnchor.constraint(equalTo: dialogueBoxView.topAnchor, constant: 8),
@@ -226,7 +229,7 @@ class StoryView: UIViewController {
         let dialogue = dialogues[currentDialogueIndex]
         nameLabel.text = dialogue.speaker
         dialogueLabel.text = dialogue.line
-        
+        characterImageView.image = UIImage(named: dialogue.speaker)
         prevButton.isHidden = currentDialogueIndex == 0
         
         if currentDialogueIndex == dialogues.count - 1 {
@@ -254,12 +257,12 @@ class StoryView: UIViewController {
         bgmPlayer?.stop()
         
         // 퀘스트 맵 또는 다음 화면으로 이동
-        let questVC = QuestMapView()
+        let questVC = QuestMapView(themeName: themeName, spotName: spotName)
         questVC.modalPresentationStyle = .fullScreen
         present(questVC, animated: true)
     }
 }
 
 #Preview {
-    StoryView()
+    StoryView(themeName: "잊혀진 유산", spotName: "미륵사지")
 }
