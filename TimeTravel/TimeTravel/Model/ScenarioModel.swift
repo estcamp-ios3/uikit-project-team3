@@ -59,7 +59,7 @@ class ScenarioModel {
                 item: [
                     Item(itemImage: "golden_ring", itemName: "금가락지", itemDetail: "투박한 금가락지",
                          isRandom: true,
-                         itemLongtitude: 0, itemLatitude: 0),
+                         itemLongtitude: 126.957370, itemLatitude: 35.953040),
                     Item(itemImage: "part_0", itemName: "기억의 조각", itemDetail: "기억의 일부",
                          isRandom: true,
                          itemLongtitude: 0,
