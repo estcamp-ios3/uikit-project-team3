@@ -7,20 +7,14 @@
 
 import Foundation
 
-struct User: Codable {
-    let id: Int
-    let name: String
-    let questProgress: Int
-}
-
 class UserModel {
     static let shared = UserModel()
     
-    private var users: [User] = []
+    var questProgress: [String]
+    var items: [String]
     
     private init() {
-        users = [
-            //User(id: <#T##Int#>, name: <#T##String#>, questProgress: <#T##Int#>),
-        ]
+        questProgress = ["서동시장"]
+        items = ["기억의 조각_0"]
     }
 }
