@@ -7,13 +7,10 @@
 
 import UIKit
 import MapKit
-import SnapKit
 
-final class MapView: UIView {
-    
-    // MARK: - UI Components
+class MapView: UIView {
     let mapView = MKMapView()
-    let mapOverlayImageView = UIImageView()
+    let backButton = UIButton(type: .system)
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -21,23 +18,30 @@ final class MapView: UIView {
     }
     
     required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupUI()
+        fatalError("init(coder:) has not been implemented")
     }
     
     private func setupUI() {
-        // 지도 설정
         addSubview(mapView)
-        mapView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
+        addSubview(backButton)
         
-        // 고지도 스타일 오버레이
-        addSubview(mapOverlayImageView)
-        mapOverlayImageView.image = UIImage(named: "gojido_overlay")
-        mapOverlayImageView.contentMode = .scaleAspectFill
-        mapOverlayImageView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
+        mapView.translatesAutoresizingMaskIntoConstraints = false
+        backButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            mapView.topAnchor.constraint(equalTo: topAnchor),
+            mapView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            mapView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            mapView.trailingAnchor.constraint(equalTo: trailingAnchor)
+        ])
+        
+        backButton.setImage(UIImage(systemName: "chevron.left.circle.fill"), for: .normal)
+        backButton.tintColor = .systemBlue
+        backButton.setPreferredSymbolConfiguration(.init(pointSize: 40), forImageIn: .normal)
+        
+        NSLayoutConstraint.activate([
+            backButton.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 16),
+            backButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16)
+        ])
     }
 }

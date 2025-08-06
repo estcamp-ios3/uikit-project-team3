@@ -6,11 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		BE55BA552E41DC5100CDAEC3 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = BE55BA542E41DC5100CDAEC3 /* SnapKit */; };
-		BE55BA572E41DC5100CDAEC3 /* SnapKit-Dynamic in Frameworks */ = {isa = PBXBuildFile; productRef = BE55BA562E41DC5100CDAEC3 /* SnapKit-Dynamic */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXFileReference section */
 		BE55BA232E41D94A00CDAEC3 /* LociTravel.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LociTravel.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -41,8 +36,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BE55BA552E41DC5100CDAEC3 /* SnapKit in Frameworks */,
-				BE55BA572E41DC5100CDAEC3 /* SnapKit-Dynamic in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,8 +78,6 @@
 			);
 			name = LociTravel;
 			packageProductDependencies = (
-				BE55BA542E41DC5100CDAEC3 /* SnapKit */,
-				BE55BA562E41DC5100CDAEC3 /* SnapKit-Dynamic */,
 			);
 			productName = LociTravel;
 			productReference = BE55BA232E41D94A00CDAEC3 /* LociTravel.app */;
@@ -117,7 +108,6 @@
 			mainGroup = BE55BA1A2E41D94A00CDAEC3;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				BE55BA532E41DC5100CDAEC3 /* XCRemoteSwiftPackageReference "SnapKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = BE55BA242E41D94A00CDAEC3 /* Products */;
@@ -357,30 +347,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		BE55BA532E41DC5100CDAEC3 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SnapKit/SnapKit";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.7.1;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		BE55BA542E41DC5100CDAEC3 /* SnapKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = BE55BA532E41DC5100CDAEC3 /* XCRemoteSwiftPackageReference "SnapKit" */;
-			productName = SnapKit;
-		};
-		BE55BA562E41DC5100CDAEC3 /* SnapKit-Dynamic */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = BE55BA532E41DC5100CDAEC3 /* XCRemoteSwiftPackageReference "SnapKit" */;
-			productName = "SnapKit-Dynamic";
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = BE55BA1B2E41D94A00CDAEC3 /* Project object */;
 }

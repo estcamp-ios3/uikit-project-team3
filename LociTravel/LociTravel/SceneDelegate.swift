@@ -11,12 +11,30 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
-
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
-        // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
-        // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard let _ = (scene as? UIWindowScene) else { return }
+        // 이 메서드는 새로운 UIWindowScene이 생성될 때 호출됩니다.
+        // 앱의 UI를 연결하고, 윈도우를 만들고, 뷰 계층을 설정합니다.
+        
+        // 1. UIWindowScene 인스턴스를 가져옵니다.
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+        
+        // 2. 새로운 UIWindow를 생성하고, 이 윈도우를 windowScene에 연결합니다.
+        // 이 window는 앱의 모든 UI를 담는 컨테이너 역할을 합니다.
+        window = UIWindow(windowScene: windowScene)
+        
+        // 3. 앱의 첫 화면으로 보여줄 HomeViewController를 생성합니다.
+        let homeViewController = HomeViewController()
+        
+        // 4. HomeViewController를 UINavigationController의 rootViewController로 설정합니다.
+        // 이렇게 하면 화면 전환(push/pop) 기능을 사용할 수 있게 됩니다.
+        let navigationController = UINavigationController(rootViewController: homeViewController)
+        
+        // 5. 생성된 UINavigationController를 window의 rootViewController로 설정합니다.
+        // 이제 앱이 시작될 때 이 컨트롤러가 관리하는 화면이 가장 먼저 표시됩니다.
+        window?.rootViewController = navigationController
+        
+        // 6. 윈도우를 화면에 표시하고, 앱의 메인 윈도우로 만듭니다.
+        window?.makeKeyAndVisible()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -44,9 +62,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidEnterBackground(_ scene: UIScene) {
         // Called as the scene transitions from the foreground to the background.
         // Use this method to save data, release shared resources, and store enough scene-specific state information
-        // to restore the scene back to its current state.
+        // to restore the scene back to its current state in case it is terminated later.
     }
-
-
 }
-

@@ -6,65 +6,64 @@
 //
 
 import UIKit
-import SnapKit
 
-final class QuestCardView: UIView {
-    
-    // MARK: - UI Components
-    let cardBackgroundImageView = UIImageView()
-    let titleLabel = UILabel()
-    let descriptionLabel = UILabel()
-    let statusLabel = UILabel()
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+class QuestCardView: UITableViewCell {
+    static let identifier = "QuestCardView"
+
+    private let titleLabel = UILabel()
+    private let descriptionLabel = UILabel()
+    private let completeStatusLabel = UILabel()
+
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
     }
-    
+
     required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupUI()
+        fatalError("init(coder:) has not been implemented")
     }
-    
+
     private func setupUI() {
-        // 카드 배경 (고서 말린 종이 일러스트)
-        addSubview(cardBackgroundImageView)
-        cardBackgroundImageView.image = UIImage(named: "quest_card_background")
-        cardBackgroundImageView.contentMode = .scaleAspectFill
-        cardBackgroundImageView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
+        backgroundColor = .clear
         
-        // 제목
-        addSubview(titleLabel)
-        titleLabel.font = .boldSystemFont(ofSize: 18)
-        titleLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(20)
-            make.leading.trailing.equalToSuperview().inset(20)
-        }
+        let backgroundImageView = UIImageView(image: UIImage(named: "quest_card_background"))
+        backgroundImageView.contentMode = .scaleToFill
+        backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(backgroundImageView)
         
-        // 설명
-        addSubview(descriptionLabel)
-        descriptionLabel.numberOfLines = 0
-        descriptionLabel.font = .systemFont(ofSize: 14)
-        descriptionLabel.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(10)
-            make.leading.trailing.equalToSuperview().inset(20)
-        }
+        NSLayoutConstraint.activate([
+            backgroundImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 5),
+            backgroundImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -5),
+            backgroundImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10),
+            backgroundImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10)
+        ])
         
-        // 상태
-        addSubview(statusLabel)
-        statusLabel.font = .boldSystemFont(ofSize: 14)
-        statusLabel.snp.makeConstraints { make in
-            make.bottom.equalToSuperview().offset(-20)
-            make.trailing.equalToSuperview().offset(-20)
-        }
+        let stackView = UIStackView(arrangedSubviews: [titleLabel, descriptionLabel, completeStatusLabel])
+        stackView.axis = .vertical
+        stackView.spacing = 5
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(stackView)
+        
+        NSLayoutConstraint.activate([
+            stackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 15),
+            stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -15),
+            stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 30),
+            stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -30)
+        ])
+
+        titleLabel.font = UIFont.systemFont(ofSize: 20, weight: .bold)
+        descriptionLabel.font = UIFont.systemFont(ofSize: 15)
+        completeStatusLabel.font = UIFont.systemFont(ofSize: 13, weight: .light)
+        
+        titleLabel.textColor = .black
+        descriptionLabel.textColor = .darkGray
+        completeStatusLabel.textColor = .systemGreen
     }
     
-    // 외부에서 데이터 설정용 함수
-    func configure(title: String, description: String, status: String) {
-        titleLabel.text = title
-        descriptionLabel.text = description
-        statusLabel.text = status
+    func configure(with quest: Quest) {
+        titleLabel.text = quest.title
+        descriptionLabel.text = quest.description
+        completeStatusLabel.text = quest.isCompleted ? "완료" : "진행 중"
+        completeStatusLabel.textColor = quest.isCompleted ? .systemGreen : .systemOrange
     }
 }

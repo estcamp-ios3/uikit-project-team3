@@ -6,82 +6,94 @@
 //
 
 import UIKit
-import SnapKit
 
-final class HomeView: UIView {
-    
-    // MARK: - UI Components
+class HomeView: UIView {
     let backgroundImageView = UIImageView()
-    let portalImageView = UIImageView()
     let titleLabel = UILabel()
-    let navigationStackView = UIStackView()
-    
+    let lokiImageView = UIImageView()
+    let startButton = UIButton(type: .system)
+    let questListButton = UIButton(type: .system)
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
     }
-    
+
     required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupUI()
+        fatalError("init(coder:) has not been implemented")
     }
-    
+
     private func setupUI() {
-        // 배경 이미지 (익산 미륵사지 일러스트)
+        backgroundColor = .white
+
+        // 뷰 계층 구조 설정
         addSubview(backgroundImageView)
+        addSubview(titleLabel)
+        addSubview(lokiImageView)
+        addSubview(startButton)
+        addSubview(questListButton)
+
+        // 모든 뷰에 Auto Layout 사용 설정 (필수!)
+        backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        lokiImageView.translatesAutoresizingMaskIntoConstraints = false
+        startButton.translatesAutoresizingMaskIntoConstraints = false
+        questListButton.translatesAutoresizingMaskIntoConstraints = false
+
+        // 배경 이미지 설정
         backgroundImageView.image = UIImage(named: "home_background_illustration")
         backgroundImageView.contentMode = .scaleAspectFill
-        backgroundImageView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-        
-        // 앱 제목
-        addSubview(titleLabel)
+        backgroundImageView.clipsToBounds = true
+        NSLayoutConstraint.activate([
+            backgroundImageView.topAnchor.constraint(equalTo: topAnchor),
+            backgroundImageView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            backgroundImageView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            backgroundImageView.trailingAnchor.constraint(equalTo: trailingAnchor)
+        ])
+
+        // 타이틀 레이블 설정
         titleLabel.text = "장소의 기억"
+        titleLabel.font = UIFont.systemFont(ofSize: 40, weight: .bold)
         titleLabel.textColor = .white
-        titleLabel.font = .boldSystemFont(ofSize: 32)
-        titleLabel.snp.makeConstraints { make in
-            make.top.equalTo(safeAreaLayoutGuide.snp.top).offset(40)
-            make.centerX.equalToSuperview()
-        }
+        NSLayoutConstraint.activate([
+            titleLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+            titleLabel.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 50)
+        ])
+
+        // 로키 이미지 설정
+        lokiImageView.image = UIImage(named: "loki_portal_illustration")
+        lokiImageView.contentMode = .scaleAspectFit
+        NSLayoutConstraint.activate([
+            lokiImageView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            lokiImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            lokiImageView.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 0.8),
+            lokiImageView.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 0.6)
+        ])
+
+        // 시작 버튼 설정
+        startButton.setTitle("지도 보기", for: .normal)
+        startButton.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
+        startButton.backgroundColor = .systemBlue
+        startButton.setTitleColor(.white, for: .normal)
+        startButton.layer.cornerRadius = 25
+        NSLayoutConstraint.activate([
+            startButton.centerXAnchor.constraint(equalTo: centerXAnchor),
+            startButton.bottomAnchor.constraint(equalTo: questListButton.topAnchor, constant: -20),
+            startButton.widthAnchor.constraint(equalToConstant: 250),
+            startButton.heightAnchor.constraint(equalToConstant: 50)
+        ])
         
-        // 중앙 포털 및 로키 이미지
-        addSubview(portalImageView)
-        portalImageView.image = UIImage(named: "loki_portal_illustration")
-        portalImageView.contentMode = .scaleAspectFit
-        portalImageView.snp.makeConstraints { make in
-            make.center.equalToSuperview()
-            make.width.equalTo(snp.width).multipliedBy(0.8)
-            make.height.equalTo(portalImageView.snp.width)
-        }
-        
-        // 하단 내비게이션 버튼 스택
-        let mapButton = createNavButton(iconName: "map")
-        let questButton = createNavButton(iconName: "flag.checkered")
-        let recordsButton = createNavButton(iconName: "book")
-        
-        navigationStackView.addArrangedSubview(mapButton)
-        navigationStackView.addArrangedSubview(questButton)
-        navigationStackView.addArrangedSubview(recordsButton)
-        navigationStackView.axis = .horizontal
-        navigationStackView.distribution = .fillEqually
-        navigationStackView.spacing = 20
-        
-        addSubview(navigationStackView)
-        navigationStackView.snp.makeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.bottom.equalTo(safeAreaLayoutGuide.snp.bottom).offset(-20)
-            make.width.equalToSuperview().multipliedBy(0.8)
-        }
-    }
-    
-    private func createNavButton(iconName: String) -> UIButton {
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: iconName), for: .normal)
-        button.tintColor = .white
-        button.contentEdgeInsets = UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20)
-        button.layer.cornerRadius = 20
-        button.backgroundColor = .systemBrown.withAlphaComponent(0.7)
-        return button
+        // 탐험 일지 버튼 설정
+        questListButton.setTitle("탐험 일지", for: .normal)
+        questListButton.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
+        questListButton.backgroundColor = .systemGreen
+        questListButton.setTitleColor(.white, for: .normal)
+        questListButton.layer.cornerRadius = 25
+        NSLayoutConstraint.activate([
+            questListButton.centerXAnchor.constraint(equalTo: centerXAnchor),
+            questListButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -50),
+            questListButton.widthAnchor.constraint(equalToConstant: 250),
+            questListButton.heightAnchor.constraint(equalToConstant: 50)
+        ])
     }
 }
