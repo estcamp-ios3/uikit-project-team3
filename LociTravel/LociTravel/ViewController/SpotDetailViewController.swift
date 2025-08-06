@@ -68,7 +68,8 @@ class SpotDetailViewController: UIViewController, UIScrollViewDelegate {
     
     // 뒤로가기 버튼 액션
     @objc private func didTapBackButton() {
-        navigationController?.popViewController(animated: true)
+        //navigationController?.popViewController(animated: true)
+        dismiss(animated: true)
     }
     
     // MARK: - 이미지 캐러셀 자동 스크롤

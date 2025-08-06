@@ -93,10 +93,10 @@ class QuestMapViewController: UIViewController, MKMapViewDelegate, CLLocationMan
                 timer.invalidate()
                 return
             }
-            if player.volume < 0.1 {
+            if player.volume < 0.08 {
                 player.volume += 0.02
             } else {
-                player.volume = 0.1
+                player.volume = 0.08
                 timer.invalidate()
             }
         }
@@ -105,6 +105,14 @@ class QuestMapViewController: UIViewController, MKMapViewDelegate, CLLocationMan
     func setupActions() {
         questView.closeButton.addTarget(self, action: #selector(close), for: .touchUpInside)
         questView.musicToggleButton.addTarget(self, action: #selector(toggleMusic), for: .touchUpInside)
+        questView.questionButton.addTarget(self, action: #selector(showDetailView), for: .touchUpInside)
+    }
+    
+    @objc func showDetailView() {
+        bgmPlayer?.stop()
+        let detailVC = SpotDetailViewController()
+        detailVC.spotName = spotName
+        present(detailVC, animated: true)
     }
 
     @objc func close() {

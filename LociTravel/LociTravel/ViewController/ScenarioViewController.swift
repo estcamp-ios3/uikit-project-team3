@@ -56,6 +56,7 @@ class ScenarioViewController: UIViewController {
         scenarioView.nextButton.addTarget(self, action: #selector(nextDialogue), for: .touchUpInside)
         scenarioView.startQuestButton.addTarget(self, action: #selector(startQuest), for: .touchUpInside)
         scenarioView.musicToggleButton.addTarget(self, action: #selector(toggleMusic), for: .touchUpInside)
+        scenarioView.questionButton.addTarget(self, action: #selector(showDetailView), for: .touchUpInside)
     }
 
     func playBackgroundMusic() {
@@ -82,11 +83,11 @@ class ScenarioViewController: UIViewController {
                 return
             }
 
-            if player.volume < 0.3 {
+            if player.volume < 0.08 {
                 player.volume += 0.02
             } else {
                 timer.invalidate()
-                player.volume = 0.3
+                player.volume = 0.08
             }
         }
     }
@@ -134,9 +135,17 @@ class ScenarioViewController: UIViewController {
 
     @objc func startQuest() {
         bgmPlayer?.stop()
-        //let questVC = QuestMapView(questName: spotName)
-        //questVC.modalPresentationStyle = .fullScreen
-        //present(questVC, animated: true)
+        let questVC = QuestMapViewController(spotName: spotName)
+        questVC.modalPresentationStyle = .fullScreen
+        present(questVC, animated: true)
+    }
+    
+    @objc func showDetailView() {
+        bgmPlayer?.stop()
+        let detailVC = SpotDetailViewController()
+        detailVC.spotName = spotName
+        detailVC.modalPresentationStyle = .fullScreen
+        present(detailVC, animated: true)
     }
 }
 
