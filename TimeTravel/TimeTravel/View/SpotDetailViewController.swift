@@ -44,9 +44,21 @@ class LocationNavigator {
 class SpotDetailViewController: UIViewController {
 
     // MARK: - Properties
-    var spotData: Spot? // 외부에서 전달받을 데이터
-    var theme: String? // 테마 가져오기
-    var spotName: String? //
+    var spotData: Spot // 외부에서 전달받을 데이터
+    var themeName: String // 테마 가져오기
+    var spotName: String //유적지 이름
+    
+    init(themeName: String, spotName: String) {
+        self.themeName = themeName
+        self.spotName = spotName
+        
+        self.spotData = SpotModel.shared.getSpotData(spot: spotName)
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     private var isDescriptionExpanded = false
     
@@ -73,17 +85,11 @@ class SpotDetailViewController: UIViewController {
         // 뷰의 델리케이트를 컨트롤러 자신으로 설정
         spotDetailView.imageScrollView.delegate = self
         
+        configure(with: spotData)
         
-        // getSpotData 메서드 호출로 변경하고 옵셔널 바인딩을 사용
-        if let spotName = self.spotName, let spot = SpotModel.shared.getSpotData(spot: spotName) {
-            spotData = spot
-            configure(with: spot)
-            
-
-            let imageTapGesture = UITapGestureRecognizer(target: self, action: #selector(imageTapped))
-            spotDetailView.imageScrollView.addGestureRecognizer(imageTapGesture)
-        }
-        }
+        let imageTapGesture = UITapGestureRecognizer(target: self, action: #selector(imageTapped))
+        spotDetailView.imageScrollView.addGestureRecognizer(imageTapGesture)
+    }
     
     
     // 뷰의 레이아웃이 설정된 후에 호출. 오류가 안남
@@ -133,7 +139,7 @@ class SpotDetailViewController: UIViewController {
     
     // 이미지 갤러리를 전체 화면으로 띄우는 액션
     @objc private func imageTapped() {
-        guard let images = spotData?.spotImage else { return }
+        let images = spotData.spotImage
         let tappedIndex = Int(spotDetailView.imageScrollView.contentOffset.x / view.frame.width)
         
         //뷰에서 이미지 이름 배열을 받아 UITmage 배열로 변환 후 전달
@@ -146,7 +152,7 @@ class SpotDetailViewController: UIViewController {
     
     // 지도 바로가기 버튼 탭 액션
     @objc private func navigateButtonTapped() {
-        guard let spot = spotData else { return }
+        let spot = spotData
         let navigator = LocationNavigator()
         navigator.navigateTo(
             latitude: spot.coordinate.latitude,
@@ -169,7 +175,7 @@ class SpotDetailViewController: UIViewController {
     
     // 퀘스트 시작 버튼 탭 액션
     @objc private func storyButtonTapped() {
-        let storyVC = StoryView(themeName: "잊혀진 유적", spotName: "미륵사지") // StoryView는 다른 화면의 뷰 컨트롤러라고 가정
+        let storyVC = StoryView(themeName: themeName, spotName: spotName) // StoryView는 다른 화면의 뷰 컨트롤러라고 가정
         if let navigationController = self.navigationController {
             navigationController.pushViewController(storyVC, animated: true)
         } else {
@@ -204,7 +210,7 @@ class SpotDetailViewController: UIViewController {
     // 재생/정지 버튼 탭 액션
     @objc private func playPauseButtonTapped() {
         // 이미지가 1개 이하일 떄 버튼 동작 x
-        guard spotData?.spotImage.count ?? 0 > 1 else { return }
+        guard spotData.spotImage.count == 0 else { return }
         
         isAutoScrolling.toggle()
         let config = UIImage.SymbolConfiguration(pointSize: 30, weight: .regular, scale: .large)

@@ -72,7 +72,7 @@ class SpotModel {
             )
         ),
         Spot(
-            spotName: "익산 보석박물관",
+            spotName: "보석박물관",
             spotImage: ["jewelrymuseum1", "jewelrymuseum2", "jewelrymuseum3", "jewelrymuseum4", "jewelrymuseum5"],
             spotDetail: """
             익산 보석박물관은 보석 가공 산업의 중심지였던 익산의 역사를 기리고, 보석의 아름다움을 널리 알리기 위해 건립된 곳입니다. 내부에는 세계 각지에서 수집된 진귀한 보석과 원석들이 전시되어 있습니다.
@@ -91,7 +91,7 @@ class SpotModel {
             )
         ),
         Spot(
-            spotName: "익산 교도소세트장",
+            spotName: "교도소 세트장",
             spotImage: ["prisonset1", "prisonset2", "prisonset3", "prisonset4", "prisonset5"],
             spotDetail: """
             폐교 부지를 활용하여 조성된 익산 교도소세트장은 국내에서 유일한 교도소 전문 영화 촬영지입니다. 이곳은 영화 '홀리데이', '7번방의 선물', 드라마 '아이리스' 등 수많은 인기 작품의 배경이 되었으며, 실제 교도소와 흡사한 독방, 면회실, 취조실 등의 시설을 생생하게 체험할 수 있습니다.
@@ -147,8 +147,7 @@ class SpotModel {
         )
     ]
     
-    // 메서드 이름을 getSpotData로 변경하고, 반환 타입을 옵셔널(Spot?)로 변경
-    public func getSpotData(spot: String) -> Spot? {
-        return arrSpot.filter { $0.spotName == spot }.first
+    public func getSpotData(spot: String) -> Spot {
+        return arrSpot.filter { $0.spotName == spot }.first ?? arrSpot[0]
     }
 }

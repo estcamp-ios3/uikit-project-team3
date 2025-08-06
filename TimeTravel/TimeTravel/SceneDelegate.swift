@@ -29,7 +29,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, UITabBarControllerDeleg
                                                   tag: 0)
 
                 // 5) 기존 MapView, SpotView 역시 네비게이션 컨트롤러로 래핑
-                let mapNav = UINavigationController(rootViewController: MapView())
+        let mapNav = UINavigationController(rootViewController: MapView(localName: "익산", themeName: "잊혀진 유적"))
                 mapNav.tabBarItem = UITabBarItem(title: "지도",
                                                  image: UIImage(systemName: "map"),
                                                  tag: 1)
@@ -49,26 +49,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, UITabBarControllerDeleg
                 window?.rootViewController = tabbarController
                 window?.makeKeyAndVisible()
             }
-    
-  
-        
-        
-//        let homeView = UINavigationController(rootViewController: HomeView() )
-//        
-//        homeView.tabBarItem = UITabBarItem(title: "홈", image: UIImage(systemName: "house"), tag: 0)
-//        
-//        let mapView = UINavigationController(rootViewController: MapView() )
-//        mapView.tabBarItem = UITabBarItem(title: "지도", image: UIImage(systemName: "map"), tag: 1)
-//        
-//        let spotView = UINavigationController(rootViewController: SpotView() )
-//        spotView.tabBarItem = UITabBarItem(title: "Spot", image: UIImage(systemName: "signpost.right.and.left.circle"), tag: 2)
-//        
-//        tabbarController.viewControllers = [homeView, mapView, spotView]
-//        
-//        window?.rootViewController = tabbarController
-//        window?.makeKeyAndVisible()
-//        
-//    }
 
     func sceneDidDisconnect(_ scene: UIScene) {
       
@@ -83,19 +63,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, UITabBarControllerDeleg
     }
 
     func sceneWillEnterForeground(_ scene: UIScene) {
-        // Called as the scene transitions from the background to the foreground.
-        // Use this method to undo the changes made on entering the background.
     }
 
     func sceneDidEnterBackground(_ scene: UIScene) {
-        // Called as the scene transitions from the foreground to the background.
-        // Use this method to save data, release shared resources, and store enough scene-specific state information
-        // to restore the scene back to its current state.
     }
 
 
 }
-
 
 // 🔧 5) UITabBarControllerDelegate 프로토콜 채택 & 재선택 콜백 구현
 extension SceneDelegate {

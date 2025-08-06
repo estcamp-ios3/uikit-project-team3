@@ -150,6 +150,15 @@ class SpotDetailView: UIView, UIScrollViewDelegate {
     
     // 이미지 이름 배열을 저장할 변수
     var imageNames: [String] = []
+
+    // MARK: - 텍스트 컨테이너 드래그 관련 프로퍼티
+    private var panGesture: UIPanGestureRecognizer?
+    private var textContainerTopConstraint: NSLayoutConstraint!
+    private var isExpanded = false
+    
+    // MARK: - 이미지 자동 스크롤 관련 프로퍼티
+    private var timer: Timer?
+    private var isAutoScrolling = true
     
     // MARK: - Initializers
     
@@ -157,10 +166,10 @@ class SpotDetailView: UIView, UIScrollViewDelegate {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        startAutoScroll()
     }
     
     // 스토리보드 또는 XIB로 뷰를 생성할 때 호출되는 초기화 메서드
-    // UIView를 상속받는 클래스에는 이 두 초기화 메서드가 반드시 필요합니다.
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -174,56 +183,68 @@ class SpotDetailView: UIView, UIScrollViewDelegate {
         // 뷰 계층 구조 설정
         self.addSubview(imageScrollView)
         self.addSubview(textContainerView)
-        
-        // 페이지 컨트롤과 재생/ 정지 버튼 추가
         self.addSubview(pageControl)
         self.addSubview(playPauseButton)
         
-        // Auto Layout 설정
+        // 텍스트 컨테이너 내부 뷰 계층 구조
+        textContainerView.addSubview(grabberView)
+        textContainerView.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        
+        // MARK: - 텍스트 및 레이아웃 관련
+        
+        // 1. 텍스트 컨테이너 드래그 가능하도록 GestureRecognizer 추가
+        panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
+        textContainerView.addGestureRecognizer(panGesture!)
+        
+        // 2. 텍스트 박스 투명도
+        textContainerView.backgroundColor = .systemBackground.withAlphaComponent(1.0)
+        
+        // 이미지 스크롤뷰의 델리게이트 설정
+        imageScrollView.delegate = self
+        
+        // 재생/정지 버튼 액션 연결
+        playPauseButton.addTarget(self, action: #selector(toggleAutoScroll), for: .touchUpInside)
+
+        // 메인 레이아웃 설정
+        textContainerTopConstraint = textContainerView.topAnchor.constraint(equalTo: imageScrollView.bottomAnchor)
+        textContainerTopConstraint.isActive = true
+        
         NSLayoutConstraint.activate([
-            // ✅ 수정: imageScrollView의 높이를 뷰 높이의 절반으로 설정
             imageScrollView.topAnchor.constraint(equalTo: self.topAnchor),
             imageScrollView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
             imageScrollView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-            imageScrollView.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.5),
-            
-            // ✅ 수정: textContainerView를 imageScrollView 바로 아래에 위치
-            textContainerView.topAnchor.constraint(equalTo: imageScrollView.bottomAnchor),
+            imageScrollView.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.37),
+
             textContainerView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
             textContainerView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-            textContainerView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
-            
+            textContainerView.bottomAnchor.constraint(equalTo: self.safeAreaLayoutGuide.bottomAnchor)
         ])
-        // pageControl 레이아웃 설정
+
+        // 페이지 컨트롤, 재생/정지 버튼 레이아웃
         NSLayoutConstraint.activate([
             pageControl.centerXAnchor.constraint(equalTo: imageScrollView.centerXAnchor),
             pageControl.bottomAnchor.constraint(equalTo: imageScrollView.bottomAnchor, constant: -10),
-        ])
-        
-        // playPauseButton 레이아웃 설정
-        NSLayoutConstraint.activate([
             playPauseButton.trailingAnchor.constraint(equalTo: imageScrollView.trailingAnchor, constant: -16),
             playPauseButton.bottomAnchor.constraint(equalTo: imageScrollView.bottomAnchor, constant: -10),
             playPauseButton.widthAnchor.constraint(equalToConstant: 44),
             playPauseButton.heightAnchor.constraint(equalToConstant: 44)
         ])
-        
-        textContainerView.addSubview(grabberView)
-        textContainerView.addSubview(scrollView)
-        
+
+        // 그랩바와 스크롤뷰 레이아웃
         NSLayoutConstraint.activate([
             grabberView.topAnchor.constraint(equalTo: textContainerView.topAnchor, constant: 10),
             grabberView.centerXAnchor.constraint(equalTo: textContainerView.centerXAnchor),
             grabberView.widthAnchor.constraint(equalToConstant: 40),
             grabberView.heightAnchor.constraint(equalToConstant: 5),
-            
+
             scrollView.topAnchor.constraint(equalTo: grabberView.bottomAnchor, constant: 10),
             scrollView.leadingAnchor.constraint(equalTo: textContainerView.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: textContainerView.trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: textContainerView.bottomAnchor)
         ])
-        
-        scrollView.addSubview(contentView)
+
+        // contentView 레이아웃
         NSLayoutConstraint.activate([
             contentView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
             contentView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
@@ -231,58 +252,94 @@ class SpotDetailView: UIView, UIScrollViewDelegate {
             contentView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
             contentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
         ])
+
+        // MARK: - 컨텐츠 뷰 내부 레이아웃 (요청사항에 맞게 재구성)
+        let headerStack = UIStackView(arrangedSubviews: [siteNameLabel, startButton])
+        headerStack.axis = .horizontal
+        headerStack.distribution = .equalSpacing
+        headerStack.alignment = .center
+        headerStack.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(headerStack)
+
+        let detailTitle = UILabel()
+        detailTitle.text = "상세안내"
+        detailTitle.font = UIFont.boldSystemFont(ofSize: 18)
+        detailTitle.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(detailTitle)
         
-        contentView.addSubview(siteNameLabel)
-        contentView.addSubview(navigateButton)
-        contentView.addSubview(descriptionLabel)
-        contentView.addSubview(moreButton)
-        contentView.addSubview(visitorInfoTitleLabel)
-        contentView.addSubview(visitorInfoDetailLabel)
-        contentView.addSubview(startButton)
-        
+        let detailBox = UIView()
+        detailBox.backgroundColor = UIColor.systemGray6
+        detailBox.layer.cornerRadius = 12
+        detailBox.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(detailBox)
+        detailBox.addSubview(descriptionLabel)
+        detailBox.addSubview(moreButton)
+
+        let visitHeader = UIStackView(arrangedSubviews: [visitorInfoTitleLabel, navigateButton])
+        visitHeader.axis = .horizontal
+        visitHeader.distribution = .equalSpacing
+        visitHeader.alignment = .center
+        visitHeader.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(visitHeader)
+
+        let visitorBox = UIView()
+        visitorBox.backgroundColor = UIColor.systemGray6
+        visitorBox.layer.cornerRadius = 12
+        visitorBox.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(visitorBox)
+        visitorBox.addSubview(visitorInfoDetailLabel)
+
+        // 재구성된 레이아웃 제약
         NSLayoutConstraint.activate([
-            siteNameLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 15),
-            siteNameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            siteNameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            headerStack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 15),
+            headerStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            headerStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            startButton.heightAnchor.constraint(equalToConstant: 44),
+            startButton.widthAnchor.constraint(equalToConstant: 120),
+
+            detailTitle.topAnchor.constraint(equalTo: headerStack.bottomAnchor, constant: 20),
+            detailTitle.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             
-            navigateButton.topAnchor.constraint(equalTo: siteNameLabel.bottomAnchor, constant: 10),
-            navigateButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            navigateButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            navigateButton.heightAnchor.constraint(equalToConstant: 50),
-            
-            descriptionLabel.topAnchor.constraint(equalTo: navigateButton.bottomAnchor, constant: 20),
-            descriptionLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            descriptionLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            
+            detailBox.topAnchor.constraint(equalTo: detailTitle.bottomAnchor, constant: 10),
+            detailBox.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            detailBox.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+
+            descriptionLabel.topAnchor.constraint(equalTo: detailBox.topAnchor, constant: 10),
+            descriptionLabel.leadingAnchor.constraint(equalTo: detailBox.leadingAnchor, constant: 10),
+            descriptionLabel.trailingAnchor.constraint(equalTo: detailBox.trailingAnchor, constant: -10),
             moreButton.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 5),
-            moreButton.trailingAnchor.constraint(equalTo: descriptionLabel.trailingAnchor),
-            
-            visitorInfoTitleLabel.topAnchor.constraint(equalTo: moreButton.bottomAnchor, constant: 20),
-            visitorInfoTitleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            
-            visitorInfoDetailLabel.topAnchor.constraint(equalTo: visitorInfoTitleLabel.bottomAnchor, constant: 5),
-            visitorInfoDetailLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            visitorInfoDetailLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            
-            startButton.topAnchor.constraint(equalTo: visitorInfoDetailLabel.bottomAnchor, constant: 40),
-            startButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            startButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            startButton.heightAnchor.constraint(equalToConstant: 50),
-            startButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -40)
+            moreButton.trailingAnchor.constraint(equalTo: detailBox.trailingAnchor, constant: -10),
+            moreButton.bottomAnchor.constraint(equalTo: detailBox.bottomAnchor, constant: -10),
+
+            visitHeader.topAnchor.constraint(equalTo: detailBox.bottomAnchor, constant: 20),
+            visitHeader.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            visitHeader.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+
+            navigateButton.heightAnchor.constraint(equalToConstant: 44),
+            navigateButton.widthAnchor.constraint(equalToConstant: 120),
+
+            visitorBox.topAnchor.constraint(equalTo: visitHeader.bottomAnchor, constant: 10),
+            visitorBox.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            visitorBox.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+
+            visitorInfoDetailLabel.topAnchor.constraint(equalTo: visitorBox.topAnchor, constant: 10),
+            visitorInfoDetailLabel.leadingAnchor.constraint(equalTo: visitorBox.leadingAnchor, constant: 10),
+            visitorInfoDetailLabel.trailingAnchor.constraint(equalTo: visitorBox.trailingAnchor, constant: -10),
+            visitorInfoDetailLabel.bottomAnchor.constraint(equalTo: visitorBox.bottomAnchor, constant: -10),
+
+            visitorBox.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20)
         ])
     }
+    
     // MARK: - Data Binding
     
-    // ✅ 추가: 뷰 컨트롤러로부터 이미지 배열을 받아와서 UI에 표시하는 메서드
     func setupImages(with imageNames: [String]) {
         self.imageNames = imageNames
         pageControl.numberOfPages = imageNames.count
         updateScrollViewContent()
     }
     
-    // 뷰의 레이아웃이 설정된 후 호출되어야 이미지가 올바르게 표시됩니다.
     func updateScrollViewContent() {
-        // 기존 이미지를 모두 삭제
         imageScrollView.subviews.forEach { $0.removeFromSuperview() }
         
         let viewWidth = self.bounds.width
@@ -291,7 +348,7 @@ class SpotDetailView: UIView, UIScrollViewDelegate {
         for (index, imageName) in imageNames.enumerated() {
             let imageView = UIImageView()
             imageView.image = UIImage(named: imageName)
-            imageView.contentMode = .scaleAspectFill
+            imageView.contentMode = .scaleAspectFit
             imageView.clipsToBounds = true
             imageView.translatesAutoresizingMaskIntoConstraints = false
             imageScrollView.addSubview(imageView)
@@ -309,22 +366,117 @@ class SpotDetailView: UIView, UIScrollViewDelegate {
             }
         }
         
-        // 스크롤 뷰의 전체 너비를 설정
         imageScrollView.contentSize = CGSize(width: viewWidth * CGFloat(imageNames.count), height: 0)
     }
-}
-    // MARK: - UIScrollViewDelegate
 
-    // 부모 뷰 컨트롤러를 찾는 확장만 남겨둡니다.
-    extension UIView {
-        var parentViewController: UIViewController? {
-            var parentResponder: UIResponder? = self
-            while parentResponder != nil {
-                parentResponder = parentResponder!.next
-                if let viewController = parentResponder as? UIViewController {
-                    return viewController
-                }
+    // MARK: - 드래그 제스처 처리 함수
+    @objc private func handlePan(_ gesture: UIPanGestureRecognizer) {
+        let translation = gesture.translation(in: self)
+        let threshold: CGFloat = 100.0
+
+        if gesture.state == .ended {
+            if translation.y < -threshold {
+                expandTextContainer()
+            } else if translation.y > threshold {
+                collapseTextContainer()
             }
-            return nil
         }
     }
+
+    private func expandTextContainer() {
+        guard !isExpanded else { return }
+        isExpanded = true
+        textContainerTopConstraint.constant = -self.bounds.height * 0.2
+        
+        UIView.animate(withDuration: 0.3) {
+            self.layoutIfNeeded()
+            // 텍스트 박스가 올라올 때 버튼과 페이지 컨트롤 숨기기
+            self.playPauseButton.alpha = 0
+            self.pageControl.alpha = 0
+        }
+    }
+
+    private func collapseTextContainer() {
+        guard isExpanded else { return }
+        isExpanded = false
+        textContainerTopConstraint.constant = 0
+        
+        UIView.animate(withDuration: 0.3) {
+            self.layoutIfNeeded()
+            // 텍스트 박스가 내려갈 때 버튼과 페이지 컨트롤 다시 보이게 하기
+            self.playPauseButton.alpha = 0.7
+            self.pageControl.alpha = 1.0
+        }
+    }
+
+    // MARK: - 이미지 자동 스크롤 관련 함수
+    @objc private func startAutoScroll() {
+        guard timer == nil else { return }
+        timer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(scrollToNextPage), userInfo: nil, repeats: true)
+    }
+
+    @objc private func stopAutoScroll() {
+        timer?.invalidate()
+        timer = nil
+    }
+
+    @objc private func scrollToNextPage() {
+        let contentOffset = imageScrollView.contentOffset.x
+        let pageWidth = imageScrollView.frame.size.width
+        let currentPage = Int(contentOffset / pageWidth)
+
+        let nextPage = (currentPage + 1) % imageNames.count
+        let newContentOffset = CGPoint(x: pageWidth * CGFloat(nextPage), y: 0)
+
+        UIView.animate(withDuration: 0.5) {
+            self.imageScrollView.contentOffset = newContentOffset
+        }
+        pageControl.currentPage = nextPage
+    }
+    
+    // 플레이/스탑 버튼 기능 구현
+    @objc private func toggleAutoScroll() {
+        isAutoScrolling.toggle()
+        let config = UIImage.SymbolConfiguration(pointSize: 30, weight: .regular, scale: .large)
+        if isAutoScrolling {
+            startAutoScroll()
+            playPauseButton.setImage(UIImage(systemName: "pause.circle.fill", withConfiguration: config), for: .normal)
+        } else {
+            stopAutoScroll()
+            playPauseButton.setImage(UIImage(systemName: "play.circle.fill", withConfiguration: config), for: .normal)
+        }
+    }
+
+    // MARK: - UIScrollViewDelegate
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        if scrollView == imageScrollView {
+            let pageIndex = round(scrollView.contentOffset.x/scrollView.frame.width)
+            pageControl.currentPage = Int(pageIndex)
+        }
+    }
+    
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        if scrollView == imageScrollView {
+            if isAutoScrolling {
+                stopAutoScroll()
+                let config = UIImage.SymbolConfiguration(pointSize: 30, weight: .regular, scale: .large)
+                playPauseButton.setImage(UIImage(systemName: "play.circle.fill", withConfiguration: config), for: .normal)
+            }
+        }
+    }
+}
+
+// MARK: - UIView Extension
+
+extension UIView {
+    var parentViewController: UIViewController? {
+        var parentResponder: UIResponder? = self
+        while parentResponder != nil {
+            parentResponder = parentResponder!.next
+            if let viewController = parentResponder as? UIViewController {
+                return viewController
+            }
+        }
+        return nil
+    }
+}

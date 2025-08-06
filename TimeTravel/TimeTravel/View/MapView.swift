@@ -13,23 +13,42 @@ import CoreLocation  // 현재 위치 확인 및 활용을 위한 기술
 class MapView: UIViewController  {
     
     // 이전에 선택된 테마를 저장하는 정적(static) 변수
-       // HomeView에서 이 변수에 테마를 할당하고, MapView는 이 변수를 사용합니다.
-       static var sharedTheme: Theme?
-
+    // HomeView에서 이 변수에 테마를 할당하고, MapView는 이 변수를 사용합니다.
+    //static var sharedTheme: Theme?
+    
     var stackSubviews: [UIView] = []
     // HomeView에서 넘어온 title을 받기 위한 변수
-//    var theme: Theme? {
-//        didSet {
-//            // theme 변수가 설정되면 sharedTheme에도 저장
-//            MapView.sharedTheme = theme
-//        }
-//    }
+    //    var theme: Theme? {
+    //        didSet {
+    //            // theme 변수가 설정되면 sharedTheme에도 저장
+    //            MapView.sharedTheme = theme
+    //        }
+    //    }
+    
+    var localName: String
+    var themeName: String
+    var theme: Theme
+    var color: UIColor
+    var imgCourse: String
+    var arrCourse: [Course]
+    
+    init(localName: String, themeName: String) {
+        self.localName = localName
+        self.themeName = themeName
+        self.theme = LocalModel.shared.getThemeData(localName: localName, themeName: themeName)
+        self.color = theme.color
+        self.imgCourse = theme.imgCourse
+        self.arrCourse = theme.arrCourse
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     let mapView = MKMapView()
     
     let locationManager = CLLocationManager() // 위치정보를 처리할 인스턴스
-    
-    
     
     /*
      Info.plist
@@ -38,7 +57,6 @@ class MapView: UIViewController  {
      <string>이 앱은 현재 위치를 지도에 표시하기 위해 위치 권한이 필요합니다.</string>
      
      */
-    
     
     // 코스 이미지
     let courseImage: UIImageView = {
@@ -64,73 +82,42 @@ class MapView: UIViewController  {
         return stackView
     }()
     
-    
-    
-    
     override func viewDidLoad() {
         
         super.viewDidLoad()
         self.view.backgroundColor = .systemBackground
-        
-                print("didload")
-        // viewDidLoad 시점에 theme이 nil이면 sharedTheme을 사용합니다.
-               // 이렇게 하면 다른 탭을 갔다가 돌아왔을 때 이전에 선택된 테마를 복원할 수 있습니다.
-             
-//        if self.theme == nil {
-//            self.theme = MapView.sharedTheme
-//            print("\(self.theme)", #line)
-//        }
-        
-        guard let currentTheme = MapView.sharedTheme else {
-            print("Error: No theme data found.")
-            
-            return
-        }
-//        self.title = currentTheme.theme
         setupLocation()
-        setupMapUI(with: currentTheme)
-       
-       
-        self.mapView.mapType = .standard
+        setupMapUI(with: theme)
         
+        self.mapView.mapType = .standard
     }
     
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-            
-            // 📌 1. 맵 뷰의 모든 핀을 제거합니다.
-            mapView.removeAnnotations(mapView.annotations)
-            
-            // 📌 2. 스택뷰의 버튼들을 모두 제거합니다.
-            stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-            stackSubviews.removeAll()
-            
-            guard let currentTheme = MapView.sharedTheme else {
-                showNoThemeAlert()
-                return
-            }
-        print(currentTheme)
         
-        self.title = currentTheme.theme
-            self.courseImage.image = UIImage(named: currentTheme.imgCourse)
-            setupButtons(with: currentTheme)
-            
+        // 📌 1. 맵 뷰의 모든 핀을 제거합니다.
+        mapView.removeAnnotations(mapView.annotations)
+        
+        // 📌 2. 스택뷰의 버튼들을 모두 제거합니다.
+        stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        stackSubviews.removeAll()
+        
+        self.title = themeName
+        self.courseImage.image = UIImage(named: imgCourse)
+        setupButtons(with: theme)
+        
         // TODO: - MapView annotation 초기화하기
-        for spot in currentTheme.arrCourse {
-                let annotation = MKPointAnnotation()
-                annotation.coordinate = spot.coordinate
-                annotation.title = spot.courseName
-                mapView.addAnnotation(annotation)
-            }
-            
-            
-            checkLocationAuthorization()
-            startPinAnimation()
-        
+        for spot in arrCourse {
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = spot.coordinate
+            annotation.title = spot.courseName
+            mapView.addAnnotation(annotation)
         }
-    
-    
+        
+        checkLocationAuthorization()
+        startPinAnimation()
+    }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
@@ -138,9 +125,6 @@ class MapView: UIViewController  {
         // 뷰가 화면에서 사라질 때 핀 애니메이션을 중지합니다.
         stopPinAnimation()
     }
-    
-    
-    
     
     private func setupMapUI(with theme: Theme) {
         
@@ -187,12 +171,7 @@ class MapView: UIViewController  {
         ])
         
         mapView.delegate = self
-        
-        
-  
-        
     }
-    
     
     private func setupButtons(with theme: Theme) {
         
@@ -235,8 +214,6 @@ class MapView: UIViewController  {
             button.tag = index // 버튼 태그를 스팟 배열의 인덱스로 설정
             button.addTarget(self, action: #selector(spotButtonTapped(_:)), for: .touchUpInside)
             
-            
-            
             // 버튼 스타일링
             button.layer.cornerRadius = 15
             button.layer.borderWidth = 1
@@ -245,15 +222,11 @@ class MapView: UIViewController  {
             
             stackView.addArrangedSubview(button)
             stackSubviews.append(button)
-            
         }
-        
     }
     
     // 나중에 현재위치로 할 시 사용
     @objc private func spotButtonTapped(_ sender: UIButton) {
-        
-        guard let theme = MapView.sharedTheme else { return }
         
         let spotIndex = sender.tag
         
@@ -290,47 +263,7 @@ class MapView: UIViewController  {
                 mapView.selectAnnotation(annotation, animated: true)
             }
         }
-        
     }
-    
-    
-    //    @objc private func spotButtonTapped(_ sender: UIButton) {
-    //        guard let theme = self.theme else { return }
-    //
-    //        let spotIndex = sender.tag
-    //
-    //        if spotIndex == -1 {
-    //            // "현재 위치" 버튼을 누르면 가상 익산역으로 이동
-    //            let iksanStationLatitude: CLLocationDegrees = 35.9458
-    //            let iksanStationLongitude: CLLocationDegrees = 126.9467
-    //            let iksanLocation = CLLocationCoordinate2D(latitude: iksanStationLatitude, longitude: iksanStationLongitude)
-    //            let region = MKCoordinateRegion(center: iksanLocation, latitudinalMeters: 500, longitudinalMeters: 500)
-    //            mapView.setRegion(region, animated: true)
-    //
-    //            if let annotation = mapView.annotations.first(where: {
-    //                $0.title == "현재 위치"
-    //            }) {
-    //                mapView.selectAnnotation(annotation, animated: true)
-    //            }
-    //
-    //        } else {
-    //            let selectedSpot = theme.arrCourse[spotIndex]
-    //            let coordinate = selectedSpot.coordinate
-    //
-    //            let region = MKCoordinateRegion(center: coordinate, latitudinalMeters: 500, longitudinalMeters: 500)
-    //            mapView.setRegion(region, animated: true)
-    //
-    //            if let annotation = mapView.annotations.first(where: {
-    //                $0.title == selectedSpot.courseName /*&&*/
-    ////                $0.coordinate.latitude == selectedSpot.coordinate.latitude &&
-    ////                $0.coordinate.longitude == selectedSpot.coordinate.longitude
-    //            }) {
-    //                mapView.selectAnnotation(annotation, animated: true)
-    //            }
-    //        }
-    //    }
-    
-    
     
     // MARK: - 위치 권한 및 업데이트 설정
     private func setupLocation() {
@@ -339,17 +272,16 @@ class MapView: UIViewController  {
         checkLocationAuthorization()
     }
     
-    
     private func showNoThemeAlert() {
-            let alert = UIAlertController(title: "테마를 선택해주세요",
-                                          message: "홈 화면에서 먼저 테마를 선택해주세요.",
-                                          preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "확인", style: .default) { _ in
-                // 사용자를 홈 탭으로 이동시킵니다.
-                self.tabBarController?.selectedIndex = 0
-            })
-            present(alert, animated: true)
-        }
+        let alert = UIAlertController(title: "테마를 선택해주세요",
+                                      message: "홈 화면에서 먼저 테마를 선택해주세요.",
+                                      preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default) { _ in
+            // 사용자를 홈 탭으로 이동시킵니다.
+            self.tabBarController?.selectedIndex = 0
+        })
+        present(alert, animated: true)
+    }
     
     
     private func checkLocationAuthorization() {
@@ -387,8 +319,6 @@ class MapView: UIViewController  {
         present(alert, animated: true)
     }
     
-    
-    
     // MARK: - 역지오코딩 후 핀 추가
     private func reverseGeocodeAndAddPin(at location: CLLocation, title: String) {
         let geocoder = CLGeocoder()
@@ -414,11 +344,6 @@ class MapView: UIViewController  {
             self.mapView.addAnnotation(annotation)
         }
     }
-    
-    
-    
-    
-    
     
     // MARK: - 핀 애니메이션 시작/중지
     private func startPinAnimation() {
@@ -464,12 +389,7 @@ class MapView: UIViewController  {
             view.subviews.filter { $0.tag == 999 }.forEach { $0.removeFromSuperview() }
         }
     }
-    
 }
-
-
-
-
 
 // MARK: - CLLocationManagerDelegate 확장
 extension MapView: CLLocationManagerDelegate {
@@ -479,12 +399,15 @@ extension MapView: CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let currentLocation = locations.first else { return }
         
+        //사용자의 처음위치를 기준으로 맵 만들기
+        //guard let currentLocation = locations.first else { return }
+        
+        let currentLocation = arrCourse[3]
         // 현재 위치로 지도의 중심 영역을 설정하고 확대/축소 레벨을 조절합니다.
         let region = MKCoordinateRegion(center: currentLocation.coordinate,
-                                        latitudinalMeters: 3000,
-                                        longitudinalMeters: 3000)
+                                        latitudinalMeters: 20_000,
+                                        longitudinalMeters: 20_000)
         
         mapView.setRegion(region, animated: true)
         
@@ -499,36 +422,6 @@ extension MapView: CLLocationManagerDelegate {
         
     }
 }
-
-//        // --- 익산역 가상 위치 설정 ---
-//        let iksanStationLatitude: CLLocationDegrees = 35.9458 // 익산역 위도
-//        let iksanStationLongitude: CLLocationDegrees = 126.9467 // 익산역 경도
-//
-//        let iksanLocation = CLLocation(latitude: iksanStationLatitude, longitude: iksanStationLongitude)
-
-// 핀에 label 달아주기
-//        reverseGeocodeAndAddPin(at: currentLocation, title: "현재 위치")
-
-//        // 지도의 중심을 익산역으로 설정하고 확대/축소 레벨을 조절합니다.
-//        let region = MKCoordinateRegion(center: iksanLocation.coordinate,
-//                                        latitudinalMeters: 3000,
-//                                        longitudinalMeters: 3000)
-
-//        mapView.setRegion(region, animated: true)
-//
-//        // 한 번 위치를 잡은 후에는 업데이트를 중지합니다 (배터리 소모 방지).
-//        // 계속해서 위치를 추적하려면 이 줄을 주석 처리하세요.
-//        manager.stopUpdatingLocation()
-//
-//
-//        func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-//            print("📍 위치를 가져오지 못했습니다: \(error.localizedDescription)")
-//
-//        }
-//    }
-//}
-
-
 
 // MARK: - MKMapViewDelegate 확장
 extension MapView: MKMapViewDelegate {
@@ -551,8 +444,6 @@ extension MapView: MKMapViewDelegate {
                 // 재사용 시 기존 애니메이션 뷰를 제거하고 다시 시작합니다.
                 annotationView?.subviews.filter { $0.tag == 999 }.forEach { $0.removeFromSuperview() }
             }
-            
-            guard let theme = MapView.sharedTheme else { return nil }
             
             // 핀 색상 설정
             if pointAnnotation.title == "현재 위치" {
@@ -605,17 +496,10 @@ extension MapView: MKMapViewDelegate {
         
         // 일반 스팟 핀(파란색)이 탭되면 SpotDetailView로 이동합니다.
         if let pointAnnotation = annotation as? MKPointAnnotation, let spotName = pointAnnotation.title {
-            let detailVC = SpotDetailViewController()
-            
-            // 핀의 제목(spotName)을 상세 화면으로 전달
-            detailVC.spotName = spotName
-            // 만약 SpotDetailView에 스팟 정보(제목, 좌표 등)를 전달하고 싶다면
-            // SpotDetailView 클래스에 해당 속성을 추가하고 여기서 값을 할당할 수 있습니다.
-            // 예시:
+            let detailVC = SpotDetailViewController(themeName: themeName, spotName: spotName)
+            navigationController?.pushViewController(detailVC, animated: true)
         }
     }
-    
-    
 }
 
 

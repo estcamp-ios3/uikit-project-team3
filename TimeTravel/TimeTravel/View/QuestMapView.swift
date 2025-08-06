@@ -19,6 +19,7 @@ class QuestMapView: UIViewController {
         self.themeName = themeName
         self.spotName = spotName
         self.quest = ScenarioModel.shared.getQuest(themeName: themeName, spotName: spotName)
+        self.itemPosition = CLLocationCoordinate2D(latitude: quest.item[0].itemLatitude, longitude: quest.item[0].itemLatitude)
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -40,11 +41,12 @@ class QuestMapView: UIViewController {
     let descriptionLabel = UILabel()
     let progressView = UIProgressView(progressViewStyle: .default)
     
-    let iksanMarket = CLLocationCoordinate2D(latitude: 35.953040, longitude: 126.957370)
+    var itemPosition: CLLocationCoordinate2D
+    var itemPositions: [CLLocationCoordinate2D] = []
     var foundItems: Set<Int> = []
     
     // 임의 아이템 위치 (익산역 중심 반경 100m 이내)
-    lazy var itemLocations: [(coordinate: CLLocationCoordinate2D, id: Int)] = {
+    lazy var itemRandomLocations: [(coordinate: CLLocationCoordinate2D, id: Int)] = {
         return [
             (offsetCoord(lat: 0.0003, lon: 0.0003), 0),
             (offsetCoord(lat: -0.0004, lon: 0.0005), 1),
@@ -54,8 +56,8 @@ class QuestMapView: UIViewController {
     }()
     
     func offsetCoord(lat: Double, lon: Double) -> CLLocationCoordinate2D {
-        return CLLocationCoordinate2D(latitude: iksanMarket.latitude + lat,
-                                      longitude: iksanMarket.longitude + lon)
+        return CLLocationCoordinate2D(latitude: itemPosition.latitude + lat,
+                                      longitude: itemPosition.longitude + lon)
     }
     
     override func viewDidLoad() {
@@ -187,7 +189,7 @@ extension QuestMapView: MKMapViewDelegate, CLLocationManagerDelegate {
         mapView.delegate = self
         mapView.showsUserLocation = false //사용자 위치 잠시 꺼둠
         
-        let region = MKCoordinateRegion(center: iksanMarket,
+        let region = MKCoordinateRegion(center: itemPosition,
                                         latitudinalMeters: 250,
                                         longitudinalMeters: 250)
         mapView.setRegion(region, animated: false)
@@ -199,13 +201,18 @@ extension QuestMapView: MKMapViewDelegate, CLLocationManagerDelegate {
         
         //가짜 나의 위치
         let fakeMyPosition = MKPointAnnotation()
-        fakeMyPosition.coordinate = iksanMarket
+        fakeMyPosition.coordinate = itemPosition
         fakeMyPosition.title = "나"
         mapView.addAnnotation(fakeMyPosition)
     }
     
     //퀘스트 아이템 위치 생성
     func setupItems() {
+        if quest.item[0].isRandom {
+            for i in itemRandomLocations {
+                itemPositions.append(offsetCoord(lat: i.coordinate.latitude, lon: i.coordinate.longitude))
+            }
+        }
         for (i, item)in quest.item.enumerated() {
             let annotation = MKPointAnnotation()
             annotation.coordinate.longitude = item.itemLongtitude
