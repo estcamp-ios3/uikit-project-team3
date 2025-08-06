@@ -87,8 +87,8 @@ class QuestCardView: UITableViewCell {
     
     /// Quest 모델을 받아 화면 업데이트
     func configure(with quest: Quest) {
-        titleLabel.text = quest.title
-        descriptionLabel.text = quest.description
+        titleLabel.text = quest.questName
+        descriptionLabel.text = quest.questDetail
         completeStatusLabel.text = quest.isCompleted ? "완료" : "진행 중"
         completeStatusLabel.textColor = quest.isCompleted ? .systemGreen : .systemOrange
     }
