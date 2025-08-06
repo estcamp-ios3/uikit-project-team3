@@ -15,7 +15,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
-				ViewController/Untitled.swift,
 			);
 			target = BE55BA222E41D94A00CDAEC3 /* LociTravel */;
 		};
