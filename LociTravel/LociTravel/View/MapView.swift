@@ -12,6 +12,23 @@ class MapView: UIView {
     
     let mapImageView = UIImageView()
     let backButton = UIButton(type: .system)
+    
+    let optionButton = UIButton(type: .system)
+
+    //옵션 버튼 안에 들어갈 코드
+    
+    // 3) 슬라이딩 메뉴 패널
+        let menuView: UIView = {
+            let v = UIView()
+            v.backgroundColor = .white
+            v.layer.cornerRadius = 12
+            v.translatesAutoresizingMaskIntoConstraints = false
+            return v
+        }()
+    
+
+    
+    
     // 장소 버튼
     let seodongParkButton = UIButton(type: .system)
     let wanggungriButton = UIButton(type: .system)
@@ -31,7 +48,7 @@ class MapView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    
+
     
     private func setupUI() {
         addSubview(mapImageView)
@@ -41,6 +58,10 @@ class MapView: UIView {
         addSubview(jewelryButton)
         addSubview(mireuksaButton)
         addSubview(seodongMarketButton)
+        
+        addSubview(optionButton)
+    
+        
         
         
         mapImageView.image = UIImage(named: "oldmap")
@@ -56,6 +77,9 @@ class MapView: UIView {
         mireuksaButton.translatesAutoresizingMaskIntoConstraints = false
         seodongMarketButton.translatesAutoresizingMaskIntoConstraints = false
         
+        optionButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        
         
         NSLayoutConstraint.activate([
             mapImageView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
@@ -64,6 +88,19 @@ class MapView: UIView {
             mapImageView.trailingAnchor.constraint(equalTo: trailingAnchor)
         ])
         
+        // 옵션 버튼 이미지 설정
+        optionButton.setImage(UIImage(systemName: "gearshape.fill"), for: .normal)
+        optionButton.tintColor = .systemBlue
+        optionButton.setPreferredSymbolConfiguration(.init(pointSize: 40), forImageIn: .normal)
+        
+        //오토 레이아웃 제약
+        NSLayoutConstraint.activate([
+            // optionButton: safeArea 오른쪽 상단
+            optionButton.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 8),
+            optionButton.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: -8),
+            optionButton.widthAnchor.constraint(equalToConstant: 36),
+            optionButton.heightAnchor.constraint(equalToConstant: 36),
+        ])
         
         // Back Button 이미지 설정 부분
         let backButtonImage = UIImage(named: "button_back_icon")?.withRenderingMode(.alwaysOriginal)
