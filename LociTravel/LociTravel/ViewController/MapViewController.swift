@@ -32,6 +32,7 @@ class MapViewController: UIViewController {
         navigationController?.popViewController(animated: true)
     }
     
+    //맵에 유적지를 나타내는 핀이 아니라 버튼으로 레이아웃을 따로잡게 화면 레이아웃의 x, y 위치값을 고정해서 맵뷰에 보이도록 수정 할 예정.
     private func addAnnotations() {
         let mireuksa = MKPointAnnotation()
         mireuksa.title = "미륵사지 석탑"
@@ -45,7 +46,7 @@ class MapViewController: UIViewController {
         
         if isQuestCompleted {
             let jesaksaji = MKPointAnnotation()
-            jesaksaji.title = "제석사지"
+            jesaksaji.title = "보석박물관"
             jesaksaji.coordinate = CLLocationCoordinate2D(latitude: 35.9427, longitude: 126.9734)
             mapView.mapView.addAnnotation(jesaksaji)
         }
@@ -55,4 +56,6 @@ class MapViewController: UIViewController {
         let region = MKCoordinateRegion(center: center, span: span)
         mapView.mapView.setRegion(region, animated: false)
     }
+    
+    //버튼을 누르면 시나리오 화면으로 넘어가는 함수
 }

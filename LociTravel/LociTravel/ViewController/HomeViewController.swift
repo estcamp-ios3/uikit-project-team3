@@ -29,13 +29,15 @@ class HomeViewController: UIViewController {
         homeView.questListButton.addTarget(self, action: #selector(didTapQuestListButton), for: .touchUpInside)
     }
     
+    //시작하기 버튼 함수
     @objc private func didTapStartButton() {
         let mapVC = MapViewController()
         navigationController?.pushViewController(mapVC, animated: true)
     }
     
+    //추후에 이어하기 버튼으로 변경
     @objc private func didTapQuestListButton() {
         let questListVC = QuestListViewController()
-        navigationController?.pushViewController(questListVC, animated: true)
+        //navigationController?.pushViewController(questListVC, animated: true)
     }
 }

@@ -7,13 +7,7 @@
 
 import UIKit
 
-// MARK: - StoryPart 데이터 모델
-struct StoryPart {
-    let speaker: String
-    let text: String
-    let image: UIImage?
-    let options: [String]
-}
+
 
 class SpotDetailViewController: UIViewController {
     
