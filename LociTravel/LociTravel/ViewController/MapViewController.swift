@@ -22,11 +22,7 @@ class MapViewController: UIViewController {
         super.viewDidLoad()
         
         setupButtonActions()
-        
     }
-    
-    
-    
     
     private func setupButtonActions() {
         customMapView.backButton.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
@@ -37,16 +33,17 @@ class MapViewController: UIViewController {
         customMapView.seodongMarketButton.addTarget(self, action: #selector(didTapPin5Button), for: .touchUpInside)
     }
     
-    
-    
     @objc private func didTapBackButton() {
-        //        navigationController?.popViewController(animated: true)        //버튼을 누르면 시나리오 화면으로 넘어가는 함수
+        //navigationController?.popViewController(animated: true)
+        //버튼을 누르면 시나리오 화면으로 넘어가는 함수
         
         print("back button")
     }
     
     @objc private func didTapPinButton() {
         print("seodong park button")
+        let scenarioVC = ScenarioViewController(spotName: "서동공원")
+        navigationController?.pushViewController(scenarioVC, animated: true)
     }
     
     @objc private func didTapPin2Button() {
@@ -64,9 +61,6 @@ class MapViewController: UIViewController {
     @objc private func didTapPin5Button() {
         print("seodong market button")
     }
-    
-    
-    
 }
 
 #Preview {
