@@ -20,7 +20,7 @@ class UserModel {
     
     private init() {
         users = [
-            User(id: <#T##Int#>, name: <#T##String#>, questProgress: <#T##Int#>),
+            //User(id: <#T##Int#>, name: <#T##String#>, questProgress: <#T##Int#>),
         ]
     }
 }

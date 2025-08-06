@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 public struct Story: Codable {
     public var id: String
@@ -19,7 +20,7 @@ public struct Story: Codable {
 struct StoryPart {
     let speaker: String
     let text: String
-    let image: UIImage?
+    let image: UIImage
     let options: [String]
 }
 
