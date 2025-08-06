@@ -93,10 +93,10 @@ class QuestMapViewController: UIViewController, MKMapViewDelegate, CLLocationMan
                 timer.invalidate()
                 return
             }
-            if player.volume < 0.6 {
+            if player.volume < 0.1 {
                 player.volume += 0.02
             } else {
-                player.volume = 1.0
+                player.volume = 0.1
                 timer.invalidate()
             }
         }
@@ -139,8 +139,9 @@ class QuestMapViewController: UIViewController, MKMapViewDelegate, CLLocationMan
 
     func setupItems() {
         itemPositions.removeAll()
+        questView.mapView.removeAnnotations(questView.mapView.annotations.filter { $0 !== questView.mapView.userLocation && $0.title != "나" })
         
-        if !quest.item[0].isRandom {
+        if quest.item[0].isRandom {
             for i in itemRandomOffsets {
                 let coord = offsetCoord(lat: i.lat, lon: i.lon)
                     itemPositions.append(coord)
