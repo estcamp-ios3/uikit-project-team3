@@ -9,6 +9,7 @@ class QuestMapView: UIView {
     let titleLabel = UILabel()
     let descriptionLabel = UILabel()
     let progressView = UIProgressView(progressViewStyle: .default)
+    let questionButton = UIButton()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -22,7 +23,7 @@ class QuestMapView: UIView {
     private func setup() {
         backgroundColor = .systemBackground
 
-        [mapView, closeButton, musicToggleButton, titleLabel, descriptionLabel, progressView].forEach {
+        [mapView, closeButton, questionButton, musicToggleButton, titleLabel, descriptionLabel, progressView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             addSubview($0)
         }
@@ -30,7 +31,11 @@ class QuestMapView: UIView {
         closeButton.setTitle("✕", for: .normal)
         closeButton.titleLabel?.font = .boldSystemFont(ofSize: 30)
         closeButton.setTitleColor(.black, for: .normal)
-
+        
+        questionButton.setTitle("?", for: .normal)
+        questionButton.titleLabel?.font = .boldSystemFont(ofSize: 24)
+        questionButton.setTitleColor(.black, for: .normal)
+        
         musicToggleButton.setImage(UIImage(systemName: "headphones"), for: .normal)
         musicToggleButton.tintColor = .black
 
@@ -55,7 +60,12 @@ class QuestMapView: UIView {
             musicToggleButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             musicToggleButton.widthAnchor.constraint(equalToConstant: 30),
             musicToggleButton.heightAnchor.constraint(equalToConstant: 30),
-
+            
+            questionButton.centerYAnchor.constraint(equalTo: closeButton.centerYAnchor),
+            questionButton.trailingAnchor.constraint(equalTo: musicToggleButton.leadingAnchor, constant: -8),
+            questionButton.widthAnchor.constraint(equalToConstant: 30),
+            questionButton.heightAnchor.constraint(equalToConstant: 30),
+            
             titleLabel.topAnchor.constraint(equalTo: closeButton.bottomAnchor, constant: 10),
             titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),

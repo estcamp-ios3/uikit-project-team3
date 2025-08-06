@@ -19,6 +19,8 @@ class ScenarioView: UIView {
     let nextButton = UIButton()
     let startQuestButton = UIButton()
     let musicToggleButton = UIButton()
+    
+    let questionButton = UIButton()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -62,6 +64,11 @@ class ScenarioView: UIView {
         dialogueBoxView.addSubview(dialogueLabel)
 
         // 6. 버튼들
+        questionButton.setTitle("?", for: .normal)
+        questionButton.titleLabel?.font = .boldSystemFont(ofSize: 24)
+        questionButton.translatesAutoresizingMaskIntoConstraints = false
+        dialogueBoxView.addSubview(questionButton)
+        
         prevButton.setTitle("←", for: .normal)
         prevButton.titleLabel?.font = .boldSystemFont(ofSize: 24)
         prevButton.translatesAutoresizingMaskIntoConstraints = false
@@ -101,6 +108,11 @@ class ScenarioView: UIView {
             musicToggleButton.widthAnchor.constraint(equalToConstant: 30),
             musicToggleButton.heightAnchor.constraint(equalToConstant: 30),
 
+            questionButton.topAnchor.constraint(equalTo: dialogueBoxView.topAnchor, constant: 8),
+            questionButton.trailingAnchor.constraint(equalTo: musicToggleButton.leadingAnchor, constant: -8),
+            questionButton.widthAnchor.constraint(equalToConstant: 30),
+            questionButton.heightAnchor.constraint(equalToConstant: 30),
+            
             characterImageView.bottomAnchor.constraint(equalTo: dialogueBoxView.topAnchor, constant: 20),
             characterImageView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             characterImageView.widthAnchor.constraint(equalToConstant: 200),
