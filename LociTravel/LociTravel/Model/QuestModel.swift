@@ -6,16 +6,27 @@
 //
 
 import Foundation
-import CoreLocation
+import UIKit
 
 // MARK: - Quest 데이터 모델
 struct Quest {
-    let id: String
-    let title: String
-    let description: String
-    let location: CLLocationCoordinate2D
-    var isCompleted: Bool
-    let storyKey: String
+    let spotName: String
+    let themeName: String
+    let color: UIColor
+    let questName: String
+    let questDetail: String
+    let item: [Item]
+    let bgm: String
+    let isCompleted: Bool
+}
+
+struct Item {
+    let itemImage: String
+    let itemName: String
+    let itemDetail: String
+    let isRandom: Bool
+    let itemLongtitude: Double
+    let itemLatitude: Double
 }
 
 class QuestModel {
@@ -23,9 +34,56 @@ class QuestModel {
     private var quests: [Quest] = []
     private init() {
         quests = [
-            Quest(id: "quest_1", title: "미륵사지 석탑의 비밀", description: "백제 무왕과 선화공주의 전설이 깃든 곳...", location: CLLocationCoordinate2D(latitude: 35.9427, longitude: 126.9634), isCompleted: false, storyKey: "mireuksa_quest_intro"),
-            Quest(id: "quest_2", title: "왕궁리 5층 석탑의 수수께끼", description: "천년의 시간을 품은 탑의 이야기를 들어보자.", location: CLLocationCoordinate2D(latitude: 35.9431, longitude: 127.0270), isCompleted: false, storyKey: "wanggungri_quest_intro"),
-            Quest(id: "quest_3", title: "제석사지", description: "미륵사지 근처에 위치한 제석사지터.", location: CLLocationCoordinate2D(latitude: 35.9427, longitude: 126.9734), isCompleted: true, storyKey: "jesaksaji_quest_intro")
+            Quest(
+                spotName: "없음", themeName: "없음",
+                color: .yellow,
+                questName: "없음", questDetail: "없음",
+                item: [
+                    Item(itemImage: "없음", itemName: "없음", itemDetail: "없음",
+                         isRandom: true,
+                         itemLongtitude: 126.957370, itemLatitude: 35.953040),
+                    Item(itemImage: "없음", itemName: "없음", itemDetail: "없음",
+                         isRandom: true,
+                         itemLongtitude: 0,
+                         itemLatitude: 0),
+                ],
+                bgm: "없음",
+                isCompleted: false
+            ),
+            Quest(
+                spotName: "서동시장", themeName: "잊혀진 유산",
+                color: .yellow,
+                questName: "금가락지 소동", questDetail: "아주머니의 잃어버린 금가락지를 찾아라",
+                item: [
+                    Item(itemImage: "golden_ring", itemName: "금가락지", itemDetail: "투박한 금가락지",
+                         isRandom: true,
+                         itemLongtitude: 126.957370, itemLatitude: 35.953040),
+                    Item(itemImage: "part_0", itemName: "기억의 조각", itemDetail: "기억의 일부",
+                         isRandom: true,
+                         itemLongtitude: 0,
+                         itemLatitude: 0),
+                ],
+                bgm: "motivity",
+                isCompleted: false
+            ),
+            Quest(
+                spotName: "왕궁리 유적", themeName: "잊혀진 유산",
+                color: .yellow, questName: "무왕의 꿈", questDetail: "꿈의 조각을 모아라", item: [
+                    Item(itemImage: "memory_0", itemName: "꿈의 조각", itemDetail: "영롱한 빛을 낸다",
+                         isRandom: false,
+                         itemLongtitude: 127.02, itemLatitude: 37.56),
+                    Item(itemImage: "memory_1", itemName: "꿈의 조각", itemDetail: "영롱한 빛을 낸다",
+                         isRandom: false,
+                         itemLongtitude: 127.07,
+                         itemLatitude: 38.00),
+                ],
+                bgm: "motivity",
+                isCompleted: false
+            ),
         ]
+    }
+    
+    public func getQuest(spotName: String) -> Quest {
+        return quests.filter { $0.spotName == spotName }.first ?? quests[0]
     }
 }
