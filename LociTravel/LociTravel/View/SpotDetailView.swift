@@ -113,6 +113,7 @@ class SpotDetailView: UIView {
     }
     
     // 이 메서드는 외부에서 스토리 파트를 추가할 때 사용합니다.
+    /*
     func addStoryPart(part: StoryPart) {
         let storyPartView = UIView()
         let dialogueLabel = UILabel()
@@ -142,4 +143,5 @@ class SpotDetailView: UIView {
             storyScrollView.setContentOffset(bottomOffset, animated: true)
         }
     }
+     */
 }
