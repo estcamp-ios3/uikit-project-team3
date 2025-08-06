@@ -12,7 +12,10 @@ class HomeView: UIView {
     let titleLabel = UILabel()
     let lokiImageView = UIImageView()
     let startButton = UIButton(type: .system)
-    let questListButton = UIButton(type: .system)
+    
+    //0806 로드버튼 추가, 퀘스트리스트버튼 비활성화
+    let loadButton = UIButton(type: .system)
+    //let questListButton = UIButton(type: .system)
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -31,14 +34,20 @@ class HomeView: UIView {
         addSubview(titleLabel)
         addSubview(lokiImageView)
         addSubview(startButton)
-        addSubview(questListButton)
+        
+        //0806 로드버튼 추가, 퀘스트리스트버튼 비활성화
+        addSubview(loadButton)
+      //  addSubview(questListButton)
 
         // 모든 뷰에 Auto Layout 사용 설정 (필수!)
         backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         lokiImageView.translatesAutoresizingMaskIntoConstraints = false
         startButton.translatesAutoresizingMaskIntoConstraints = false
-        questListButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        //0806 로드버튼 추가, 퀘스트리스트버튼 비활성화
+        loadButton.translatesAutoresizingMaskIntoConstraints = false
+       // questListButton.translatesAutoresizingMaskIntoConstraints = false
 
         // 배경 이미지 설정
         backgroundImageView.image = UIImage(named: "home_background_illustration")
@@ -71,29 +80,53 @@ class HomeView: UIView {
         ])
 
         // 시작 버튼 설정
-        startButton.setTitle("지도 보기", for: .normal)
+        startButton.setTitle("시작 하기", for: .normal)
         startButton.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
         startButton.backgroundColor = .systemBlue
         startButton.setTitleColor(.white, for: .normal)
         startButton.layer.cornerRadius = 25
         NSLayoutConstraint.activate([
             startButton.centerXAnchor.constraint(equalTo: centerXAnchor),
-            startButton.bottomAnchor.constraint(equalTo: questListButton.topAnchor, constant: -20),
+            // 0806 로드버튼으로 수정
+            startButton.bottomAnchor.constraint(equalTo: loadButton.topAnchor, constant: -20),
             startButton.widthAnchor.constraint(equalToConstant: 250),
             startButton.heightAnchor.constraint(equalToConstant: 50)
         ])
         
-        // 탐험 일지 버튼 설정
-        questListButton.setTitle("탐험 일지", for: .normal)
-        questListButton.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
-        questListButton.backgroundColor = .systemGreen
-        questListButton.setTitleColor(.white, for: .normal)
-        questListButton.layer.cornerRadius = 25
+        
+        // 0806 로드 버튼 설정
+        loadButton.setTitle("이어서 하기(개발중)", for: .normal)
+        loadButton.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
+        loadButton.backgroundColor = .systemBlue
+        loadButton.setTitleColor(.white, for: .normal) // 활성화 시 글자색
+        loadButton.setTitleColor(.lightGray, for: .disabled)  // 비활성화 시 글자색
+        loadButton.layer.cornerRadius = 25
+        
+        // 항상 비활성화
+        loadButton.isEnabled = false      // ← 이 라인이 터치와 동작을 완전히 막아줍니다.
+        loadButton.alpha = 0.5            // ← 투명도를 조절해 ‘눌리지 않음’을 강조
+        
+        
+        
         NSLayoutConstraint.activate([
-            questListButton.centerXAnchor.constraint(equalTo: centerXAnchor),
-            questListButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -50),
-            questListButton.widthAnchor.constraint(equalToConstant: 250),
-            questListButton.heightAnchor.constraint(equalToConstant: 50)
+            loadButton.centerXAnchor.constraint(equalTo: centerXAnchor),
+            loadButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            loadButton.widthAnchor.constraint(equalToConstant: 250),
+            loadButton.heightAnchor.constraint(equalToConstant: 50)
         ])
+        
+        // 0806 비활성화
+        // 탐험 일지 버튼 설정
+//        questListButton.setTitle("탐험 일지", for: .normal)
+//        questListButton.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
+//        questListButton.backgroundColor = .systemGreen
+//        questListButton.setTitleColor(.white, for: .normal)
+//        questListButton.layer.cornerRadius = 25
+//        NSLayoutConstraint.activate([
+//            questListButton.centerXAnchor.constraint(equalTo: centerXAnchor),
+//            questListButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -50),
+//            questListButton.widthAnchor.constraint(equalToConstant: 250),
+//            questListButton.heightAnchor.constraint(equalToConstant: 50)
+//        ])
     }
 }
