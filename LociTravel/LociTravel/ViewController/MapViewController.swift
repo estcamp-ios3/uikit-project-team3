@@ -73,14 +73,14 @@ class MapViewController: UIViewController {
         /// '탐험일지' 선택 시 퀘스트 목록 화면으로 이동
         @objc private func showJournal() {
             let journalVC = QuestListViewController()
-            navigationController?.pushViewController(journalVC,
+            self.navigationController?.pushViewController(journalVC,
                                                      animated: true)
         }
 
         /// '리코드북' 선택 시 스팟 상세 화면으로 이동
         @objc private func showRecordBook() {
             let recordVC = SpotDetailViewController()
-            navigationController?.pushViewController(recordVC,
+            self.navigationController?.pushViewController(recordVC,
                                                      animated: true)
         }
     
