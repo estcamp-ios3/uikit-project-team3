@@ -152,7 +152,7 @@ class MapViewController: UIViewController {
     }
     
     @objc private func didTapBackButton() {
-        //        navigationController?.popViewController(animated: true)        //버튼을 누르면 시나리오 화면으로 넘어가는 함수
+            navigationController?.popToRootViewController(animated: true)        //버튼을 누르면 시나리오 화면으로 넘어가는 함수
         
         print("back button")
     }

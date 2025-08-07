@@ -70,3 +70,7 @@ class PrologueViewController: UIViewController {
         navigationController?.pushViewController(mapVC, animated: true)
     }
 }
+
+#Preview{
+    PrologueViewController()
+}

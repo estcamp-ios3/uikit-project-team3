@@ -19,7 +19,10 @@ class ScenarioView: UIView {
     let nextButton = UIButton()
     let startQuestButton = UIButton()
     let musicToggleButton = UIButton()
-
+    
+    let questionButton = UIButton()
+    let backButton = UIButton()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setup()
@@ -31,7 +34,7 @@ class ScenarioView: UIView {
 
     func setup() {
         backgroundColor = .systemBackground
-
+        
         // 1. 배경 이미지
         backgroundImageView.contentMode = .scaleAspectFill
         backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
@@ -62,6 +65,11 @@ class ScenarioView: UIView {
         dialogueBoxView.addSubview(dialogueLabel)
 
         // 6. 버튼들
+        questionButton.setTitle("?", for: .normal)
+        questionButton.titleLabel?.font = .boldSystemFont(ofSize: 24)
+        questionButton.translatesAutoresizingMaskIntoConstraints = false
+        dialogueBoxView.addSubview(questionButton)
+        
         prevButton.setTitle("←", for: .normal)
         prevButton.titleLabel?.font = .boldSystemFont(ofSize: 24)
         prevButton.translatesAutoresizingMaskIntoConstraints = false
@@ -85,7 +93,12 @@ class ScenarioView: UIView {
         musicToggleButton.tintColor = .white
         musicToggleButton.translatesAutoresizingMaskIntoConstraints = false
         dialogueBoxView.addSubview(musicToggleButton)
-
+        
+        let backButtonImage = UIImage(named: "button_back_icon")?.withRenderingMode(.alwaysTemplate)
+        backButton.setImage(backButtonImage, for: .normal)
+        backButton.tintColor = .white
+        backButton.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(backButton)
         setupConstraints()
     }
 
@@ -96,11 +109,21 @@ class ScenarioView: UIView {
             backgroundImageView.trailingAnchor.constraint(equalTo: trailingAnchor),
             backgroundImageView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
 
+            backButton.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 8),
+            backButton.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 8),
+            backButton.widthAnchor.constraint(equalToConstant: 30),
+            backButton.heightAnchor.constraint(equalToConstant: 30),
+            
             musicToggleButton.topAnchor.constraint(equalTo: dialogueBoxView.topAnchor, constant: 8),
             musicToggleButton.trailingAnchor.constraint(equalTo: dialogueBoxView.trailingAnchor, constant: -8),
             musicToggleButton.widthAnchor.constraint(equalToConstant: 30),
             musicToggleButton.heightAnchor.constraint(equalToConstant: 30),
 
+            questionButton.topAnchor.constraint(equalTo: dialogueBoxView.topAnchor, constant: 8),
+            questionButton.trailingAnchor.constraint(equalTo: musicToggleButton.leadingAnchor, constant: -8),
+            questionButton.widthAnchor.constraint(equalToConstant: 30),
+            questionButton.heightAnchor.constraint(equalToConstant: 30),
+            
             characterImageView.bottomAnchor.constraint(equalTo: dialogueBoxView.topAnchor, constant: 20),
             characterImageView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             characterImageView.widthAnchor.constraint(equalToConstant: 200),

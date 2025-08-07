@@ -37,7 +37,7 @@ class ScenarioViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         setupButtonActions()
         updateDialogue()
         playBackgroundMusic()
@@ -56,6 +56,12 @@ class ScenarioViewController: UIViewController {
         scenarioView.nextButton.addTarget(self, action: #selector(nextDialogue), for: .touchUpInside)
         scenarioView.startQuestButton.addTarget(self, action: #selector(startQuest), for: .touchUpInside)
         scenarioView.musicToggleButton.addTarget(self, action: #selector(toggleMusic), for: .touchUpInside)
+        scenarioView.questionButton.addTarget(self, action: #selector(showDetailView), for: .touchUpInside)
+        scenarioView.backButton.addTarget(self, action: #selector(backToMain), for: .touchUpInside)
+    }
+    
+    @objc func backToMain() {
+        navigationController?.popViewController(animated: true)
     }
 
     func playBackgroundMusic() {
@@ -82,11 +88,11 @@ class ScenarioViewController: UIViewController {
                 return
             }
 
-            if player.volume < 0.3 {
+            if player.volume < 0.08 {
                 player.volume += 0.02
             } else {
                 timer.invalidate()
-                player.volume = 0.3
+                player.volume = 0.08
             }
         }
     }
@@ -134,12 +140,20 @@ class ScenarioViewController: UIViewController {
 
     @objc func startQuest() {
         bgmPlayer?.stop()
-        //let questVC = QuestMapView(questName: spotName)
-        //questVC.modalPresentationStyle = .fullScreen
-        //present(questVC, animated: true)
+        let questVC = QuestMapViewController(spotName: spotName)
+        navigationController?.pushViewController(questVC, animated: true)
+    }
+    
+    @objc func showDetailView() {
+        bgmPlayer?.stop()
+        let detailVC = SpotDetailViewController()
+        detailVC.spotName = spotName
+        navigationController?.pushViewController(detailVC, animated: true)
+        //detailVC.modalPresentationStyle = .fullScreen
+        //present(detailVC, animated: true)
     }
 }
 
-#Preview{
-    ScenarioViewController(spotName: "서동공원")
-}
+//#Preview{
+//    ScenarioViewController(spotName: "서동공원")
+//}
