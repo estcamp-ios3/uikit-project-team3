@@ -37,7 +37,7 @@ class ScenarioViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         setupButtonActions()
         updateDialogue()
         playBackgroundMusic()
@@ -57,6 +57,11 @@ class ScenarioViewController: UIViewController {
         scenarioView.startQuestButton.addTarget(self, action: #selector(startQuest), for: .touchUpInside)
         scenarioView.musicToggleButton.addTarget(self, action: #selector(toggleMusic), for: .touchUpInside)
         scenarioView.questionButton.addTarget(self, action: #selector(showDetailView), for: .touchUpInside)
+        scenarioView.backButton.addTarget(self, action: #selector(backToMain), for: .touchUpInside)
+    }
+    
+    @objc func backToMain() {
+        navigationController?.popViewController(animated: true)
     }
 
     func playBackgroundMusic() {
@@ -136,19 +141,19 @@ class ScenarioViewController: UIViewController {
     @objc func startQuest() {
         bgmPlayer?.stop()
         let questVC = QuestMapViewController(spotName: spotName)
-        questVC.modalPresentationStyle = .fullScreen
-        present(questVC, animated: true)
+        navigationController?.pushViewController(questVC, animated: true)
     }
     
     @objc func showDetailView() {
         bgmPlayer?.stop()
         let detailVC = SpotDetailViewController()
         detailVC.spotName = spotName
-        detailVC.modalPresentationStyle = .fullScreen
-        present(detailVC, animated: true)
+        navigationController?.pushViewController(detailVC, animated: true)
+        //detailVC.modalPresentationStyle = .fullScreen
+        //present(detailVC, animated: true)
     }
 }
 
-#Preview{
-    ScenarioViewController(spotName: "서동공원")
-}
+//#Preview{
+//    ScenarioViewController(spotName: "서동공원")
+//}

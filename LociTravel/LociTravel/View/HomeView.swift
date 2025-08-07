@@ -62,15 +62,15 @@ class HomeView: UIView {
 
         // 타이틀 레이블 설정
         titleLabel.text = "장소의 기억"
-        titleLabel.font = UIFont.systemFont(ofSize: 40, weight: .bold)
+        titleLabel.font = UIFont.systemFont(ofSize: 50, weight: .bold)
         titleLabel.textColor = .white
         NSLayoutConstraint.activate([
             titleLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
-            titleLabel.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 50)
+            titleLabel.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 70)
         ])
 
         // 로키 이미지 설정
-        lokiImageView.image = UIImage(named: "loki_portal_illustration")
+        lokiImageView.image = UIImage(named: "")//loki_portal_illustration
         lokiImageView.contentMode = .scaleAspectFit
         NSLayoutConstraint.activate([
             lokiImageView.centerXAnchor.constraint(equalTo: centerXAnchor),
@@ -82,7 +82,7 @@ class HomeView: UIView {
         // 시작 버튼 설정
         startButton.setTitle("시작 하기", for: .normal)
         startButton.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
-        startButton.backgroundColor = .systemBlue
+        startButton.backgroundColor = .systemBrown
         startButton.setTitleColor(.white, for: .normal)
         startButton.layer.cornerRadius = 25
         NSLayoutConstraint.activate([
@@ -97,7 +97,7 @@ class HomeView: UIView {
         // 0806 로드 버튼 설정
         loadButton.setTitle("이어서 하기(개발중)", for: .normal)
         loadButton.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
-        loadButton.backgroundColor = .systemBlue
+        loadButton.backgroundColor = .systemBrown
         loadButton.setTitleColor(.white, for: .normal) // 활성화 시 글자색
         loadButton.setTitleColor(.lightGray, for: .disabled)  // 비활성화 시 글자색
         loadButton.layer.cornerRadius = 25
@@ -110,7 +110,7 @@ class HomeView: UIView {
         
         NSLayoutConstraint.activate([
             loadButton.centerXAnchor.constraint(equalTo: centerXAnchor),
-            loadButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            loadButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -40),
             loadButton.widthAnchor.constraint(equalToConstant: 250),
             loadButton.heightAnchor.constraint(equalToConstant: 50)
         ])
