@@ -149,6 +149,8 @@ class ScenarioViewController: UIViewController {
         let detailVC = SpotDetailViewController()
         detailVC.spotName = spotName
         navigationController?.pushViewController(detailVC, animated: true)
+        //detailVC.modalPresentationStyle = .fullScreen
+        //present(detailVC, animated: true)
     }
 }
 
