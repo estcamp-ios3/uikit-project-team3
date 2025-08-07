@@ -116,7 +116,8 @@ class QuestMapViewController: UIViewController, MKMapViewDelegate, CLLocationMan
     }
 
     @objc func close() {
-        dismiss(animated: true)
+        //dismiss(animated: true)
+        navigationController?.popViewController(animated: true)
     }
 
     @objc func toggleMusic() {
@@ -220,11 +221,27 @@ class QuestMapViewController: UIViewController, MKMapViewDelegate, CLLocationMan
 
     func showCompletionAlert() {
         let alert = UIAlertController(title: "퀘스트 완료!", message: "모든 금가락지를 찾았습니다!", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
+            guard let self = self else { return }
+            
+            // 1. 네비게이션 스택에 있는 모든 뷰 컨트롤러를 가져옵니다.
+            if let viewControllers = self.navigationController?.viewControllers {
+                
+                // 2. 뷰 컨트롤러 배열을 순회하며 MapViewController 인스턴스를 찾습니다.
+                for viewController in viewControllers {
+                    if let mapVC = viewController as? MapViewController {
+                        // 3. MapViewController를 찾으면, 해당 인스턴스로 돌아갑니다.
+                        self.navigationController?.popToViewController(mapVC, animated: true)
+                        return
+                    }
+                }
+            }
+        }
+        alert.addAction(confirmAction)
         present(alert, animated: true)
     }
 }
 
-#Preview {
-    QuestMapViewController(spotName: "서동시장")
-}
+//#Preview {
+//    QuestMapViewController(spotName: "서동시장")
+//}

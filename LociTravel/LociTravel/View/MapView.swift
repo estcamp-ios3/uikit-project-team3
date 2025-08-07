@@ -92,16 +92,16 @@ class MapView: UIView {
         
         // 옵션 버튼 이미지 설정
         optionButton.setImage(UIImage(systemName: "gearshape.fill"), for: .normal)
-        optionButton.tintColor = .systemBlue
-        optionButton.setPreferredSymbolConfiguration(.init(pointSize: 40), forImageIn: .normal)
+        optionButton.tintColor = .white
+        optionButton.setPreferredSymbolConfiguration(.init(pointSize: 30), forImageIn: .normal)
         
         //오토 레이아웃 제약
         NSLayoutConstraint.activate([
             // optionButton: safeArea 오른쪽 상단
-            optionButton.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 8),
-            optionButton.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: -8),
-            optionButton.widthAnchor.constraint(equalToConstant: 36),
-            optionButton.heightAnchor.constraint(equalToConstant: 36),
+            optionButton.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 10),
+            optionButton.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: -10),
+            optionButton.widthAnchor.constraint(equalToConstant: 30),
+            optionButton.heightAnchor.constraint(equalToConstant: 30),
         ])
         
         // Back Button 이미지 설정 부분
@@ -111,16 +111,16 @@ class MapView: UIView {
          // 이미지를 나중에 brown색으로 해보기
         let backButtonImage = UIImage(named: "button_back_icon")?.withRenderingMode(.alwaysTemplate)
         backButton.setImage(backButtonImage, for: .normal)
-        backButton.tintColor = UIColor(red: 0.6, green: 0.4, blue: 0.2, alpha: 1.0)
-
+        //backButton.tintColor = UIColor(red: 0.6, green: 0.4, blue: 0.2, alpha: 1.0)
+        backButton.tintColor = .white
         
         
         NSLayoutConstraint.activate([
             backButton.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: -5),
             backButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
             
-            backButton.widthAnchor.constraint(equalToConstant: 100),
-            backButton.heightAnchor.constraint(equalToConstant: 100)
+            backButton.widthAnchor.constraint(equalToConstant: 50),
+            backButton.heightAnchor.constraint(equalToConstant: 50)
         ])
         
         
@@ -234,14 +234,14 @@ class MapView: UIView {
                 let shapeLayer = CAShapeLayer()
                 shapeLayer.strokeColor = UIColor.brown.cgColor // 화살표 색상
                 shapeLayer.lineWidth = 3 // 화살표 두께
-                shapeLayer.lineDashPattern = [6, 6] // [선 길이, 간격]
+                shapeLayer.lineDashPattern = [6, 4] // [선 길이, 간격]
                 shapeLayer.fillColor = UIColor.clear.cgColor
                 shapeLayer.path = path.cgPath
                 
                 // 화살표 방향을 위한 삼각형 모양을 추가합니다.
                 let arrowPath = UIBezierPath()
                 let angle = atan2(endPoint.y - startPoint.y, endPoint.x - startPoint.x)
-                let arrowSize: CGFloat = 30
+                let arrowSize: CGFloat = 15
                 
                 // 화살표 끝 부분의 좌표
                 let arrowPoint1 = CGPoint(

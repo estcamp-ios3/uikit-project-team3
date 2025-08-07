@@ -86,4 +86,8 @@ class QuestModel {
     public func getQuest(spotName: String) -> Quest {
         return quests.filter { $0.spotName == spotName }.first ?? quests[0]
     }
+    
+    public func getAllQuests() -> [Quest] {
+        return quests
+    }
 }

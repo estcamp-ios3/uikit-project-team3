@@ -41,7 +41,7 @@ class HomeViewController: UIViewController {
     
     //추후에 이어하기 버튼으로 변경
     @objc private func didTapQuestListButton() {
-        let questListVC = QuestListViewController()
+        //let questListVC = QuestListViewController()
         //navigationController?.pushViewController(questListVC, animated: true)
     }
 }

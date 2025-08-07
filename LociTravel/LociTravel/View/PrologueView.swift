@@ -35,7 +35,7 @@ class PrologueView: UIView {
         // 배경 이미지뷰 설정
         backgroundImageView.contentMode = .scaleAspectFill
         backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
-        backgroundImageView.image = UIImage(named: "prologue_background")
+        backgroundImageView.image = UIImage(named: "background/prologue_background")
         addSubview(backgroundImageView)
         sendSubviewToBack(backgroundImageView) // 배경 이미지가 다른 뷰 뒤에 오도록 설정
         NSLayoutConstraint.activate([

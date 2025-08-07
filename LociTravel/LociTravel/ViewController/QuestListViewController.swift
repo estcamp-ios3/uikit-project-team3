@@ -12,13 +12,13 @@ class QuestListViewController: UIViewController, UITableViewDataSource, UITableV
     
     private let tableView = UITableView()
     
-    private var quests: [Quest] = [
-    ]
-    
+    private var quests: [Quest]!
+    //private var quests: [Quest] = []
  
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        quests = QuestModel.shared.getAllQuests()
         setupBackgroundImage()    // 🔧 배경 이미지 설정 메서드 호출
         setupTableView()
         setupUI()
@@ -65,16 +65,12 @@ class QuestListViewController: UIViewController, UITableViewDataSource, UITableV
             tableView.register(QuestCardView.self, forCellReuseIdentifier: QuestCardView.identifier)
         }
     
-    
-    
     private func setupUI() {
-        
-        
         title = "탐험 일지"
         view.backgroundColor = .clear
         
-        view.addSubview(tableView)
-        tableView.translatesAutoresizingMaskIntoConstraints = false
+        //view.addSubview(tableView)
+        //tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
@@ -87,10 +83,6 @@ class QuestListViewController: UIViewController, UITableViewDataSource, UITableV
         tableView.register(QuestCardView.self, forCellReuseIdentifier: QuestCardView.identifier)
         tableView.backgroundColor = .clear
         tableView.separatorStyle = .none
-        
-        
-        
-        
         
         //        navigationController?.setNavigationBarHidden(false, animated: false)
         //        let backButton = UIBarButtonItem(title: "뒤로", style: .plain, target: self, action: #selector(didTapBackButton))
