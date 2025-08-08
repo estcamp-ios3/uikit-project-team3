@@ -53,7 +53,7 @@ class HomeView: UIView {
        // questListButton.translatesAutoresizingMaskIntoConstraints = false
 
         // 배경 이미지 설정
-        backgroundImageView.image = UIImage(named: "bluebackground")
+        backgroundImageView.image = UIImage(named: "bluehomeviewbackground")
         backgroundImageView.contentMode = .scaleAspectFill
         backgroundImageView.clipsToBounds = true
         NSLayoutConstraint.activate([
@@ -166,19 +166,7 @@ class HomeView: UIView {
         
         
         
-        // 0806 비활성화
-        // 탐험 일지 버튼 설정
-//        questListButton.setTitle("탐험 일지", for: .normal)
-//        questListButton.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
-//        questListButton.backgroundColor = .systemGreen
-//        questListButton.setTitleColor(.white, for: .normal)
-//        questListButton.layer.cornerRadius = 25
-//        NSLayoutConstraint.activate([
-//            questListButton.centerXAnchor.constraint(equalTo: centerXAnchor),
-//            questListButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -50),
-//            questListButton.widthAnchor.constraint(equalToConstant: 250),
-//            questListButton.heightAnchor.constraint(equalToConstant: 50)
-//        ])
+
     }
 }
 
