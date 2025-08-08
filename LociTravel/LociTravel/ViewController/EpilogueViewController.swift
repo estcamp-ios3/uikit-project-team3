@@ -74,3 +74,8 @@ class EpilogueViewController: UIViewController {
         UserModel.shared.clearAll()
     }
 }
+
+
+#Preview {
+    EpilogueViewController()
+}
