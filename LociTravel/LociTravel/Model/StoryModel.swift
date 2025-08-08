@@ -53,6 +53,46 @@ class StoryModel {
     public func getStories(spotName: String) -> Story {
         return innerStories.filter { $0.spotName == spotName }.first ?? innerStories[0]
     }
+    
+    //퀘스트뷰에서 가져올것
+    public func getStory(for regionName: String, preferPostMission: Bool = false) -> Story {
+        // 1) 정확 일치 우선
+        if let exact = innerStories.first(where: { $0.spotName == regionName }) {
+            return exact
+        }
+
+        // 2) 정규화 키로 후보 찾기
+        let key = Self.baseKey(regionName)
+        let candidates = innerStories.filter { Self.baseKey($0.spotName) == key }
+
+        if !candidates.isEmpty {
+            if preferPostMission {
+                return candidates.first(where: { $0.spotName.contains("미션 후") }) ?? candidates[0]
+            } else {
+                return candidates.first(where: { $0.spotName.contains("미션 전") }) ?? candidates[0]
+            }
+        }
+
+        // 3) 폴백
+        return innerStories.first ?? Story(spotName: "", questName: "", scenarioImage: "", characterImage: "", arrScenario: [], bgm: "")
+    }
+    
+    // ✅ [추가] 공백/괄호/“미션 전·후” 표기 제거해서 비교용 키 생성
+       private static func baseKey(_ s: String) -> String {
+           var t = s.replacingOccurrences(of: " ", with: "")
+           // 다양한 표기 제거
+           t = t.replacingOccurrences(of: "(미션전)", with: "")
+                .replacingOccurrences(of: "(미션후)", with: "")
+                .replacingOccurrences(of: "(미션 전)", with: "")
+                .replacingOccurrences(of: "(미션 후)", with: "")
+                .replacingOccurrences(of: "미션전", with: "")
+                .replacingOccurrences(of: "미션후", with: "")
+                .replacingOccurrences(of: "(", with: "")
+                .replacingOccurrences(of: ")", with: "")
+           return t
+       }
+    
+    
 }
 
 // MARK: - 대사 데이터

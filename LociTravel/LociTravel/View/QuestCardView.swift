@@ -121,7 +121,7 @@ class QuestCardView: UITableViewCell {
             titleLabel.textColor = .black
 
             descriptionLabel.font = .systemFont(ofSize: 15)
-            descriptionLabel.textColor = .systemBlue
+            descriptionLabel.textColor = .black
             descriptionLabel.numberOfLines = 2
         }
         

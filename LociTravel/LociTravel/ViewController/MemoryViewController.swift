@@ -7,62 +7,103 @@
 
 import UIKit
 
-/// 퀘스트의 상세 ‘이야기’를 보여주는 화면
-class MemoryViewController: UIViewController {
-    // ① QuestList에서 전달받은 storyKey
-    var storyKey: String?
-    
-    // ② 내용을 보여줄 UITextView (스크롤 가능)
-    private let textView: UITextView = {
-        let tv = UITextView()
-        tv.translatesAutoresizingMaskIntoConstraints = false
-        tv.isEditable = false                // 읽기 전용
-        tv.font = UIFont.systemFont(ofSize: 16)
-        tv.textColor = .darkGray
-        return tv
-    }()
-    
+final class MemoryViewController: UIViewController {
+
+    // ✅ 전달받는 매개변수(지역 이름)
+    private let regionName: String
+
+    // UI
+    private let scrollView = UIScrollView()
+    private let contentStack = UIStackView()
+    private let titleLabel = UILabel()
+    private let bodyLabel = UILabel()
+
+    // MARK: - Init
+    init(regionName: String) {
+        self.regionName = regionName
+        super.init(nibName: nil, bundle: nil)
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
-        
-        setupNavigationBar()
-        setupTextView()
-       // loadContent()   // ✨ 초보자 주석: storyKey에 맞는 텍스트를 불러와서 textView에 세팅
+
+        view.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.95)
+
+        setupNav()
+        setupLayout()
+        loadStory()   // ✅ StoryModel에서 지역 이름으로 스토리 로드
     }
-    
-    // MARK: - 네비게이션 바 설정
-    private func setupNavigationBar() {
-        title = "탐험 이야기"        // 기본 타이틀
-        navigationItem.largeTitleDisplayMode = .never
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // 리스트/맵과 충돌 방지: 여기서는 네비바 보이기(무애니메이션)
+        navigationController?.setNavigationBarHidden(false, animated: false)
+        navigationController?.interactivePopGestureRecognizer?.delegate = nil
+        navigationController?.interactivePopGestureRecognizer?.isEnabled = true
     }
-    
-    // MARK: - UITextView 배치
-    private func setupTextView() {
-        view.addSubview(textView)
+
+    // MARK: - UI
+    private func setupNav() {
+        navigationItem.title = "스토리"
+        navigationItem.hidesBackButton = true
+        // 좌상단 닫기/뒤로 버튼
+        let close = UIBarButtonItem(image: UIImage(systemName: "chevron.left"),
+                                    style: .plain,
+                                    target: self,
+                                    action: #selector(didTapClose))
+        navigationItem.leftBarButtonItem = close
+    }
+
+    private func setupLayout() {
+        // 스크롤 + 스택(수직)
+        view.addSubview(scrollView)
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            textView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            textView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            textView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            textView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
+
+        contentStack.axis = .vertical
+        contentStack.spacing = 12
+
+        scrollView.addSubview(contentStack)
+        contentStack.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            contentStack.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor, constant: 16),
+            contentStack.leadingAnchor.constraint(equalTo: scrollView.frameLayoutGuide.leadingAnchor),
+            contentStack.trailingAnchor.constraint(equalTo: scrollView.frameLayoutGuide.trailingAnchor),
+            contentStack.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor, constant: -16),
+            contentStack.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
+        ])
+
+        titleLabel.font = .systemFont(ofSize: 22, weight: .bold)
+        titleLabel.numberOfLines = 0
+
+        bodyLabel.font = .systemFont(ofSize: 16)
+        bodyLabel.numberOfLines = 0
+
+        contentStack.addArrangedSubview(titleLabel)
+        contentStack.addArrangedSubview(bodyLabel)
     }
-    
-    // MARK: - 콘텐츠 불러오기
-//    private func loadContent() {
-//        guard let key = storyKey else {
-//            textView.text = "불러올 이야기가 없습니다."
-//            return
-//        }
-//        
-//        // ✨ 초보자 주석:
-//        // LocalModel 같은 곳에 미리 storyKey별 텍스트를 저장해 두었다고 가정하고 불러옵니다.
-//        // 이 부분은 실제 데이터 구조에 맞춰 바꿔주세요.
-//        let allStories = UserModel.shared.storyTexts  // [String: String] 딕셔너리
-//        if let story = allStories[key] {
-//            textView.text = story
-//        } else {
-//            textView.text = "아직 준비된 내용이 없어요."
-//        }
-//    }
+
+    // MARK: - Data
+    private func loadStory() {
+        // ✅ StoryModel에서 지역명 기반으로 로드
+        let story = StoryModel.shared.getStory(for: regionName, preferPostMission: false)
+        titleLabel.text = "\(story.spotName) — \(story.questName)"
+
+           // 대사 배열을 본문 텍스트로 합치기
+           bodyLabel.text = story.arrScenario
+               .map { "\($0.speaker): \($0.line)" }
+               .joined(separator: "\n\n")
+    }
+
+    // MARK: - Actions
+    @objc private func didTapClose() {
+        navigationController?.popViewController(animated: true) // ✅ 리스트로 복귀
+    }
 }

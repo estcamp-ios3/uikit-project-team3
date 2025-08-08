@@ -34,14 +34,10 @@ class MapViewController: UIViewController {
         private func configureOptionMenu() {
 
             // 1️⃣ 에셋 이름을 실제 이미지 이름으로 수정하세요 추후 에셋에 이미지업로드한 이름 사용
-           // let mapIcon     = UIImage(named: "jewelry") //에셋 주얼리
-            let journalIcon = UIImage(named: "mireuksa")
-            let recordIcon  = UIImage(named: "pin")
+            let journalIcon = UIImage(named: "questlisticon")
+            let recordIcon  = UIImage(named: "recordbookicon")
 
             // 2️⃣ UIAction 생성 시 title과 image를 지정
-//            let mapAction = UIAction(title: "지도", image: mapIcon) { [weak self] _ in
-//                self?.showMap()
-//            }
             let journalAction = UIAction(title: "탐험일지", image: journalIcon) { [weak self] _ in
                 self?.showJournal()
             }
@@ -52,8 +48,7 @@ class MapViewController: UIViewController {
             // 3️⃣ 메뉴 생성 후 버튼에 연결
             let menu = UIMenu(title: "",
                               options: .displayInline,    // 메뉴 옵션: 인라인으로 표시
-                              children: [//mapAction,
-                                journalAction, recordAction])
+                              children: [journalAction, recordAction])
             customMapView.optionButton.menu = menu
             customMapView.optionButton.showsMenuAsPrimaryAction = true
         }
@@ -64,11 +59,11 @@ class MapViewController: UIViewController {
 
 
         /// '지도' 선택 시 현재 화면 재로드 혹은 상세 지도로 이동
-        @objc private func showMap() {
-            let detailVC = MapViewController()  // 실제 지도 화면
-            navigationController?.pushViewController(detailVC,
-                                                     animated: true)
-        }
+//        @objc private func showMap() {
+//            let detailVC = MapViewController()  // 실제 지도 화면
+//            navigationController?.pushViewController(detailVC,
+//                                                     animated: true)
+//        }
 
         /// '탐험일지' 선택 시 퀘스트 목록 화면으로 이동
         @objc private func showJournal() {
@@ -80,6 +75,13 @@ class MapViewController: UIViewController {
         /// '리코드북' 선택 시 스팟 상세 화면으로 이동
         @objc private func showRecordBook() {
             let recordVC = SpotDetailViewController()
+            
+            // ✅ [추가] SpotDetailViewController는 spotName이 없으면 바로 pop 됩니다.
+                //    그래서 최소 한 개의 유효한 스팟 이름을 넘겨줘야 합니다.
+                //    최근 진행한 스팟이 있으면 그걸, 없으면 기본값으로 "서동시장".
+                let lastVisited = UserModel.shared.getQuestProgress().last
+                recordVC.spotName = lastVisited ?? "서동시장"
+            
             self.navigationController?.pushViewController(recordVC,
                                                      animated: true)
         }
@@ -88,14 +90,14 @@ class MapViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        navigationController?.setNavigationBarHidden(true, animated: animated)
+        navigationController?.setNavigationBarHidden(true, animated: false) // false로 수정함
 
         questProgress = UserModel.shared.getQuestProgress()
         // 퀘스트 진행 상황에 따라 버튼 상태를 업데이트합니다.
                updateButtonStates()
     }
     
-    
+  
     
     private func updateButtonStates() {
         let completedQuestions = Set(questProgress)
