@@ -8,31 +8,35 @@
 import UIKit
 
 class HomeViewController: UIViewController {
-    private let homeView = HomeView()
+    private let rootView = HomeView() // 이미 쓰는 HomeView
     
-    
-    override func loadView() {
-        view = homeView
-    }
-    
+    override func loadView() { view = rootView }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
+       // rootView.loadButton.addTarget(self, action: #selector(didTapLoad), for: .touchUpInside)
+
+        // 진행도 변경 실시간 반영
+        NotificationCenter.default.addObserver(self,
+            selector: #selector(updateLoadButtonState),
+            name: .progressDidChange, object: nil)
         
         setupButtonActions()
     }
     
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        updateLoadButtonState() // 화면 복귀 시 반영
         navigationController?.setNavigationBarHidden(true, animated: animated)
     }
     
     private func setupButtonActions() {
-        homeView.startButton.addTarget(self, action: #selector(didTapStartButton), for: .touchUpInside)
+        rootView.startButton.addTarget(self, action: #selector(didTapStartButton), for: .touchUpInside)
         
         //0806 questlistbutton -> loadbutton으로 수정
-        homeView.loadButton.addTarget(self, action: #selector(didTapQuestListButton), for: .touchUpInside)
+        rootView.loadButton.addTarget(self, action: #selector(didTapLoad), for: .touchUpInside)
     }
     
     //시작하기 버튼 함수
@@ -43,9 +47,24 @@ class HomeViewController: UIViewController {
         navigationController?.pushViewController(prologueVC, animated: true)
     }
     
-    //추후에 이어하기 버튼으로 변경
-    @objc private func didTapQuestListButton() {
-        //let questListVC = QuestListViewController()
-        //navigationController?.pushViewController(questListVC, animated: true)
-    }
+    @objc private func updateLoadButtonState() {
+        let canResume = UserModel.shared.hasResumeData
+                // 👉 만약 ‘퀘스트 기록만 있어도’ 활성화하고 싶으면 아래 주석 해제:
+                // let hasProgress = (UserModel.shared.progress != nil) || (UserModel.shared.getQuestProgress().last != nil)
+
+        
+        rootView.loadButton.isEnabled = canResume
+            rootView.loadButton.alpha = canResume ? 1.0 : 0.4
+        
+        }
+    
+    @objc private func didTapLoad() {
+            //guard let p = UserModel.shared.progress else { return }
+       
+        let vc = MapViewController(resumeMode: true)
+            navigationController?.pushViewController(vc, animated: true)
+        }
+
+        deinit { NotificationCenter.default.removeObserver(self) }
+    
 }

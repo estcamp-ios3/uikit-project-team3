@@ -135,7 +135,7 @@ class HomeView: UIView {
         
         
         // 0806 로드 버튼 설정
-        loadButton.setTitle("이어서 하기(개발중)", for: .normal)
+        loadButton.setTitle("이어서 하기", for: .normal)
         loadButton.titleLabel?.font = UIFont.systemFont(ofSize: 25, weight: .semibold)
         startButton.setTitleColor(.brown, for: .normal)
         startButton.setTitleColor(UIColor.brown.withAlphaComponent(0.7), for: .highlighted)
@@ -168,8 +168,4 @@ class HomeView: UIView {
         
 
     }
-}
-
-#Preview {
-    HomeView()
 }
