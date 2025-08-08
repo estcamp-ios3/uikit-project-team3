@@ -14,9 +14,24 @@ class MapViewController: UIViewController {
     // 완료된 퀘스트를 저장할 Set 변수 추가
     private var completedQuests: Set<String> = []
     
-    private var questProgress: [String] = [""]
+    private var questProgress: [String] = []
+       
+       // ⛏ FIX: 신호용 플래그 추가
+           private var resumeMode = false
+       
+       // ✅ 마지막 진행 상태를 전달받기 위한 선택적 저장소
+       private var bootProgress: GameProgress?
+       
+       
+       // ⛏ FIX: 이어하기용 생성자 추가
+           convenience init(resumeMode: Bool) {
+               self.init(nibName: nil, bundle: nil)
+               self.resumeMode = resumeMode
+           }
+
+    
     // 퀘스트 순서를 정의합니다.
-    private let questOrder: [String] = ["서동시장", "보석박물관", "미륵사지", "서동공원", "왕궁리유적"]
+    private let questOrder: [String] = ["서동시장", "보석 박물관", "미륵사지", "서동공원", "왕궁리 유적"]
     
     private var isQuestCompleted = true // 임시 상태
     
@@ -31,6 +46,52 @@ class MapViewController: UIViewController {
         setupButtonActions()
         
         configureOptionMenu()
+        
+        // ✅ 진행 상태 바뀌면 버튼 상태 갱신
+              NotificationCenter.default.addObserver(self,
+                                                     selector: #selector(onProgressChanged),
+                                                     name: .progressDidChange,
+                                                     object: nil)
+          }
+          
+          
+          
+          override func viewWillAppear(_ animated: Bool) {
+              super.viewWillAppear(animated)
+              
+              navigationController?.setNavigationBarHidden(true, animated: false)
+              
+              
+              // ✅ 디스크/싱글톤에서 최신 진행 불러와 버튼 상태 반영
+              questProgress = UserModel.shared.getQuestProgress()
+              updateButtonStates()
+              
+           
+          }
+          
+          override func viewDidAppear(_ animated: Bool) {
+              super.viewDidAppear(animated)
+              
+              //⛏ FIX: 부울 플래그로 분기
+              if resumeMode {
+                          resumeMode = false  // 재호출 방지
+                          if let next = nextUnclearedQuest() {
+                              pushScenario(for: next)
+                          } else {
+                              // 모두 완료 시 처리
+                          }
+                      }
+                  }
+              
+          
+          
+          
+          // 2) 다음 미완료 퀘스트 찾기 함수 추가
+          // 🔧 추가
+          private func nextUnclearedQuest() -> String? {
+              let completed = Set(UserModel.shared.getQuestProgress())
+              return questOrder.first { !completed.contains($0) }
+
     }
     
     // MARK: - UIMenu 설정 (새로 추가)
@@ -85,27 +146,8 @@ class MapViewController: UIViewController {
         
         
         
-        
-        override func viewWillAppear(_ animated: Bool) {
-            super.viewWillAppear(animated)
-            
-            
-            navigationController?.setNavigationBarHidden(true, animated: false) // false로 수정함
-            
-            
-            navigationController?.setNavigationBarHidden(true, animated: animated)
-            
-            
-            questProgress = UserModel.shared.getQuestProgress()
-            updateButtonStates()
-        }
-        
-        
-        
-        
         private func updateButtonStates() {
             let completedQuests = Set(UserModel.shared.getQuestProgress())
-            let questOrder: [String] = ["서동시장", "보석박물관", "미륵사지", "서동공원", "왕궁리유적"]
             
             for (index, questName) in questOrder.enumerated() {
                 let button: UIButton
@@ -113,30 +155,37 @@ class MapViewController: UIViewController {
                 switch questName {
                 case "서동시장":
                     button = customMapView.seodongMarketButton
-                case "보석박물관":
+                case "보석 박물관":
                     button = customMapView.jewelryButton
                 case "미륵사지":
                     button = customMapView.mireuksaButton
                 case "서동공원":
                     button = customMapView.seodongParkButton
-                case "왕궁리유적":
+                case "왕궁리 유적":
                     button = customMapView.wanggungriButton
                 default:
                     continue
                 }
                 
-                // 퀘스트 완료 여부를 확인
-                let isQuestCompleted = completedQuests.contains(questName)
+      
+                            let isCompleted = completedQuests.contains(questName)
+                            let prevDone = (index == 0) ? true : completedQuests.contains(questOrder[index - 1])
+                            
+                            // ✅ 규칙:
+                            // - 완료된 퀘스트: 비활성
+                            // - 미완료 + 직전 완료: 활성 (즉 "다음 퀘스트"만 활성)
+                            // - 그 외: 비활성
+                            let shouldEnable = (!isCompleted && prevDone)
+
                 
-                // 이전 퀘스트가 완료되었는지 확인
-                // 첫 번째 퀘스트는 이전 퀘스트가 없으므로 항상 true로 간주합니다.
-                let isPreviousQuestCompleted = (index == 0) || completedQuests.contains(questOrder[index - 1])
-                let shouldEnable = isQuestCompleted || (isPreviousQuestCompleted && !isQuestCompleted)
-                
-                button.isEnabled = shouldEnable
-                button.alpha = shouldEnable ? 1.0 : 0.3
             }
         }
+    
+    @objc private func onProgressChanged() {
+              questProgress = UserModel.shared.getQuestProgress()
+              updateButtonStates()
+          }
+
         
         
         
@@ -167,11 +216,11 @@ class MapViewController: UIViewController {
             print("seodong market button")
             let scenarioVC = ScenarioViewController(spotName: "서동시장")
             navigationController?.pushViewController(scenarioVC, animated: true)
-        }
+        } 
         
         @objc private func didTapJewelryButton() {
             print("jewelry button")
-            let scenarioVC = ScenarioViewController(spotName: "보석박물관")
+            let scenarioVC = ScenarioViewController(spotName: "보석 박물관")
             navigationController?.pushViewController(scenarioVC, animated: true)
         }
         
@@ -189,12 +238,21 @@ class MapViewController: UIViewController {
         
         @objc private func didTapWanggungriButton() {
             print("wanggungri button")
-            let scenarioVC = ScenarioViewController(spotName: "왕궁리유적")
+            let scenarioVC = ScenarioViewController(spotName: "왕궁리 유적")
             navigationController?.pushViewController(scenarioVC, animated: true)
         }
         
         
-        
+    /// 스팟 이름 → 해당 시나리오 화면으로 이동(중복 코드 제거)
+            private func pushScenario(for spot: String) {
+                let scenarioVC = ScenarioViewController(spotName: spot)
+                navigationController?.pushViewController(scenarioVC, animated: true)
+            }
+            
+            deinit {
+                NotificationCenter.default.removeObserver(self)
+            }
+
         
         
         
@@ -212,7 +270,7 @@ class MapViewController: UIViewController {
     // 1. 임시로 모든 퀘스트를 완료 상태로 만듭니다.
     UserModel.shared.clearAll() // 기존 데이터 초기화 (선택 사항)
     UserModel.shared.addQuestProgress("서동시장")
-    UserModel.shared.addQuestProgress("보석박물관")
+    UserModel.shared.addQuestProgress("보석 박물관")
     UserModel.shared.addQuestProgress("미륵사지")
     UserModel.shared.addQuestProgress("서동공원")
     

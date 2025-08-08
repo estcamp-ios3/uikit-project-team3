@@ -24,19 +24,49 @@ class QuestMapViewController: UIViewController, MKMapViewDelegate, CLLocationMan
     let questView = QuestMapView()
     let locationManager = CLLocationManager()
     
-    let fakeMyPosition = MKPointAnnotation()
+    private let proximityRadius: CLLocationDistance = 4 // 오차 범위
+    private var mapRegionLogitude: Double = 300
+    private var mapRegionLatitude: Double = 300
     private var itemAnnotations: [MKPointAnnotation] = []
+    
+    //디버그 용도
+    let fakeMyPosition = MKPointAnnotation()
+    private let step: CLLocationDegrees = 0.00003 // 로키 이동 거리
+    private var isPresentingCompletion = false
+    struct QuestLocation {
+        let spotName: String
+        let coordinate: CLLocationCoordinate2D
+    }
+    
+    let questLocations: [QuestLocation] = [
+        QuestLocation(spotName: "서동시장",
+                      coordinate: CLLocationCoordinate2D(latitude: 35.953162, longitude: 126.957308)),
+        QuestLocation(spotName: "보석 박물관",
+                      coordinate: CLLocationCoordinate2D(latitude: 35.990587, longitude: 127.102335)),
+        QuestLocation(spotName: "미륵사지",
+                      coordinate: CLLocationCoordinate2D(latitude: 36.009675, longitude: 127.029928)),
+        QuestLocation(spotName: "서동공원",
+                      coordinate: CLLocationCoordinate2D(latitude: 36.001224, longitude: 127.058147)),
+        QuestLocation(spotName: "왕궁리 유적",
+                      coordinate: CLLocationCoordinate2D(latitude: 35.972822, longitude: 127.054597))
+    ]
 
+    
     lazy var itemRandomOffsets: [(lat: Double, lon: Double, id: Int)] = [
         (0.0003, 0.0003, 0),
         (-0.0004, 0.0005, 1),
         (0.0008, -0.0008, 2),
         (-0.0003, -0.0006, 3)
     ]
+    
     init(spotName: String) {
         self.spotName = spotName
         self.quest = QuestModel.shared.getQuest(spotName: spotName)
         self.items = QuestModel.shared.getItems(questName: quest.questName)
+        
+        fakeMyPosition.coordinate = questLocations.first(where: { $0.spotName == spotName })?.coordinate
+        ?? CLLocationCoordinate2D(latitude: 35.9535, longitude: 126.9573) // 안전 기본값
+        
         if let first = items.first {
             self.itemPosition = CLLocationCoordinate2D(latitude: first.itemLatitude,
                                                        longitude: first.itemLongitude)
@@ -45,6 +75,7 @@ class QuestMapViewController: UIViewController, MKMapViewDelegate, CLLocationMan
             self.itemPosition = CLLocationCoordinate2D(latitude: 35.9535, longitude: 126.9573)
             print("⚠️ items가 비었습니다. 기본 좌표로 대체합니다.")
         }
+        
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -126,8 +157,6 @@ class QuestMapViewController: UIViewController, MKMapViewDelegate, CLLocationMan
         ])
         return button
     }
-    
-    private let step: CLLocationDegrees = 0.00002 // ≈ 2.2m
     
     @objc func moveUp() {
         fakeMyPosition.coordinate.latitude += step
@@ -228,13 +257,15 @@ class QuestMapViewController: UIViewController, MKMapViewDelegate, CLLocationMan
     func setupMap() {
         questView.mapView.showsUserLocation = false
 
-        let region = MKCoordinateRegion(center: itemPosition, latitudinalMeters: 150, longitudinalMeters: 150)
+        //디버깅 용도
+        let center = fakeMyPosition.coordinate
+        
+        let region = MKCoordinateRegion(center: center, latitudinalMeters: mapRegionLatitude, longitudinalMeters: mapRegionLogitude)
         questView.mapView.setRegion(region, animated: false)
 
         locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
 
-        fakeMyPosition.coordinate = CLLocationCoordinate2D(latitude: 35.954300, longitude: 126.957150)
         fakeMyPosition.title = "나"
         questView.mapView.addAnnotation(fakeMyPosition)
     }
@@ -325,8 +356,6 @@ class QuestMapViewController: UIViewController, MKMapViewDelegate, CLLocationMan
         return nil
     }
 
-    private let proximityRadius: CLLocationDistance = 4 // 4m로 통일
-
     private func pickup(index i: Int) {
         guard !foundItems.contains(i) else { return }
         foundItems.insert(i)
@@ -341,12 +370,32 @@ class QuestMapViewController: UIViewController, MKMapViewDelegate, CLLocationMan
         questView.progressView.progress = Float(foundItems.count) / Float(itemPositions.count)
 
         // 알림 (중복 표시 방지)
-        if presentedViewController == nil {
-            showItemPickupAlert(itemIndex: i)
-        }
+        let isAllCollected = (foundItems.count == itemPositions.count)
 
-        if foundItems.count == itemPositions.count {
+        if isAllCollected {
+            // 마지막 아이템이면 획득 알림은 띄우지 말고, 완료 알림만!
+            presentCompletionAlertSafely()
+        } else {
+            // 획득 알림은 기존처럼 단독일 때만 표시
+            if presentedViewController == nil {
+                showItemPickupAlert(itemIndex: i)
+            }
+        }
+    }
+    
+    private func presentCompletionAlertSafely() {
+        guard !isPresentingCompletion else { return }
+        isPresentingCompletion = true
+
+        // 이미 다른 알림이 떠있다면 먼저 내리고 완료 알림 표시
+        if let presented = presentedViewController {
+            presented.dismiss(animated: true) { [weak self] in
+                self?.showCompletionAlert()
+                self?.isPresentingCompletion = false
+            }
+        } else {
             showCompletionAlert()
+            isPresentingCompletion = false
         }
     }
     
@@ -380,40 +429,40 @@ class QuestMapViewController: UIViewController, MKMapViewDelegate, CLLocationMan
     }
     
     func showCompletionAlert() {
-        let alert = UIAlertController(title: "퀘스트 완료!", message: "모든 금가락지를 찾았습니다!", preferredStyle: .alert)
+        let alert = UIAlertController(title: "퀘스트 완료!", message: "", preferredStyle: .alert)
+        
         let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
             guard let self = self else { return }
             
             // 퀘스트 완료 상태를 UserModel에 저장합니다.
             UserModel.shared.addQuestProgress(self.spotName)
-            
+            //퀘스트 완료 상태를 퀘스트모델에도 저장 -> 나중에 시간될때 바꾸기
+            let dummy = QuestModel.shared.updateQuest(spotName: spotName)
             // 마지막 퀘스트인 "왕궁리유적"인지 확인합니다.
-            if self.spotName == "왕궁리유적" {
-                // 마지막 퀘스트가 맞다면 EpilogueViewController로 이동합니다.
-                let epilogueVC = EpilogueViewController()
-                self.navigationController?.pushViewController(epilogueVC, animated: true)
-            } else {
-                // 마지막 퀘스트가 아니라면 MapViewController로 돌아갑니다.
-                if let viewControllers = self.navigationController?.viewControllers {
-                    for viewController in viewControllers {
-                        if let mapVC = viewController as? MapViewController {
-                            self.navigationController?.popToViewController(mapVC, animated: true)
-                            return
-                        }
+            let isLastQuest = (self.spotName == "왕궁리 유적") // ← 문자열 일치로 수정
+
+            // 알럿이 닫힌 직후 안전하게 내비게이션
+            DispatchQueue.main.async {
+                if isLastQuest {
+                    let epilogueVC = EpilogueViewController()
+                    if let nav = self.navigationController {
+                        nav.pushViewController(epilogueVC, animated: true)
+                    } else {
+                        self.present(epilogueVC, animated: true) // 혹시 네비가 없으면 모달
                     }
+                    return
                 }
-            }
-        
-            // 1. 네비게이션 스택에 있는 모든 뷰 컨트롤러를 가져옵니다.
-            if let viewControllers = self.navigationController?.viewControllers {
-                
-                // 2. 뷰 컨트롤러 배열을 순회하며 MapViewController 인스턴스를 찾습니다.
-                for viewController in viewControllers {
-                    if let mapVC = viewController as? MapViewController {
-                        // 3. MapViewController를 찾으면, 해당 인스턴스로 돌아갑니다.
-                        self.navigationController?.popToViewController(mapVC, animated: true)
-                        return
+
+                // 마지막 퀘스트가 아니면 맵으로 복귀
+                if let nav = self.navigationController {
+                    if let mapVC = nav.viewControllers.first(where: { $0 is MapViewController }) {
+                        nav.popToViewController(mapVC, animated: true)
+                    } else {
+                        nav.popToRootViewController(animated: true) // 폴백
                     }
+                } else {
+                    // 네비게이션이 없으면 모달로 열렸던 것 → 닫기
+                    self.dismiss(animated: true)
                 }
             }
         }
@@ -423,5 +472,5 @@ class QuestMapViewController: UIViewController, MKMapViewDelegate, CLLocationMan
 }
 
 #Preview {
-    QuestMapViewController(spotName: "서동시장")
+    QuestMapViewController(spotName: "왕궁리 유적")
 }
