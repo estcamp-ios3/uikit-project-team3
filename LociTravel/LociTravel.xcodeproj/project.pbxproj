@@ -21,11 +21,6 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		AEC045CA2E45CDBF00C68F02 /* Fonts */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Fonts;
-			sourceTree = "<group>";
-		};
 		BE55BA252E41D94A00CDAEC3 /* LociTravel */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -52,7 +47,6 @@
 			children = (
 				BE55BA252E41D94A00CDAEC3 /* LociTravel */,
 				BE55BA242E41D94A00CDAEC3 /* Products */,
-				AEC045CA2E45CDBF00C68F02 /* Fonts */,
 			);
 			sourceTree = "<group>";
 		};
@@ -80,7 +74,6 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				AEC045CA2E45CDBF00C68F02 /* Fonts */,
 				BE55BA252E41D94A00CDAEC3 /* LociTravel */,
 			);
 			name = LociTravel;
