@@ -254,7 +254,3 @@ class SpotDetailView: UIView {
         pageControl.currentPage = 0
     }
 }
-
-#Preview {
-    SpotDetailView()
-}

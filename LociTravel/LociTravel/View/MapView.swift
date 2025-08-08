@@ -73,7 +73,7 @@ class MapView: UIView {
         
         addSubview(optionButton)
         
-        addSubview(progressLabel) // 새로 추가된 라벨을 뷰에 추가
+        addSubview(progressLabel)
         
         
         mapImageView.image = UIImage(named: "oldmap3")
@@ -97,7 +97,7 @@ class MapView: UIView {
         
         optionButton.translatesAutoresizingMaskIntoConstraints = false
         
-        progressLabel.translatesAutoresizingMaskIntoConstraints = false // 오토 레이아웃 설정
+        progressLabel.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             mapImageView.topAnchor.constraint(equalTo: topAnchor),
@@ -121,9 +121,6 @@ class MapView: UIView {
         ])
         
         // Back Button 이미지 설정 부분
-        //        let backButtonImage = UIImage(named: "button_back_icon")?.withRenderingMode(.alwaysOriginal)
-        //        backButton.setImage(backButtonImage, for: .normal)
-        
         let backButtonImage = UIImage(named: "button_back_icon")?.withRenderingMode(.alwaysTemplate)
         backButton.setImage(backButtonImage, for: .normal)
         //backButton.tintColor = UIColor(red: 0.6, green: 0.4, blue: 0.2, alpha: 1.0)
