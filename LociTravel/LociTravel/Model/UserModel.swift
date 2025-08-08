@@ -14,7 +14,7 @@ class UserModel {
     private var items: [String]
     
     private init() {
-        questProgress = ["서동시장"]
+        questProgress = []
         items = ["기억의 조각_0"]
     }
     
