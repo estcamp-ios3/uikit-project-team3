@@ -66,8 +66,8 @@ class MapView: UIView {
         
         
         
-        mapImageView.image = UIImage(named: "oldmap")
-        mapImageView.contentMode = .scaleAspectFill
+        mapImageView.image = UIImage(named: "oldmap3")
+        mapImageView.contentMode = .scaleAspectFit
         mapImageView.clipsToBounds = true
         
         
@@ -84,8 +84,8 @@ class MapView: UIView {
         
         
         NSLayoutConstraint.activate([
-            mapImageView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
-            mapImageView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
+            mapImageView.topAnchor.constraint(equalTo: topAnchor),
+            mapImageView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: 10),
             mapImageView.leadingAnchor.constraint(equalTo: leadingAnchor),
             mapImageView.trailingAnchor.constraint(equalTo: trailingAnchor)
         ])
@@ -125,10 +125,10 @@ class MapView: UIView {
         
         
         // seodongparkButton 이미지 설정 부분
-        let pinImage = UIImage(named: "seodongpark")?.withRenderingMode(.alwaysOriginal)
+        let pinImage = UIImage(named: "seodongparkButton")?.withRenderingMode(.alwaysOriginal)
         seodongParkButton.setImage(pinImage, for: .normal)
         
-        let buttonSize: CGFloat = 100
+        let buttonSize: CGFloat = 80
         let buttonX = (UIScreen.main.bounds.width - buttonSize) / 2
         let buttonY = (UIScreen.main.bounds.height - buttonSize) / 2 + 25
         
@@ -140,10 +140,10 @@ class MapView: UIView {
         ])
         
         // wanggungriButton 이미지 설정 부분
-        let pinImage2 = UIImage(named: "wanggungri")?.withRenderingMode(.alwaysOriginal)
+        let pinImage2 = UIImage(named: "wanggungriButton")?.withRenderingMode(.alwaysOriginal)
         wanggungriButton.setImage(pinImage2, for: .normal)
         
-        let buttonSize2: CGFloat = 100
+        let buttonSize2: CGFloat = 80
         let buttonX2 = (UIScreen.main.bounds.width - buttonSize2) / 2 + 50
         let buttonY2 = (UIScreen.main.bounds.height - buttonSize2) / 2 + 200
         
@@ -155,10 +155,10 @@ class MapView: UIView {
         ])
         
         // jewelryButton 이미지 설정 부분
-        let pinImage3 = UIImage(named: "jewelry")?.withRenderingMode(.alwaysOriginal)
+        let pinImage3 = UIImage(named: "jewelryButton")?.withRenderingMode(.alwaysOriginal)
         jewelryButton.setImage(pinImage3, for: .normal)
         
-        let buttonSize3: CGFloat = 100
+        let buttonSize3: CGFloat = 70
         let buttonX3 = (UIScreen.main.bounds.width - buttonSize3) / 2 + 140
         let buttonY3 = (UIScreen.main.bounds.height - buttonSize3) / 2 + 70
         
@@ -170,10 +170,10 @@ class MapView: UIView {
         ])
         
         // mireuksaButton 이미지 설정 부분
-        let pinImage4 = UIImage(named: "mireuksa")?.withRenderingMode(.alwaysOriginal)
+        let pinImage4 = UIImage(named: "mireuksaButton")?.withRenderingMode(.alwaysOriginal)
         mireuksaButton.setImage(pinImage4, for: .normal)
         
-        let buttonSize4: CGFloat = 100
+        let buttonSize4: CGFloat = 80
         let buttonX4 = (UIScreen.main.bounds.width - buttonSize4) / 2 - 80
         let buttonY4 = (UIScreen.main.bounds.height - buttonSize4) / 2 - 130
         
@@ -185,10 +185,10 @@ class MapView: UIView {
         ])
         
         // marketButton 이미지 설정 부분
-        let pinImage5 = UIImage(named: "seodongmarket")?.withRenderingMode(.alwaysOriginal)
+        let pinImage5 = UIImage(named: "seodongmarketButton")?.withRenderingMode(.alwaysOriginal)
         seodongMarketButton.setImage(pinImage5, for: .normal)
         
-        let buttonSize5: CGFloat = 100
+        let buttonSize5: CGFloat = 80
         let buttonX5 = (UIScreen.main.bounds.width - buttonSize5) / 2 - 130
         let buttonY5 = (UIScreen.main.bounds.height - buttonSize5) / 2 - 10
         
