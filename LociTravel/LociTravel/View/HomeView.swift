@@ -53,7 +53,7 @@ class HomeView: UIView {
        // questListButton.translatesAutoresizingMaskIntoConstraints = false
 
         // 배경 이미지 설정
-        backgroundImageView.image = UIImage(named: "home_background_illustration")
+        backgroundImageView.image = UIImage(named: "bluebackground")
         backgroundImageView.contentMode = .scaleAspectFill
         backgroundImageView.clipsToBounds = true
         NSLayoutConstraint.activate([
@@ -77,7 +77,8 @@ class HomeView: UIView {
         
         // 타이틀 레이블 설정
         titleLabel.text = "장소의 기억"
-        titleLabel.font = UIFont.systemFont(ofSize: 50, weight: .bold)
+        //titleLabel.font = UIFont.systemFont(ofSize: 50, weight: .bold)
+        titleLabel.font = UIFont(name: "BMEULJIRO", size: 60)
         titleLabel.textColor = .black
         NSLayoutConstraint.activate([
             titleLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
@@ -96,7 +97,8 @@ class HomeView: UIView {
 
         // 시작 버튼 설정
         startButton.setTitle("시작 하기", for: .normal)
-        startButton.titleLabel?.font = UIFont.systemFont(ofSize: 25, weight: .semibold)
+      //  startButton.titleLabel?.font = UIFont.systemFont(ofSize: 25, weight: .semibold)
+        startButton.titleLabel?.font = UIFont(name: "BMEULJIRO", size: 30)
         startButton.setTitleColor(.brown, for: .normal)
         startButton.setTitleColor(UIColor.brown.withAlphaComponent(0.7), for: .highlighted)
         startButton.backgroundColor = .systemBlue
