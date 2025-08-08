@@ -9,91 +9,145 @@ import UIKit
 
 class QuestCardView: UITableViewCell {
     static let identifier = "QuestCardView"
-
+    
     private let titleLabel = UILabel()
     private let descriptionLabel = UILabel()
+   
+    // 🔧 [수정] 셀 배경 이미지뷰를 프로퍼티로 승격 (나중에 이미지 교체 가능)
+    private let bgImageView: UIImageView = {
+        let iv = UIImageView()
+        iv.contentMode = .scaleToFill   // 필요시 .scaleAspectFill
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
+    }()
+    
+    private let statusDotView = UIView()
     private let completeStatusLabel = UILabel()
+    private lazy var statusStack: UIStackView = {
+        let s = UIStackView(arrangedSubviews: [statusDotView, completeStatusLabel])
+        s.axis = .horizontal
+        s.alignment = .center
+        s.spacing = 6
+        s.translatesAutoresizingMaskIntoConstraints = false
+        return s
+    }()
+    
+    // 🔧 점 크기 제약(폰트 크기에 맞춰 업데이트)
+        private var dotW: NSLayoutConstraint!
+        private var dotH: NSLayoutConstraint!
+   
+    
     
     // 🔧 ① 카드가 탭됐다는 신호를 외부로 전달할 클로저 프로퍼티 추가
-        //        여기 안에 할당된 작업(onTap?())이 카드 터치 시 실행됩니다.
-       // var onTap: (() -> Void)?
-
+    //        여기 안에 할당된 작업(onTap?())이 카드 터치 시 실행됩니다.
+    // var onTap: (() -> Void)?
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
-       // setupGesture()
+        
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     private func setupUI() {
         backgroundColor = .clear
+        contentView.backgroundColor = .clear
         selectionStyle = .none
         
-
         
+        // 배경화면
+        //   가장자리 왜곡이 싫으면 capInsets로 늘려쓰세요.
+        let defaultBG = UIImage(named: "questlistviewcell")?.resizableImage(
+            withCapInsets: UIEdgeInsets(top: 40, left: 60, bottom: 40, right: 60),
+            resizingMode: .stretch
+        )
+        bgImageView.image = defaultBG
         
-        // 1️⃣ 배경 이미지뷰 추가: 에셋에 추가한 이미지 이름으로 변경
-        let backgroundImageView = UIImageView(image: UIImage(named: "questviewbackground"))
-        backgroundImageView.contentMode = .scaleToFill
-        backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(backgroundImageView)
-        //   backButton.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: -5)
+        contentView.addSubview(bgImageView)
         NSLayoutConstraint.activate([
-            backgroundImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 5),
-            backgroundImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -5),
-            backgroundImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10),
-            backgroundImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10)
+            bgImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 5),
+            bgImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -5),
+            bgImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10),
+            bgImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10)
         ])
         
-        // 2️⃣ 텍스트 스택뷰 추가
-        let stackView = UIStackView(arrangedSubviews: [titleLabel, descriptionLabel, completeStatusLabel])
-        stackView.axis = .vertical
-        stackView.spacing = 10
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(stackView)
         
+        // ⭐ 파피루스 내부 패딩(모든 라벨이 안쪽에 머물도록)
+        let insetTop: CGFloat = 14
+        let insetLeft: CGFloat = 24
+        let insetRight: CGFloat = 18
+        let insetBottom: CGFloat = 12
+        
+        // 텍스트 스택 (제목 + 설명)
+        let textStack = UIStackView(arrangedSubviews: [titleLabel, descriptionLabel])
+        textStack.axis = .vertical
+        textStack.spacing = 3                      // 🔧 1) 전체 간격 축소
+        textStack.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(textStack)
         NSLayoutConstraint.activate([
-            stackView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 20),
-            stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -15),
-            stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 60),
-            stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20)
+            textStack.topAnchor.constraint(equalTo: bgImageView.topAnchor, constant: insetTop),
+            textStack.leadingAnchor.constraint(equalTo: bgImageView.leadingAnchor, constant: insetLeft),
+            textStack.trailingAnchor.constraint(equalTo: bgImageView.trailingAnchor, constant: -insetRight),
+            textStack.bottomAnchor.constraint(lessThanOrEqualTo: bgImageView.bottomAnchor, constant: -insetBottom)
         ])
+        
+        // 상태 스택(● + "진행 중/완료")
+        completeStatusLabel.font = .systemFont(ofSize: 15, weight: .semibold)
+        completeStatusLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+        
+        statusDotView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            statusDotView.widthAnchor.constraint(equalToConstant: 12), // ● 크기 12
+            statusDotView.heightAnchor.constraint(equalToConstant: 12)
+        ])
+        statusDotView.layer.cornerRadius = 6
+        statusDotView.clipsToBounds = true
+        statusDotView.backgroundColor = .systemOrange
+       
+        statusStack.alignment = .center
+          contentView.addSubview(statusStack)
+          statusStack.translatesAutoresizingMaskIntoConstraints = false
+          NSLayoutConstraint.activate([
+              statusStack.trailingAnchor.constraint(equalTo: bgImageView.trailingAnchor, constant: -insetRight),
+              // 🔧 제목과 같은 높이로 정렬 (이제 두 라벨 모두 계층 안에 있어서 OK)
+              completeStatusLabel.firstBaselineAnchor.constraint(equalTo: titleLabel.firstBaselineAnchor)
+          ])
+        
+        // 라벨 스타일
+            titleLabel.font = .systemFont(ofSize: 25, weight: .bold)
+            titleLabel.textColor = .black
 
+            descriptionLabel.font = .systemFont(ofSize: 15)
+            descriptionLabel.textColor = .systemBlue
+            descriptionLabel.numberOfLines = 2
+        }
         
-        // 3️⃣ 라벨 스타일 설정
-        titleLabel.font = UIFont.systemFont(ofSize: 25, weight: .bold)
-        descriptionLabel.font = UIFont.systemFont(ofSize: 15)
-        completeStatusLabel.font = UIFont.systemFont(ofSize: 13, weight: .light)
-        
-        titleLabel.textColor = .black
-        descriptionLabel.textColor = .blue
-        completeStatusLabel.textColor = .systemGreen
-    }
+
     
-    // MARK: - 탭 제스처
-//        private func setupTapGesture() {
-//            contentView.isUserInteractionEnabled = true
-//            let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-//            contentView.addGestureRecognizer(tap)
-//        }
-//        @objc private func handleTap() {
-//            // 카드가 탭되면 여기에 설정된 onTap 클로저를 실행
-//            onTap?()   // ✨ QuestListViewController에서 이 자리에 화면 전환 코드를 넣어줄 거예요.
-//        }
     
     
     /// Quest 모델을 받아 화면 업데이트
     func configure(with quest: Quest) {
         titleLabel.text = quest.questName
         descriptionLabel.text = quest.questDetail
-        completeStatusLabel.text = quest.isCompleted ? "완료" : "진행 중"
-        completeStatusLabel.textColor = quest.isCompleted ? .systemGreen : .systemOrange
+        
+        if quest.isCompleted {
+            completeStatusLabel.text = "완료"
+            completeStatusLabel.textColor = .systemGreen
+            statusDotView.backgroundColor = .systemGreen
+        } else {
+            completeStatusLabel.text = "진행 중"
+            completeStatusLabel.textColor = .systemOrange
+            statusDotView.backgroundColor = .systemOrange
+        }
     }
+    
+    //        completeStatusLabel.text = quest.isCompleted ? "완료" : "진행 중"
+    //        completeStatusLabel.textColor = quest.isCompleted ? .systemGreen : .systemOrange
+    //.  }
 }
 
-#Preview {
-    QuestListViewController()
-}
+
