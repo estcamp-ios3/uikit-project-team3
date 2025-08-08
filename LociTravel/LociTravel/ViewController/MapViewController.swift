@@ -28,7 +28,7 @@ class MapViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-      //  setupButtonActions()
+        setupButtonActions()
         
         configureOptionMenu()
     }
@@ -60,19 +60,7 @@ class MapViewController: UIViewController {
         
         
         
-        // MARK: - Actions Setup
-        
-//        private func setupActions() {
-//        }
-        
-        
-        /// '지도' 선택 시 현재 화면 재로드 혹은 상세 지도로 이동
-        //        @objc private func showMap() {
-        //            let detailVC = MapViewController()  // 실제 지도 화면
-        //            navigationController?.pushViewController(detailVC,
-        //                                                     animated: true)
-        //        }
-        
+
         /// '탐험일지' 선택 시 퀘스트 목록 화면으로 이동
         @objc private func showJournal() {
             let journalVC = QuestListViewController()
@@ -109,7 +97,6 @@ class MapViewController: UIViewController {
             
             
             questProgress = UserModel.shared.getQuestProgress()
-            // 퀘스트 진행 상황에 따라 버튼 상태를 업데이트합니다.
             updateButtonStates()
         }
         
