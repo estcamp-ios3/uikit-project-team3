@@ -18,7 +18,7 @@ public struct Story {
 
 class StoryModel {
     static let shared = StoryModel()
-
+    
     // MARK: - 프롤로그
     static let prologueTexts: [String] = [
         "프롤로그: 버려진 왕의 마지막 염원",
@@ -42,10 +42,10 @@ class StoryModel {
         "prologue_image_4",
         "prologue_image_5"
     ]
-
+    
     // MARK: - 메인 스토리
     private var innerStories: [Story] = []
-
+    
     private init() {
         innerStories = [
             Story(spotName: "서동시장", questName: "금가락지 소동", scenarioImage: "background", characterImage: "girl", arrScenario: dialogues_Market, bgm: "market"),
@@ -56,10 +56,50 @@ class StoryModel {
             Story(spotName: "왕궁리 유적 (미션 후)", questName: "에필로그", scenarioImage: "background", characterImage: "girl", arrScenario: dialogues_Palace_Epilogue, bgm: "palace_epilogue")
         ]
     }
-
+    
     public func getStories(spotName: String) -> Story {
         return innerStories.filter { $0.spotName == spotName }.first ?? innerStories[0]
     }
+    
+    //퀘스트뷰에서 가져올것
+    public func getStory(for regionName: String, preferPostMission: Bool = false) -> Story {
+        // 1) 정확 일치 우선
+        if let exact = innerStories.first(where: { $0.spotName == regionName }) {
+            return exact
+        }
+
+        // 2) 정규화 키로 후보 찾기
+        let key = Self.baseKey(regionName)
+        let candidates = innerStories.filter { Self.baseKey($0.spotName) == key }
+
+        if !candidates.isEmpty {
+            if preferPostMission {
+                return candidates.first(where: { $0.spotName.contains("미션 후") }) ?? candidates[0]
+            } else {
+                return candidates.first(where: { $0.spotName.contains("미션 전") }) ?? candidates[0]
+            }
+        }
+
+        // 3) 폴백
+        return innerStories.first ?? Story(spotName: "", questName: "", scenarioImage: "", characterImage: "", arrScenario: [], bgm: "")
+    }
+    
+    // ✅ [추가] 공백/괄호/“미션 전·후” 표기 제거해서 비교용 키 생성
+       private static func baseKey(_ s: String) -> String {
+           var t = s.replacingOccurrences(of: " ", with: "")
+           // 다양한 표기 제거
+           t = t.replacingOccurrences(of: "(미션전)", with: "")
+                .replacingOccurrences(of: "(미션후)", with: "")
+                .replacingOccurrences(of: "(미션 전)", with: "")
+                .replacingOccurrences(of: "(미션 후)", with: "")
+                .replacingOccurrences(of: "미션전", with: "")
+                .replacingOccurrences(of: "미션후", with: "")
+                .replacingOccurrences(of: "(", with: "")
+                .replacingOccurrences(of: ")", with: "")
+           return t
+       }
+    
+    
 }
 
 // MARK: - 대사 데이터
@@ -133,11 +173,23 @@ let dialogues_Palace_Intro: [(speaker: String, line: String)] = [
 // MARK: - 에필로그: 예언의 완성 (미션 후)
 
 let dialogues_Palace_Epilogue: [(speaker: String, line: String)] = [
-    ("(조각이 맞춰지는 순간)", "眞王(진왕)이여, 백제를 다시 밝히라 – 예언의 문장이 허공에 떠오른다."),
+    //    ("(조각이 맞춰지는 순간)", "眞王(진왕)이여, 백제를 다시 밝히라 – 예언의 문장이 허공에 떠오른다."),
+    //    ("선화", "목걸이가… 빛나고 있어요…!"),
+    //    ("서동", "진왕… 진정한 왕이라… 이게 바로 그 예언의 끝이구나."),
+    //    ("선화", "당신은 피로 이어진 왕이 아닌, 믿음으로 선택된 왕이에요."),
+    //    ("서동", "이제, 우리가 함께 백제의 새로운 시대를 열자."),
+    //    (" (백성들)", "만세! 만세! 진왕 만세!"),
+    //    ("시스템", "[에필로그] 예언이 완성되었습니다. 당신의 이야기는 전설이 되었습니다.")
+    ("조각이 맞춰지는 순간", "眞王(진왕)이여, 백제를 다시 밝히라 – 예언의 문장이 허공에 떠오른다."),
     ("선화", "목걸이가… 빛나고 있어요…!"),
     ("서동", "진왕… 진정한 왕이라… 이게 바로 그 예언의 끝이구나."),
+    ("내레이션", "두 조각의 목걸이가 합쳐지자, 고조선의 마지막 왕 준왕이 남긴 염원이 빛을 발하며 새로운 역사의 서막을 알렸다. 서동은 더 이상 마를 캐던 어린아이가 아니었다. 그는 백제의 새로운 왕, 무왕으로서 백성을 이끌 운명을 깨달았다. 신라의 공주 선화는 그저 정략적인 혼인의 대상이 아닌, 예언의 마지막 조각을 완성한 진정한 동반자였다."),
     ("선화", "당신은 피로 이어진 왕이 아닌, 믿음으로 선택된 왕이에요."),
+    ("서동", "그래. 백제의 땅은 이미 수많은 피를 흘렸다. 이제 그 피의 역사를 끝내고, 백성들의 믿음과 평화로 새로운 시대를 열어야 한다."),
+    ("선화", "당신의 마음이 백성의 마음과 함께하는 한, 백제는 영원히 빛날 거예요."),
     ("서동", "이제, 우리가 함께 백제의 새로운 시대를 열자."),
+    ("내레이션", "서동의 목소리는 드넓은 왕궁을 넘어 백성들에게 닿았다. 백성들은 자신들의 삶을 보듬어 줄 진정한 왕의 탄생을 보며 환호했다."),
     (" (백성들)", "만세! 만세! 진왕 만세!"),
+    ("내레이션", "무왕은 선화와 함께 손을 잡고 백성들을 향해 걸어 나갔다. 그들의 발걸음이 닿는 곳마다 평화의 기운이 싹트고, 새로운 희망이 피어났다. 준왕이 남긴 마지막 염원은 서동과 선화의 만남을 통해 평화와 화합의 백제를 완성하는 위대한 서사가 되었다."),
     ("시스템", "[에필로그] 예언이 완성되었습니다. 당신의 이야기는 전설이 되었습니다.")
 ]

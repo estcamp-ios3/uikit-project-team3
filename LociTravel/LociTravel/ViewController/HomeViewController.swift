@@ -15,6 +15,14 @@ class HomeViewController: UIViewController {
     }
     
     override func viewDidLoad() {
+//        for family in UIFont.familyNames.sorted() {
+//            print("Family:", family)
+//            for name in UIFont.fontNames(forFamilyName: family).sorted() {
+//                print("  -", name) // ← 이게 실제로 써야 할 이름
+//            }
+//        }
+        
+        
         super.viewDidLoad()
         setupButtonActions()
     }

@@ -50,7 +50,7 @@ class QuestMapView: UIView {
 
         setupConstraints()
     }
-
+    
     private func setupConstraints() {
         NSLayoutConstraint.activate([
             closeButton.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 10),
