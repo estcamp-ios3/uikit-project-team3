@@ -60,7 +60,7 @@ class EpilogueViewController: UIViewController {
         
         let duration = isFastForwarding ? fastForwardTextDuration : defaultTextDuration
         
-        epilogueView.showDialogueText(dialogueText, duration: 1.0, delay: duration) {
+        epilogueView.showEpilogueText(dialogueText, duration: 1.0, delay: duration) {
             self.dialogueIndex += 1
             self.showNextDialogue()
         }
