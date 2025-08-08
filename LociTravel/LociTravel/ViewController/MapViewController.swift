@@ -16,7 +16,7 @@ class MapViewController: UIViewController {
     
     private var questProgress: [String] = [""]
     // 퀘스트 순서를 정의합니다.
-    private let questOrder: [String] = ["서동시장", "보석박물관", "미륵사지", "서동공원", "왕궁리유적"]
+    private let questOrder: [String] = ["서동시장", "보석 박물관", "미륵사지", "서동공원", "왕궁리 유적"]
     
     private var isQuestCompleted = true // 임시 상태
     
@@ -28,7 +28,7 @@ class MapViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-      //  setupButtonActions()
+        setupButtonActions()
         
         configureOptionMenu()
     }
@@ -94,10 +94,6 @@ class MapViewController: UIViewController {
                                                           animated: true)
         }
         
-        
-        
-        
-        
         override func viewWillAppear(_ animated: Bool) {
             super.viewWillAppear(animated)
             
@@ -118,7 +114,6 @@ class MapViewController: UIViewController {
         
         private func updateButtonStates() {
             let completedQuests = Set(UserModel.shared.getQuestProgress())
-            let questOrder: [String] = ["서동시장", "보석박물관", "미륵사지", "서동공원", "왕궁리유적"]
             
             for (index, questName) in questOrder.enumerated() {
                 let button: UIButton
@@ -126,13 +121,13 @@ class MapViewController: UIViewController {
                 switch questName {
                 case "서동시장":
                     button = customMapView.seodongMarketButton
-                case "보석박물관":
+                case "보석 박물관":
                     button = customMapView.jewelryButton
                 case "미륵사지":
                     button = customMapView.mireuksaButton
                 case "서동공원":
                     button = customMapView.seodongParkButton
-                case "왕궁리유적":
+                case "왕궁리 유적":
                     button = customMapView.wanggungriButton
                 default:
                     continue
@@ -184,7 +179,7 @@ class MapViewController: UIViewController {
         
         @objc private func didTapJewelryButton() {
             print("jewelry button")
-            let scenarioVC = ScenarioViewController(spotName: "보석박물관")
+            let scenarioVC = ScenarioViewController(spotName: "보석 박물관")
             navigationController?.pushViewController(scenarioVC, animated: true)
         }
         
@@ -202,7 +197,7 @@ class MapViewController: UIViewController {
         
         @objc private func didTapWanggungriButton() {
             print("wanggungri button")
-            let scenarioVC = ScenarioViewController(spotName: "왕궁리유적")
+            let scenarioVC = ScenarioViewController(spotName: "왕궁리 유적")
             navigationController?.pushViewController(scenarioVC, animated: true)
         }
         
@@ -225,7 +220,7 @@ class MapViewController: UIViewController {
     // 1. 임시로 모든 퀘스트를 완료 상태로 만듭니다.
     UserModel.shared.clearAll() // 기존 데이터 초기화 (선택 사항)
     UserModel.shared.addQuestProgress("서동시장")
-    UserModel.shared.addQuestProgress("보석박물관")
+    UserModel.shared.addQuestProgress("보석 박물관")
     UserModel.shared.addQuestProgress("미륵사지")
     UserModel.shared.addQuestProgress("서동공원")
     
