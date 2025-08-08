@@ -14,7 +14,7 @@ struct Quest {
     let questName: String
     let questDetail: String
     let bgm: String
-    let isCompleted: Bool
+    var isCompleted: Bool
 }
 
 struct Item {
@@ -47,7 +47,7 @@ class QuestModel {
                 isCompleted: false
             ),
             Quest(
-                spotName: "보석박물관",
+                spotName: "보석 박물관",
                 questName: "잃어버린 목걸이", questDetail: "도둑에게서 목걸이를 되찾으세요",
                 bgm: "motivity",
                 isCompleted: false
@@ -77,11 +77,11 @@ class QuestModel {
                  itemLongitude: 126.957370, itemLatitude: 35.953040),
             Item(questName: "잃어버린 목걸이", itemImage: "necklace", itemName: "서동의 목걸이", itemDetail: "王者非血... 繼之者也",
                  isRandom: false,
-                 itemLongitude: 0,
-                 itemLatitude: 0),
-            Item(questName: "목걸이의 비밀", itemImage: "oldpaper", itemName: "찢어진 고서", itemDetail: "낡은 고서, 찢어져 있어 글의 내용을 알아볼 수 없다.", isRandom: true, itemLongitude: 0, itemLatitude: 0),
-            Item(questName: "진실한 사랑", itemImage: "brokenheart", itemName: "아픈 마음", itemDetail: "...", isRandom: true, itemLongitude: 0, itemLatitude: 0),
-            Item(questName: "평화의 왕", itemImage: "mans", itemName: "백성", itemDetail: "...", isRandom: true, itemLongitude: 0, itemLatitude: 0)
+                 itemLongitude: 127.104759,
+                 itemLatitude: 35.989302),
+            Item(questName: "목걸이의 비밀", itemImage: "oldpaper", itemName: "찢어진 고서", itemDetail: "낡은 고서, 찢어져 있어 글의 내용을 알아볼 수 없다.", isRandom: true, itemLongitude: 127.030435, itemLatitude: 36.012300),
+            Item(questName: "진실한 사랑", itemImage: "brokenheart", itemName: "아픈 마음", itemDetail: "...", isRandom: true, itemLongitude: 127.057281, itemLatitude: 36.001081),
+            Item(questName: "평화의 왕", itemImage: "mans", itemName: "백성", itemDetail: "...", isRandom: true, itemLongitude: 127.054876, itemLatitude: 35.973552)
         ]
     }
     
@@ -95,5 +95,23 @@ class QuestModel {
     
     public func getItems(questName: String) -> [Item] {
         return items.filter { $0.questName == questName }
+    }
+    
+    public func updateQuest(spotName: String, completed: Bool = true) -> Bool {
+        guard let idx = quests.firstIndex(where: { $0.spotName == spotName }) else {
+            print("⚠️ updateQuest: '\(spotName)' 퀘스트를 찾지 못했습니다.")
+            return false
+        }
+        quests[idx].isCompleted = completed
+        return true
+    }
+    
+    public func updateQuestByQuestName(_ questName: String, completed: Bool = true) -> Bool {
+        guard let idx = quests.firstIndex(where: { $0.questName == questName }) else {
+            print("⚠️ updateQuestByQuestName: '\(questName)' 퀘스트를 찾지 못했습니다.")
+            return false
+        }
+        quests[idx].isCompleted = completed
+        return true
     }
 }
