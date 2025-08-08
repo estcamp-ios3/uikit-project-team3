@@ -192,3 +192,7 @@ class SpotDetailViewController: UIViewController, UIScrollViewDelegate {
         }
     }
 }
+
+#Preview {
+    SpotDetailViewController()
+}
