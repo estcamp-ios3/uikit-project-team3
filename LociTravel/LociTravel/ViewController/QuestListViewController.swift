@@ -14,6 +14,9 @@ class QuestListViewController: UIViewController, UITableViewDataSource, UITableV
     
     private var quests: [Quest]!
  
+    //0809 추가
+    private let QUEST_ORDER_BY_SPOT = ["서동시장", "보석 박물관", "미륵사지", "서동공원", "왕궁리 유적"]
+    
     // ⬇️⬇️ [추가] 전환 중 렌더링 부하를 줄이기 위한 플래그
        private var rasterizedForPop = false
     
@@ -40,6 +43,12 @@ class QuestListViewController: UIViewController, UITableViewDataSource, UITableV
             ]
             navigationController?.navigationBar.standardAppearance = ap
             navigationController?.navigationBar.scrollEdgeAppearance = ap
+        //0809 추가
+        NotificationCenter.default.addObserver(self,
+            selector: #selector(onProgressChanged),
+            name: .progressDidChange, object: nil)
+        
+        
     }
     
     // 🔧 [추가] 이 화면이 나타날 때 네비게이션 바를 다시 보이게 만듭니다.
@@ -54,6 +63,9 @@ class QuestListViewController: UIViewController, UITableViewDataSource, UITableV
                 if let idx = tableView.indexPathForSelectedRow {
                     tableView.deselectRow(at: idx, animated: true)
                 }
+            tableView.reloadData()       // 0809 추가 화면 복귀 시 항상 최신 상태로
+            
+            
         }
     
     // ⬇️⬇️ [추가] '뒤로가기 팝' 직전에 테이블을 래스터라이즈(평면화)해서
@@ -155,11 +167,18 @@ class QuestListViewController: UIViewController, UITableViewDataSource, UITableV
     @objc private func didTapBack() {
            navigationController?.popViewController(animated: true) // ← 뒤로가기 동작
        }
+    
+    //0809 추가
+    @objc private func onProgressChanged() {
+        tableView.reloadData()   // 진행 상태 바뀌면 목록 즉시 갱신
+    }
 
     // MARK: - UITableViewDataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return quests.count
     }
+    
+    
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: QuestCardView.identifier, for: indexPath) as? QuestCardView else {
@@ -167,6 +186,11 @@ class QuestListViewController: UIViewController, UITableViewDataSource, UITableV
         }
         let quest = quests[indexPath.row]
         cell.configure(with: quest)
+        
+        //0809 추가
+        let status = statusFor(quest)              // ← 상태 계산
+        cell.setStatus(status)                      // ← 카드뷰에 반영
+        cell.selectionStyle = (status == .done) ? .default : .none
         
         return cell
     }
@@ -177,9 +201,56 @@ class QuestListViewController: UIViewController, UITableViewDataSource, UITableV
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true) //0809 추가
+        
         let selectedQuest = quests[indexPath.row]
-        let memoryVC = MemoryViewController(regionName: selectedQuest.spotName) // ✅ 지역 이름 전달
-        tableView.deselectRow(at: indexPath, animated: true)
-          navigationController?.pushViewController(memoryVC, animated: true)
+        guard statusFor(selectedQuest) == .done else { return } //0809 추가
+        
+        let vc = ScenarioViewController(spotName: selectedQuest.spotName, showStartButton: false) //0809 추가
+           navigationController?.pushViewController(vc, animated: true)
+      
     }
+    
+    //0809 추가
+    func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+        let q = quests[indexPath.row]
+        return statusFor(q) == .done ? indexPath : nil
+        // ⛏ 저장값 기준으로 완료 여부 계산 (id/spotName 중 프로젝트에서 저장하는 키를 포함)
+       // let done = isDone(q)
+       // return done ? indexPath : nil     // 진행중이면 nil → 셀 선택 불가
+    }
+    
+    //0809 추가
+    private func isDone(_ quest: Quest) -> Bool {
+        let completed = Set(UserModel.shared.getQuestProgress())
+        // ⛏ 프로젝트마다 저장키가 다를 수 있어 둘 다 체크(안전)
+        return completed.contains(quest.spotName) 
+    }
+    
+    //0809 추가
+    /// 현재 진행 중(= 첫 미완료) 스팟의 인덱스 계산
+    private func currentIndexInOrder() -> Int? {
+        let completed = Set(UserModel.shared.getQuestProgress()) // 저장된 완료(spotName 기반)
+        // 순서대로 돌며 첫 미완료를 찾음
+        for (i, spot) in QUEST_ORDER_BY_SPOT.enumerated() {
+            if !completed.contains(spot) { return i }
+        }
+        return nil // 전부 완료
+    }
+
+    /// 개별 퀘스트의 표시 상태 결정
+    private func statusFor(_ quest: Quest) -> QuestStatus {
+        let completed = Set(UserModel.shared.getQuestProgress())
+        // 1) 이미 완료?
+        if completed.contains(quest.spotName) { return .done }
+
+        // 2) 진행전/진행중 판별(순차진행 규칙)
+        guard let cur = currentIndexInOrder(),
+              let idx = QUEST_ORDER_BY_SPOT.firstIndex(of: quest.spotName) else {
+            // 순서표에 없는 스팟은 보수적으로 '진행 전'
+            return .pending
+        }
+        return (idx == cur) ? .inProgress : .pending
+    }
+    
 }
