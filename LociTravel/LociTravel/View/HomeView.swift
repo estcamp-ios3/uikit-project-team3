@@ -96,7 +96,7 @@ class HomeView: UIView {
         ])
 
         // 시작 버튼 설정
-        startButton.setTitle("시작 하기", for: .normal)
+        startButton.setTitle("처음부터", for: .normal)
       //  startButton.titleLabel?.font = UIFont.systemFont(ofSize: 25, weight: .semibold)
         startButton.titleLabel?.font = UIFont(name: "BMEULJIRO", size: 30)
         startButton.setTitleColor(.brown, for: .normal)
@@ -104,6 +104,8 @@ class HomeView: UIView {
         startButton.backgroundColor = .systemBlue
        // startButton.setTitleColor(.white, for: .normal)
         startButton.layer.cornerRadius = 25
+        startButton.contentVerticalAlignment = .center      // 텍스트 기준 중앙 정렬
+    
         
         // 배경 이미지를 9-패치처럼 늘려쓰기 (모서리 보존용 inset 값은 이미지에 맞게 조정)
         let normalBG = UIImage(named: "homeviewStartButtonClear")?.resizableImage(
@@ -136,13 +138,14 @@ class HomeView: UIView {
         
         // 0806 로드 버튼 설정
         loadButton.setTitle("이어서 하기", for: .normal)
-        loadButton.titleLabel?.font = UIFont.systemFont(ofSize: 25, weight: .semibold)
-        startButton.setTitleColor(.brown, for: .normal)
-        startButton.setTitleColor(UIColor.brown.withAlphaComponent(0.7), for: .highlighted)
+        //loadButton.titleLabel?.font = UIFont.systemFont(ofSize: 25, weight: .semibold)
+        loadButton.titleLabel?.font = UIFont(name: "BMEULJIRO", size: 30)
+        loadButton.setTitleColor(UIColor.brown.withAlphaComponent(0.7), for: .highlighted)
         loadButton.backgroundColor = .systemBrown
-        loadButton.setTitleColor(.white, for: .normal) // 활성화 시 글자색
+        loadButton.setTitleColor(.brown, for: .normal) // 활성화 시 글자색
         loadButton.setTitleColor(.lightGray, for: .disabled)  // 비활성화 시 글자색
         loadButton.layer.cornerRadius = 25
+        loadButton.contentVerticalAlignment = .center      // 텍스트 기준 중앙 정렬
         
         // 항상 비활성화
         loadButton.isEnabled = false      // ← 이 라인이 터치와 동작을 완전히 막아줍니다.
