@@ -154,6 +154,6 @@ class ScenarioViewController: UIViewController {
     }
 }
 
-//#Preview{
-//    ScenarioViewController(spotName: "서동공원")
-//}
+#Preview{
+    ScenarioViewController(spotName: "서동공원")
+}

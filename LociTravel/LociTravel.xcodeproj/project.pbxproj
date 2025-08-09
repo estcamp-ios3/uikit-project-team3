@@ -150,6 +150,7 @@
 				DEVELOPMENT_TEAM = 6R3M7VGRP2;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LociTravel/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "이 앱은 사진 촬영을 위해 카메라 접근을 요청합니다.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -182,6 +183,7 @@
 				DEVELOPMENT_TEAM = 6R3M7VGRP2;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LociTravel/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "이 앱은 사진 촬영을 위해 카메라 접근을 요청합니다.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;

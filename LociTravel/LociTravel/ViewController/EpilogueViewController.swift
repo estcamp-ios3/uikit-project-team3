@@ -59,7 +59,15 @@ class EpilogueViewController: UIViewController {
         showNextDialogue()
     }
     
+    private func setupButtonActions() {
+        epilogueView.photoButton.addTarget(self, action: #selector(handlePhotoButtonTapped), for: .touchUpInside)
+    }
     
+    @objc private func handlePhotoButtonTapped() {
+        let cameraVC = CameraViewController()
+                    cameraVC.modalPresentationStyle = .fullScreen
+                    self.present(cameraVC, animated: true)
+    }
     private func showNextDialogue() {
         guard dialogueIndex < epilogueDialogues.count else {
             epilogueView.showEndButton()
@@ -101,7 +109,8 @@ class EpilogueViewController: UIViewController {
     private func navigateToRootView() {
         print("시작 화면으로 이동합니다.")
         navigationController?.popToRootViewController(animated: true)
-        UserModel.shared.clearAll()
+        
+        //UserModel.shared.clearAll()
     }
 }
 
