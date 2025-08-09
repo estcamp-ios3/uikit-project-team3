@@ -108,15 +108,72 @@ class ScenarioViewController: UIViewController {
         isMusicOn.toggle()
     }
 
+    // 컨트롤러 내부(ScenarioViewController 같은 곳)
+    enum Side { case left, right }
+
+    // 화자 배치 상태
+    var speakerSide: [String: Side] = [:]      // "서동" -> .left
+    var sideOccupant: [Side: String] = [:]     // .left -> "서동"
+    var lastSpokenAt: [String: Int] = [:]      // "서동" -> 마지막 대사 index
+
+    func ensureSide(for speaker: String) -> Side {
+        if let s = speakerSide[speaker] { return s }
+
+        // 빈 자리 먼저 할당: left -> right
+        if sideOccupant[.left] == nil {
+            speakerSide[speaker] = .left
+            sideOccupant[.left] = speaker
+            return .left
+        }
+        if sideOccupant[.right] == nil {
+            speakerSide[speaker] = .right
+            sideOccupant[.right] = speaker
+            return .right
+        }
+
+        // 둘 다 차있으면, 덜 최근에 말한 쪽을 교체
+        let leftName = sideOccupant[.left]!
+        let rightName = sideOccupant[.right]!
+        let leftLast = lastSpokenAt[leftName] ?? -1
+        let rightLast = lastSpokenAt[rightName] ?? -1
+
+        let replaceSide: Side = (leftLast <= rightLast) ? .left : .right
+        speakerSide.removeValue(forKey: sideOccupant[replaceSide]!)
+        sideOccupant[replaceSide] = speaker
+        speakerSide[speaker] = replaceSide
+        return replaceSide
+    }
+
     func updateDialogue() {
         let dialogue = dialogues[currentDialogueIndex]
+
+        // 라벨
         scenarioView.nameLabel.text = dialogue.speaker
         scenarioView.dialogueLabel.text = dialogue.line
-        scenarioView.characterImageView.image = UIImage(named: dialogue.speaker)
-        scenarioView.backgroundImageView.image = UIImage(named: story.scenarioImage)
-        
-        scenarioView.prevButton.isHidden = currentDialogueIndex == 0
 
+        // 배경
+        scenarioView.backgroundImageView.image = UIImage(named: story.scenarioImage)
+
+        // 화자 배치
+        let side = ensureSide(for: dialogue.speaker)
+        lastSpokenAt[dialogue.speaker] = currentDialogueIndex
+
+        // 좌/우 이미지 반영 (기본: speaker 이름 = 이미지 이름)
+        let leftName = sideOccupant[.left]
+        let rightName = sideOccupant[.right]
+
+        scenarioView.leftCharacterImageView.image  = leftName  != nil ? UIImage(named: leftName!)  : nil
+        scenarioView.rightCharacterImageView.image = rightName != nil ? UIImage(named: rightName!) : nil
+
+        // 강조(말하는 쪽만 1.0, 나머지 0.35)
+        let leftActive: Bool?  = (leftName  == nil) ? nil : (side == .left)
+        let rightActive: Bool? = (rightName == nil) ? nil : (side == .right)
+        UIView.animate(withDuration: 0.2) {
+            self.scenarioView.emphasize(leftActive: leftActive, rightActive: rightActive)
+        }
+
+        // 네비 버튼
+        scenarioView.prevButton.isHidden = (currentDialogueIndex == 0)
         if currentDialogueIndex == dialogues.count - 1 {
             scenarioView.nextButton.isHidden = true
             scenarioView.startQuestButton.isHidden = false
@@ -125,6 +182,7 @@ class ScenarioViewController: UIViewController {
             scenarioView.startQuestButton.isHidden = true
         }
     }
+
 
     @objc func prevDialogue() {
         guard currentDialogueIndex > 0 else { return }
@@ -144,16 +202,17 @@ class ScenarioViewController: UIViewController {
         navigationController?.pushViewController(questVC, animated: true)
     }
     
+    //추후에 퀴즈에 대한 힌트 화면 제공
     @objc func showDetailView() {
-        bgmPlayer?.stop()
-        let detailVC = SpotDetailViewController()
-        detailVC.spotName = spotName
-        navigationController?.pushViewController(detailVC, animated: true)
+        //bgmPlayer?.stop()
+        //let detailVC = SpotDetailViewController()
+        //detailVC.spotName = spotName
+        //navigationController?.pushViewController(detailVC, animated: true)
         //detailVC.modalPresentationStyle = .fullScreen
         //present(detailVC, animated: true)
     }
 }
 
 #Preview{
-    ScenarioViewController(spotName: "서동공원")
+    ScenarioViewController(spotName: "보석 박물관")
 }
