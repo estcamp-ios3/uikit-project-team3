@@ -132,7 +132,7 @@ class ScenarioView: UIView {
             dialogueBoxView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             dialogueBoxView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             dialogueBoxView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -8),
-            dialogueBoxView.heightAnchor.constraint(equalToConstant: 140),
+            dialogueBoxView.heightAnchor.constraint(equalToConstant: 200),
 
             nameLabel.topAnchor.constraint(equalTo: dialogueBoxView.topAnchor, constant: 16),
             nameLabel.leadingAnchor.constraint(equalTo: dialogueBoxView.leadingAnchor, constant: 20),

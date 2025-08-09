@@ -61,7 +61,7 @@ class HomeViewController: UIViewController {
     @objc private func didTapLoad() {
             //guard let p = UserModel.shared.progress else { return }
        
-        let vc = MapViewController(resumeMode: true)
+        let vc = MapViewController()
             navigationController?.pushViewController(vc, animated: true)
         }
 
