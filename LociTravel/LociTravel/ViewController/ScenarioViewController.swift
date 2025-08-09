@@ -17,13 +17,20 @@ class ScenarioViewController: UIViewController {
     var dialogues: [(speaker: String, line: String)]
     var currentDialogueIndex = 0
 
+    //0809 추가
+    // ✅ [추가] 컨트롤러가 '임무시작 버튼을 숨길지' 여부를 보관
+    private let showStartButton: Bool
+    
+    
     // MARK: - View
     private let scenarioView = ScenarioView()
 
-    init(spotName: String){
+    //0809 수정
+    init(spotName: String, showStartButton: Bool = true){
         self.spotName = spotName
         self.story = StoryModel.shared.getStories(spotName: spotName)
         self.dialogues = self.story.arrScenario
+        self.showStartButton = showStartButton
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -40,17 +47,45 @@ class ScenarioViewController: UIViewController {
         
         setupButtonActions()
         updateDialogue()
+        applyEntryMode() //0809 추가
+         updateDialogue() //0809 추가 ← 그 다음 현재 대사에 맞춰 토글
         playBackgroundMusic()
+        
+ 
 
         try? AVAudioSession.sharedInstance().setCategory(.playback)
         try? AVAudioSession.sharedInstance().setActive(true)
     }
+    
+    //0809 추가
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // 🔵 이 화면에서는 시스템 네비바 숨김(왼쪽 상단 Back 제거)
+        navigationController?.setNavigationBarHidden(true, animated: false)
+    }
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        // 0809 추가🔵 '뒤로가기(pop)'로 리스트로 돌아갈 때만 네비바 복구
+            if isMovingFromParent {
+                navigationController?.setNavigationBarHidden(false, animated: false)
+            }
         bgmPlayer?.stop()
     }
 
+
+    
+    // 0809 추가 ✅ 컨트롤러 클래스 내부에 있는 함수만 유지
+    private func applyEntryMode() {
+        // 버튼은 ScenarioView 안에 있으므로 scenarioView를 통해 접근
+        scenarioView.startQuestButton.isEnabled = showStartButton
+        // 숨김은 페이지(대사) 진행에 따라 updateDialogue에서 처리하도록 두고,
+        // 여기서는 '활성/비활성'만 고정해두면 깔끔합니다.
+    }
+    
+    
+    
+    
     private func setupButtonActions() {
         scenarioView.prevButton.addTarget(self, action: #selector(prevDialogue), for: .touchUpInside)
         scenarioView.nextButton.addTarget(self, action: #selector(nextDialogue), for: .touchUpInside)
@@ -176,7 +211,10 @@ class ScenarioViewController: UIViewController {
         scenarioView.prevButton.isHidden = (currentDialogueIndex == 0)
         if currentDialogueIndex == dialogues.count - 1 {
             scenarioView.nextButton.isHidden = true
-            scenarioView.startQuestButton.isHidden = false
+            
+            //0809 추가 수정
+            scenarioView.startQuestButton.isHidden = !showStartButton
+            scenarioView.startQuestButton.isEnabled = showStartButton
         } else {
             scenarioView.nextButton.isHidden = false
             scenarioView.startQuestButton.isHidden = true

@@ -41,10 +41,30 @@ class HomeViewController: UIViewController {
     
     //시작하기 버튼 함수
     @objc private func didTapStartButton() {
-        //let mapVC = MapViewController()
-        //0806 시작하기 버튼 클릭하면 PrologueView 화면으로 이동하게 만들기
-        let prologueVC = PrologueViewController()
-        navigationController?.pushViewController(prologueVC, animated: true)
+       //0809 추가
+        if UserModel.shared.hasResumeData {
+                let alert = UIAlertController(
+                    title: "새로 시작할까요?",
+                    message: "기존 진행이 초기화됩니다.",
+                    preferredStyle: .alert
+                )
+                alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+                alert.addAction(UIAlertAction(title: "시작하기", style: .destructive, handler: { _ in
+                    UserModel.shared.clearAll()   // or resetForNewRun(keepItems: true)
+                    let prologueVC = PrologueViewController()
+                    self.navigationController?.pushViewController(prologueVC, animated: true)
+                }))
+                present(alert, animated: true)
+                return
+            }
+        //0809 추가 (초기 실행 안전차원)
+         UserModel.shared.clearAll()
+           // ✅ 프롤로그부터 시작
+           let prologueVC = PrologueViewController()
+           navigationController?.pushViewController(prologueVC, animated: true)
+         
+           
+        
     }
     
     @objc private func updateLoadButtonState() {
