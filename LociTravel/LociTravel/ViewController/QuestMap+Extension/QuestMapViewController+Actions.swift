@@ -23,7 +23,7 @@ extension QuestMapViewController {
             bgmPlayer?.pause()
             questView.musicToggleButton.setImage(UIImage(systemName: "headphones.slash"), for: .normal)
         } else {
-            bgmPlayer?.play()
+            playBackgroundMusic()
             questView.musicToggleButton.setImage(UIImage(systemName: "headphones"), for: .normal)
         }
         isMusicOn.toggle()
