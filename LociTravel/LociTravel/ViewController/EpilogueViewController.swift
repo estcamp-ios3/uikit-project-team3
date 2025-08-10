@@ -65,11 +65,17 @@ class EpilogueViewController: UIViewController {
     
     @objc private func handlePhotoButtonTapped() {
         let overlay = UIImage(named: "bg")  // 투명 PNG 권장(없으면 nil)
-                CameraService.shared.present(from: self, overlay: overlay) { [weak self] image in
-                    // 합성된 결과 이미지 사용
-                    // self?.imageView.image = image
-                    // 또는 바로 공유/저장/다음 화면으로 전달
+        CameraService.shared.present(from: self, overlay: overlay) { [weak self] image in
+            // 저장 (커스텀 앨범에 넣고 싶으면 이름 지정)
+            PhotoSaver.save(image, toAlbum: "LociTravel") { result in
+                switch result {
+                case .success:
+                    self?.toast("사진이 저장되었어요 📸")
+                case .failure(let err):
+                    self?.showAlert(title: "저장 실패", message: err.localizedDescription)
                 }
+            }
+        }
     }
     
     private func showNextDialogue() {
