@@ -41,7 +41,8 @@ final class SpriteAnnotationView: MKAnnotationView {
         }
 
         canShowCallout = false
-        clusteringIdentifier = clusterId(for: npcAnn.npc.type) // 군집화 옵션
+        //clusteringIdentifier = clusterId(for: npcAnn.npc.type) // 군집화 옵션
+        clusteringIdentifier = nil
         displayPriority = .required
     }
 

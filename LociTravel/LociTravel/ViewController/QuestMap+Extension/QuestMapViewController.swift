@@ -11,7 +11,8 @@ final class QuestMapViewController: UIViewController, MKMapViewDelegate, CLLocat
     let quest: Quest
     let items: [Item]
     let assassin: Assassin?
-
+    var npcAnnotations: [NPCAnnotation] = []
+    
     // MARK: UI & Services
     let questView = QuestMapView()
     let locationManager = CLLocationManager()
@@ -84,6 +85,8 @@ final class QuestMapViewController: UIViewController, MKMapViewDelegate, CLLocat
         setupMap()
         setupItemsIfNeeded()
         setupAssassinIfNeeded()
+        registerNPCAnnotationView()   // ✅ 어노테이션 뷰 등록
+        addNPCsIfNeeded()             // ✅ 현재 spot의 NPC를 맵에 추가
         setupMoveButtonsIfDebug()
         playBackgroundMusic()
     }
@@ -96,5 +99,5 @@ final class QuestMapViewController: UIViewController, MKMapViewDelegate, CLLocat
 }
 
 #Preview {
-    QuestMapViewController(spotName: "서동시장")
+    QuestMapViewController(spotName: "왕궁리 유적")
 }

@@ -51,18 +51,18 @@ final class WorldModel {
                 name: "서동",
                 type: .questGiver,
                 spotName: "서동시장",
-                coordinate: .init(latitude: 35.954, longitude: 126.94),
+                coordinate: .init(latitude: 35.9533, longitude: 126.9574),
                 appearance: .init(imageName: "icon_seodong", size: CGSize(width: 52, height: 52), anchorBottom: true),
-                action: .startQuest(questName: "고구마 배달")
+                action: .dialogue(storyKey: "market_greeting")
             ),
             NPC(
-                id: "sunhwa-001",
+                id: "seonhwa-001",
                 name: "선화",
                 type: .questGiver,
                 spotName: "서동시장",
-                coordinate: .init(latitude: 35.95324, longitude: 126.95736),
+                coordinate: .init(latitude: 35.9542, longitude: 126.95736),
                 appearance: .init(imageName: "icon_seonhwa", size: CGSize(width: 52, height: 52), anchorBottom: true),
-                action: .startQuest(questName: "고구마 배달")
+                action: .dialogue(storyKey: "market_greeting")
             ),
             NPC(
                 id: "villager-101",
@@ -72,8 +72,97 @@ final class WorldModel {
                 coordinate: .init(latitude: 35.95319, longitude: 126.95745),
                 appearance: .init(imageName: "npc_villager_m1", size: nil, anchorBottom: true),
                 action: .dialogue(storyKey: "market_greeting")
-            )
-            // … 마을별로 추가
+            ),
+            
+            //보석 박물관
+            NPC(
+                id: "jinsapyung-001",
+                name: "진사평",
+                type: .questGiver,
+                spotName: "보석 박물관",
+                coordinate: .init(latitude: 35.989156, longitude: 127.105036),
+                appearance: .init(imageName: "icon_jinsapyung", size: CGSize(width: 52, height: 52), anchorBottom: true),
+                action: .dialogue(storyKey: "market_greeting")
+            ),
+            
+            //미륵사지
+            NPC(
+                id: "monk-001",
+                name: "승려",
+                type: .questGiver,
+                spotName: "미륵사지",
+                coordinate: .init(latitude:
+                                    36.012028, longitude: 127.030956),
+                appearance: .init(imageName: "icon_monk", size: CGSize(width: 52, height: 52), anchorBottom: true),
+                action: .dialogue(storyKey: "market_greeting")
+            ),
+            
+            //서동공원
+            NPC(
+                id: "seonhwa-002",
+                name: "선화",
+                type: .questGiver,
+                spotName: "서동공원",
+                coordinate: .init(latitude: 36.000866, longitude: 127.059637),
+                appearance: .init(imageName: "icon_seonhwa", size: CGSize(width: 52, height: 52), anchorBottom: true),
+                action: .dialogue(storyKey: "market_greeting")
+            ),
+            NPC(
+                id: "seodong-002",
+                name: "서동",
+                type: .questGiver,
+                spotName: "서동공원",
+                coordinate: .init(latitude: 36.001417, longitude: 127.056713),
+                appearance: .init(imageName: "icon_seodong", size: CGSize(width: 52, height: 52), anchorBottom: true),
+                action: .dialogue(storyKey: "market_greeting")
+            ),
+            NPC(
+                id: "jinsapyung-002",
+                name: "진사평",
+                type: .questGiver,
+                spotName: "서동공원",
+                coordinate: .init(latitude: 36.000988, longitude: 127.057641),
+                appearance: .init(imageName: "icon_jinsapyung", size: CGSize(width: 52, height: 52), anchorBottom: true),
+                action: .dialogue(storyKey: "market_greeting")
+            ),
+            
+            //왕궁리 유적
+            NPC(
+                id: "seonhwa-003",
+                name: "선화",
+                type: .questGiver,
+                spotName: "왕궁리 유적",
+                coordinate: .init(latitude: 35.972734, longitude: 127.054834),
+                appearance: .init(imageName: "icon_seonhwa", size: CGSize(width: 52, height: 52), anchorBottom: true),
+                action: .dialogue(storyKey: "market_greeting")
+            ),
+            NPC(
+                id: "seodong-003",
+                name: "서동",
+                type: .questGiver,
+                spotName: "왕궁리 유적",
+                coordinate: .init(latitude: 35.973008, longitude: 127.054612),
+                appearance: .init(imageName: "icon_seodong", size: CGSize(width: 52, height: 52), anchorBottom: true),
+                action: .dialogue(storyKey: "market_greeting")
+            ),
+            NPC(
+                id: "jinsapyung-003",
+                name: "진사평",
+                type: .questGiver,
+                spotName: "왕궁리 유적",
+                coordinate: .init(latitude: 35.973045, longitude: 127.054834),
+                appearance: .init(imageName: "icon_jinsapyung", size: CGSize(width: 52, height: 52), anchorBottom: true),
+                action: .dialogue(storyKey: "market_greeting")
+            ),
+            NPC(
+                id: "monk-003",
+                name: "승려",
+                type: .questGiver,
+                spotName: "왕궁리 유적",
+                coordinate: .init(latitude: 35.973042, longitude: 127.054671),
+                appearance: .init(imageName: "icon_monk", size: CGSize(width: 52, height: 52), anchorBottom: true),
+                action: .dialogue(storyKey: "market_greeting")
+            ),
         ]
     }
 

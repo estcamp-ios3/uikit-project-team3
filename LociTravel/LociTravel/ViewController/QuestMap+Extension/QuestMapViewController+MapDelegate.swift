@@ -17,11 +17,11 @@ extension QuestMapViewController {
     }
     
     // 어노테이션 추가
-    func addNPCsIfNeeded() {
-        let npcs = WorldModel.shared.npcs(in: spotName)
-        let annos = npcs.map { NPCAnnotation(npc: $0) }
-        questView.mapView.addAnnotations(annos)
-    }
+//    func addNPCsIfNeeded() {
+//        let npcs = WorldModel.shared.npcs(in: spotName)
+//        let annos = npcs.map { NPCAnnotation(npc: $0) }
+//        questView.mapView.addAnnotations(annos)
+//    }
     
     // Annotations
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
@@ -108,16 +108,17 @@ extension QuestMapViewController {
     }
     
     func presentStory(for key: String) {
-        guard let storyViewController = storyboard?.instantiateViewController(withIdentifier: "ScenarioViewController") as? ScenarioViewController else { return }
+        //guard let storyViewController = storyboard?.instantiateViewController(withIdentifier: "ScenarioViewController") as? ScenarioViewController else { return }
         //storyViewController.storyKey = key
-        navigationController?.pushViewController(storyViewController, animated: true)
+        //navigationController?.pushViewController(storyViewController, animated: true)
+        self.toast("아직 준비 중 입니다")
     }
     
     func startQuest(named name: String) {
-        
+        self.toast("아직 준비 중 입니다")
     }
     
     func presentShop(id: String) {
-        
+        self.toast("아직 준비 중 입니다")
     }
 }
