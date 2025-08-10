@@ -7,6 +7,9 @@
 
 import UIKit
 
+//0809 추가
+enum QuestStatus { case inProgress, pending, done }
+
 class QuestCardView: UITableViewCell {
     static let identifier = "QuestCardView"
     
@@ -47,6 +50,14 @@ class QuestCardView: UITableViewCell {
         setupUI()
         
     }
+    
+    //0809 추가
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        // 기본은 '진행 중' 모양으로 초기화 (컨트롤러가 곧 setStatus로 덮어씀)
+        setStatus(.inProgress)
+    }
+    
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -125,23 +136,29 @@ class QuestCardView: UITableViewCell {
             descriptionLabel.numberOfLines = 2
         }
         
-
-    
-    
     
     /// Quest 모델을 받아 화면 업데이트
     func configure(with quest: Quest) {
         titleLabel.text = quest.questName
         descriptionLabel.text = quest.questDetail
-        
-        if quest.isCompleted {
-            completeStatusLabel.text = "완료"
-            completeStatusLabel.textColor = .systemGreen
-            statusDotView.backgroundColor = .systemGreen
-        } else {
+    }
+    
+    //0809 추가
+    // ⬇️ 클래스 내부에 추가: 점/라벨 색과 텍스트만 바꿔주는 전담 메서드
+    func setStatus(_ status: QuestStatus) {
+        switch status {
+        case .inProgress:
             completeStatusLabel.text = "진행 중"
             completeStatusLabel.textColor = .systemOrange
             statusDotView.backgroundColor = .systemOrange
+        case .pending:
+                completeStatusLabel.text = "진행 전"
+                completeStatusLabel.textColor = .systemRed
+                statusDotView.backgroundColor = .systemRed
+        case .done:
+            completeStatusLabel.text = "완료"
+            completeStatusLabel.textColor = .systemGreen
+            statusDotView.backgroundColor = .systemGreen
         }
     }
     

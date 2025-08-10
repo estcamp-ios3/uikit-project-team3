@@ -1,196 +1,77 @@
-//
-//  MapViewController.swift
-//  LociTravel
-//
-//  Created by suji chae on 8/5/25.
-//
-
 import UIKit
 import MapKit
 
-class MapViewController: UIViewController {
-    
+final class MapViewController: UIViewController {
+
     private let customMapView = MapView()
-    // 완료된 퀘스트를 저장할 Set 변수 추가
-    private var completedQuests: Set<String> = []
-    
-    private var questProgress: [String] = []
-    
-    // ⛏ FIX: 신호용 플래그 추가
+
+    // 퀘스트 순서
+    private let questOrder = ["서동시장", "보석 박물관", "미륵사지", "서동공원", "왕궁리 유적"]
+
+    // 이어하기 플래그
     private var resumeMode = false
     
-    // ✅ 마지막 진행 상태를 전달받기 위한 선택적 저장소
-    private var bootProgress: GameProgress?
+    //0809추가 ✅ 완료 뱃지 식별 태그(중복 추가 방지용)
+       private let COMPLETION_BADGE_TAG = 9001
+    //0809추가 ✅ 버튼 <-> 퀘스트명 매핑
+       //0809추가    ⬇️ 여기 “버튼 참조”는 실제 MapView의 아울렛 이름으로 교체하세요.
+       private lazy var questButtons: [(name: String, button: UIButton)] = [
+           (name: "서동시장",   button: customMapView.seodongMarketButton),
+           (name: "보석 박물관", button: customMapView.jewelryButton),
+           (name: "미륵사지",   button: customMapView.mireuksaButton),
+           (name: "서동공원",   button: customMapView.seodongParkButton),
+           (name: "왕궁리 유적", button: customMapView.wanggungriButton)
+       ]
     
     
-    // ⛏ FIX: 이어하기용 생성자 추가
-    convenience init(resumeMode: Bool) {
-        self.init(nibName: nil, bundle: nil)
-        self.resumeMode = resumeMode
-    }
-    
-    
-    // 퀘스트 순서를 정의합니다.
-    private let questOrder: [String] = ["서동시장", "보석 박물관", "미륵사지", "서동공원", "왕궁리 유적"]
-    
-    private var isQuestCompleted = true // 임시 상태
-    
-    
-    override func loadView() {
-        view = customMapView
-    }
-    
+
+    // MARK: - Life Cycle
+    override func loadView() { view = customMapView }
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         setupButtonActions()
+        setupTopMenu()
         
-        configureOptionMenu()
-        
-        // ✅ 진행 상태 바뀌면 버튼 상태 갱신
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(onProgressChanged),
-                                               name: .progressDidChange,
-                                               object: nil)
+        //0809추가 🔔 진행도 변경 시 버튼 상태 다시 그리기
+                NotificationCenter.default.addObserver(self,
+                    selector: #selector(onProgressChanged),
+                    name: .progressDidChange, object: nil)
+
+        // 버튼 액션 연결
+        customMapView.connectOptionButton(target: self, action: #selector(didTapOptionButton))
+        customMapView.connectCameraButton(target: self, action: #selector(didTapCameraButton))
     }
-    
-    
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
         navigationController?.setNavigationBarHidden(true, animated: false)
-        
-        
-        // ✅ 디스크/싱글톤에서 최신 진행 불러와 버튼 상태 반영
-        questProgress = UserModel.shared.getQuestProgress()
-        updateButtonStates()
-        
-        
+        refreshUIFromProgress()  // ✅ 진행 반영은 여기 '한 곳'에서만
+        updateQuestButtonsUI() // 0809추가✅ 화면 복귀 시 항상 최신 반영
     }
-    
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
-        //⛏ FIX: 부울 플래그로 분기
         if resumeMode {
-            resumeMode = false  // 재호출 방지
+            resumeMode = false
             if let next = nextUnclearedQuest() {
                 pushScenario(for: next)
-            } else {
-                // 모두 완료 시 처리
             }
         }
     }
-    
-    
-    
-    
-    // 2) 다음 미완료 퀘스트 찾기 함수 추가
-    // 🔧 추가
-    private func nextUnclearedQuest() -> String? {
-        let completed = Set(UserModel.shared.getQuestProgress())
-        return questOrder.first { !completed.contains($0) }
-        
-    }
-    
-    // MARK: - UIMenu 설정 (새로 추가)
-    
-    private func configureOptionMenu() {
-        
-        // 1️⃣ 에셋 이름을 실제 이미지 이름으로 수정하세요 추후 에셋에 이미지업로드한 이름 사용
+
+    // MARK: - UI 구성
+    private func setupTopMenu() {
         let journalIcon = UIImage(named: "questlisticon")
         let recordIcon  = UIImage(named: "recordbookicon")
-        
-        // 2️⃣ UIAction 생성 시 title과 image를 지정
-        let journalAction = UIAction(title: "탐험일지", image: journalIcon) { [weak self] _ in
-            self?.showJournal()
-        }
-        let recordAction = UIAction(title: "리코드북", image: recordIcon) { [weak self] _ in
-            self?.showRecordBook()
-        }
-        
-        // 3️⃣ 메뉴 생성 후 버튼에 연결
-        let menu = UIMenu(title: "",
-                          options: .displayInline,    // 메뉴 옵션: 인라인으로 표시
-                          children: [journalAction, recordAction])
-        customMapView.optionButton.menu = menu
-        customMapView.optionButton.showsMenuAsPrimaryAction = true
-        
+
+        let journal = UIAction(title: "탐험일지", image: journalIcon) { [weak self] _ in self?.showJournal() }
+        let record  = UIAction(title: "리코드북", image: recordIcon) { [weak self] _ in self?.showRecordBook() }
+
+        let menu = UIMenu(title: "", options: .displayInline, children: [journal, record])
+        customMapView.setOptionMenu(menu)
     }
-    
-    
-    
-    
-    /// '탐험일지' 선택 시 퀘스트 목록 화면으로 이동
-    @objc private func showJournal() {
-        let journalVC = QuestListViewController()
-        self.navigationController?.pushViewController(journalVC,
-                                                      animated: true)
-    }
-    
-    /// '리코드북' 선택 시 스팟 상세 화면으로 이동
-    @objc private func showRecordBook() {
-        let recordVC = SpotDetailViewController()
-        
-        // ✅ [추가] SpotDetailViewController는 spotName이 없으면 바로 pop 됩니다.
-        //    그래서 최소 한 개의 유효한 스팟 이름을 넘겨줘야 합니다.
-        //    최근 진행한 스팟이 있으면 그걸, 없으면 기본값으로 "서동시장".
-        let lastVisited = UserModel.shared.getQuestProgress().last
-        recordVC.spotName = lastVisited ?? "서동시장"
-        
-        self.navigationController?.pushViewController(recordVC,
-                                                      animated: true)
-    }
-    
-    
-    
-    
-    private func updateButtonStates() {
-        let completedQuests = Set(UserModel.shared.getQuestProgress())
-        
-        for (index, questName) in questOrder.enumerated() {
-            let button: UIButton
-            
-            switch questName {
-            case "서동시장":
-                button = customMapView.seodongMarketButton
-            case "보석 박물관":
-                button = customMapView.jewelryButton
-            case "미륵사지":
-                button = customMapView.mireuksaButton
-            case "서동공원":
-                button = customMapView.seodongParkButton
-            case "왕궁리 유적":
-                button = customMapView.wanggungriButton
-            default:
-                continue
-            }
-            
-            
-            let isCompleted = completedQuests.contains(questName)
-            let prevDone = (index == 0) ? true : completedQuests.contains(questOrder[index - 1])
-            
-            // ✅ 규칙:
-            // - 완료된 퀘스트: 비활성
-            // - 미완료 + 직전 완료: 활성 (즉 "다음 퀘스트"만 활성)
-            // - 그 외: 비활성
-            let shouldEnable = isCompleted || (!isCompleted && prevDone)
-            
-            button.isEnabled = shouldEnable
-            button.alpha = shouldEnable ? 1.0 : 0.3
-        }
-    }
-    
-    @objc private func onProgressChanged() {
-        questProgress = UserModel.shared.getQuestProgress()
-        updateButtonStates()
-    }
-    
-    
-    
-    
-    
+
     private func setupButtonActions() {
         customMapView.backButton.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
         customMapView.seodongParkButton.addTarget(self, action: #selector(didTapParkButton), for: .touchUpInside)
@@ -199,86 +80,143 @@ class MapViewController: UIViewController {
         customMapView.mireuksaButton.addTarget(self, action: #selector(didTapMireuksaButton), for: .touchUpInside)
         customMapView.seodongMarketButton.addTarget(self, action: #selector(didTapMarketButton), for: .touchUpInside)
     }
-    
-    private func optionButtonActions() {
-        customMapView.optionButton.addTarget(self, action: #selector(didTapOptionButton), for: .touchUpInside)
+
+    // MARK: - 진행 상태 기반 UI 갱신 (단일 소스)
+    private func refreshUIFromProgress() {
+        let completed = Set(UserModel.shared.getQuestProgress())
+
+        // 카메라 버튼 표시: 모든 퀘스트 완료 시
+        let allCleared = questOrder.allSatisfy { completed.contains($0) }
+        customMapView.setCameraButtonVisible(allCleared)
+
+        // 각 퀘스트 버튼 활성 규칙:
+        // - 완료된 퀘스트: 활성
+        // - 미완료 && 직전 완료: 활성 (즉 “다음 퀘스트” 1개만 열리게)
+        // - 그 외: 비활성
+        var states: [String: Bool] = [:]
+        for (idx, name) in questOrder.enumerated() {
+            let done = completed.contains(name)
+            let prevDone = (idx == 0) ? true : completed.contains(questOrder[idx-1])
+            states[name] = done || (!done && prevDone)
+        }
+        customMapView.applyQuestButtonStates(states)
     }
-    
-    @objc private func didTapOptionButton() {
+
+    // 진행 보조
+    private func nextUnclearedQuest() -> String? {
+        let completed = Set(UserModel.shared.getQuestProgress())
+        return questOrder.first { !completed.contains($0) }
     }
-    
+
+    // MARK: - Actions
+    @objc private func didTapOptionButton() { /* 필요 시 추가 */ }
+
     @objc private func didTapBackButton() {
         navigationController?.popToRootViewController(animated: true)
-        print("back button")
     }
-    
-    
-    @objc private func didTapMarketButton() {
-        print("seodong market button")
-        let scenarioVC = ScenarioViewController(spotName: "서동시장")
-        navigationController?.pushViewController(scenarioVC, animated: true)
+
+    @objc private func didTapCameraButton() {
+        let overlay = UIImage(named: "bg")  // 투명 PNG 권장(없으면 nil)
+        CameraService.shared.present(from: self, overlay: overlay) { [weak self] image in
+            // 저장 (커스텀 앨범에 넣고 싶으면 이름 지정)
+            PhotoSaver.save(image, toAlbum: "LociTravel") { result in
+                switch result {
+                case .success:
+                    self?.toast("사진이 저장되었어요 📸")
+                case .failure(let err):
+                    self?.showAlert(title: "저장 실패", message: err.localizedDescription)
+                }
+            }
+        }
     }
+
+    @objc private func didTapMarketButton()   { pushScenario(for: "서동시장") }
+    @objc private func didTapJewelryButton()  { pushScenario(for: "보석 박물관") }
+    @objc private func didTapMireuksaButton() { pushScenario(for: "미륵사지") }
+    @objc private func didTapParkButton()     { pushScenario(for: "서동공원") }
+    @objc private func didTapWanggungriButton(){ pushScenario(for: "왕궁리 유적") }
     
-    @objc private func didTapJewelryButton() {
-        print("jewelry button")
-        let scenarioVC = ScenarioViewController(spotName: "보석 박물관")
-        navigationController?.pushViewController(scenarioVC, animated: true)
+    //0809 추가 MARK: - 완료 뱃지 + 비활성화 반영
+        @objc private func updateQuestButtonsUI() {
+            let completed = Set(UserModel.shared.getQuestProgress()) // ⬅️ 완료된 퀘스트명 배열을 반환한다고 가정
+
+            questButtons.forEach { entry in
+                let isDone = completed.contains(entry.name)
+                applyCompletionUI(to: entry.button, completed: isDone)
+            }
+        }
+    //0809 추가
+    @objc private func onProgressChanged() {
+        // ⛏ FIX(초보자용): 진행도 바뀌면
+        // 1) 순차진행 규칙(어떤 버튼을 열지/닫을지) 먼저 반영하고
+        // 2) 완료 뱃지/비활성화를 덧씌웁니다.
+        refreshUIFromProgress()
+        updateQuestButtonsUI()
     }
-    
-    @objc private func didTapMireuksaButton() {
-        print("mireuksa button")
-        let scenarioVC = ScenarioViewController(spotName: "미륵사지")
-        navigationController?.pushViewController(scenarioVC, animated: true)
-    }
-    
-    @objc private func didTapParkButton() {
-        print("seodong park button")
-        let scenarioVC = ScenarioViewController(spotName: "서동공원")
-        navigationController?.pushViewController(scenarioVC, animated: true)
-    }
-    
-    @objc private func didTapWanggungriButton() {
-        print("wanggungri button")
-        let scenarioVC = ScenarioViewController(spotName: "왕궁리 유적")
-        navigationController?.pushViewController(scenarioVC, animated: true)
-    }
-    
-    
-    /// 스팟 이름 → 해당 시나리오 화면으로 이동(중복 코드 제거)
+
+        private func applyCompletionUI(to button: UIButton, completed: Bool) {
+            if completed {
+                // 1) 터치 차단
+                button.isEnabled = false
+                // 2) 비주얼 약하게
+                button.alpha = 0.5
+                // 3) “완료됨” 뱃지 추가(중복 방지)
+                addCompletionBadge(above: button)
+            } else {
+                // 되돌리기
+//                button.isEnabled = true
+//                button.alpha = 1.0
+                removeCompletionBadge(above: button)
+            }
+        }
+
+        // MARK: - “완료됨” 뱃지
+        private func addCompletionBadge(above button: UIView) {
+            // 이미 있으면 패스
+            if let _ = button.superview?.viewWithTag(COMPLETION_BADGE_TAG + button.hashValue) { return }
+
+            let label = UILabel() // ⬅️ 아래에 정의한 패딩 라벨 사용(없으면 UILabel로 대체 가능)
+            label.text = "완료!"
+            label.font = .systemFont(ofSize: 15, weight: .semibold)
+            label.textColor = .white
+            label.backgroundColor = UIColor.systemCyan
+            label.layer.cornerRadius = 8
+            label.layer.masksToBounds = true
+            label.translatesAutoresizingMaskIntoConstraints = false
+            label.tag = COMPLETION_BADGE_TAG + button.hashValue
+
+            // 🔧 부모: 버튼의 슈퍼뷰에 붙이면 지도 위 배치가 자연스러움
+            guard let container = button.superview else { return }
+            container.addSubview(label)
+
+            // ⛏ 오토레이아웃: 버튼 위 4pt, 가운데 정렬
+            NSLayoutConstraint.activate([
+                label.bottomAnchor.constraint(equalTo: button.topAnchor, constant: -4),
+                label.centerXAnchor.constraint(equalTo: button.centerXAnchor)
+            ])
+        }
+
+        private func removeCompletionBadge(above button: UIView) {
+            let tag = COMPLETION_BADGE_TAG + button.hashValue
+            button.superview?.viewWithTag(tag)?.removeFromSuperview()
+        }
+
     private func pushScenario(for spot: String) {
-        let scenarioVC = ScenarioViewController(spotName: spot)
-        navigationController?.pushViewController(scenarioVC, animated: true)
+        let vc = ScenarioViewController(spotName: spot)
+        navigationController?.pushViewController(vc, animated: true)
     }
-    
-    deinit {
-        NotificationCenter.default.removeObserver(self)
+
+    // 서브 화면
+    private func showJournal() {
+        navigationController?.pushViewController(QuestListViewController(), animated: true)
     }
-    
-    
-    
-    
+    private func showRecordBook() {
+        let vc = SpotDetailViewController()
+        vc.spotName = UserModel.shared.getQuestProgress().last ?? "서동시장"
+        navigationController?.pushViewController(vc, animated: true)
+    }
 }
 
-
-
-
-//#Preview {
-//    MapViewController()
-//}
-
-
-#Preview {
-    // 1. 임시로 모든 퀘스트를 완료 상태로 만듭니다.
-    UserModel.shared.clearAll() // 기존 데이터 초기화 (선택 사항)
-    UserModel.shared.addQuestProgress("서동시장")
-    UserModel.shared.addQuestProgress("보석 박물관")
-    UserModel.shared.addQuestProgress("미륵사지")
-    UserModel.shared.addQuestProgress("서동공원")
-    
-    // 2. MapViewController를 생성합니다.
-    let mapVC = MapViewController()
-    
-    // 3. 네비게이션 컨트롤러에 담아 반환합니다.
-    return UINavigationController(rootViewController: mapVC)
+#Preview{
+    MapView()
 }
-

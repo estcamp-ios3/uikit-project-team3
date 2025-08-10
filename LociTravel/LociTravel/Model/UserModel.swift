@@ -12,6 +12,14 @@ extension Notification.Name {
     static let progressDidChange = Notification.Name("UserModel.progressDidChange")
 }
 
+// 0809추가: 탐험일지에서 완료 여부 빠르게 확인할 때 사용
+extension UserModel {
+    /// 저장된 진행 목록에 해당 id가 있으면 true
+    func isQuestCompleted(_ id: String) -> Bool {
+        return Set(getQuestProgress()).contains(id)
+    }
+}
+
 extension UserModel {
     /// 저장된 진행이 하나라도 있으면 true
     var hasResumeData: Bool {
@@ -59,6 +67,7 @@ class UserModel {
           guard !questProgress.contains(id) else { return }
           questProgress.append(id)
           saveQuests()
+          postProgressDidChange()   // 0809추가 ✅ 완료 직후 화면 갱신 알림
       }
 
       /// 아이템 추가(즉시 저장)
@@ -80,6 +89,7 @@ class UserModel {
           items.removeAll()
           saveQuests()
           saveItems()
+          postProgressDidChange()   // 0809추가 ✅ 전체 초기화 후에도 알림
       }
 
       /// 팀원이 쓰고 있을 수 있는 읽기 함수들(그대로 둬도 됨)
@@ -128,6 +138,12 @@ class UserModel {
           loadItems()
           loadProgress()
       }
+    
+    // 0809추가: 진행 변경을 구독 화면(맵/탐험일지)에 알려주는 공통 함수
+    private func postProgressDidChange() {
+        NotificationCenter.default.post(name: .progressDidChange, object: nil)
+    }
+    
   }
     
     

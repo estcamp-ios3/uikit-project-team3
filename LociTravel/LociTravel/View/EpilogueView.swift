@@ -14,6 +14,7 @@ class EpilogueView: UIView {
     let skipButton = UIButton(type: .system)
     let fastForwardButton = UIButton(type: .system)
     let endButton = UIButton(type: .system)
+    let photoButton = UIButton(type: .system) //기념사진촬영 버튼
     
     let backgroundImageView = UIImageView()
     let storyImageView = UIImageView()
@@ -26,7 +27,6 @@ class EpilogueView: UIView {
     var onSkipButtonTapped: (() -> Void)?
     var onFastForwardButtonTapped: (() -> Void)?
     var onEndButtonTapped: (() -> Void)?
-    
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -92,11 +92,40 @@ class EpilogueView: UIView {
         endButton.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
         endButton.translatesAutoresizingMaskIntoConstraints = false
         endButton.isHidden = true
-        
+
+        // 🎯 기념 촬영 버튼 스타일 설정
+        // 기념 촬영 버튼 추가
+        photoButton.setTitle(" 기념 촬영", for: .normal) // 앞에 공백을 넣어 글자와 아이콘 간격 확보
+        photoButton.setTitleColor(.white, for: .normal)
+        photoButton.backgroundColor = .systemGreen
+        photoButton.layer.cornerRadius = 25
+        photoButton.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
+        photoButton.translatesAutoresizingMaskIntoConstraints = false
+
+        // 📷 카메라 아이콘 추가 (SF Symbols)
+        let cameraImage = UIImage(systemName: "camera.fill")
+        photoButton.setImage(cameraImage, for: .normal)
+        photoButton.tintColor = .white // 아이콘 색상
+        photoButton.imageView?.contentMode = .scaleAspectFit
+
+        // 이미지와 텍스트 간격 조정
+        photoButton.semanticContentAttribute = .forceLeftToRight
+        photoButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: -5, bottom: 0, right: 5)
+
+        photoButton.isHidden = true
+                
         addSubview(label)
         addSubview(skipButton)
         addSubview(fastForwardButton)
-        addSubview(endButton)
+        
+        // 📌 버튼들을 담을 StackView
+        let bottomButtonStack = UIStackView(arrangedSubviews: [endButton, photoButton])
+        bottomButtonStack.axis = .horizontal
+        bottomButtonStack.spacing = 20
+        bottomButtonStack.alignment = .center
+        bottomButtonStack.distribution = .equalSpacing
+        bottomButtonStack.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(bottomButtonStack)
         
         // 레이블 위치 제약 조건 정의
         labelCenterYConstraint = label.centerYAnchor.constraint(equalTo: centerYAnchor)
@@ -127,9 +156,14 @@ class EpilogueView: UIView {
             fastForwardButton.widthAnchor.constraint(equalToConstant: 90),
             fastForwardButton.heightAnchor.constraint(equalToConstant: 30),
             
-            endButton.centerXAnchor.constraint(equalTo: centerXAnchor),
-            endButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -50),
-            endButton.widthAnchor.constraint(equalToConstant: 180),
+            // 📌 하단 버튼 스택 가운데 정렬
+            bottomButtonStack.centerXAnchor.constraint(equalTo: centerXAnchor),
+            bottomButtonStack.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -50),
+            
+            photoButton.widthAnchor.constraint(equalToConstant: 140),
+            photoButton.heightAnchor.constraint(equalToConstant: 50),
+            
+            endButton.widthAnchor.constraint(equalToConstant: 140),
             endButton.heightAnchor.constraint(equalToConstant: 50)
         ])
         
@@ -140,7 +174,6 @@ class EpilogueView: UIView {
         fastForwardButton.addTarget(self, action: #selector(didTapFastForwardButton), for: .touchUpInside)
         endButton.addTarget(self, action: #selector(didTapEndButton), for: .touchUpInside)
     }
-    
     
     @objc private func didTapSkipButton() {
         onSkipButtonTapped?()
@@ -209,6 +242,7 @@ class EpilogueView: UIView {
     
     func showEndButton() {
         endButton.isHidden = false
+        photoButton.isHidden = false
         showButtons(false)
     }
 }
