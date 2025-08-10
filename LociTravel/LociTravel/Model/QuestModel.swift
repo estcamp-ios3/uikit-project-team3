@@ -47,9 +47,6 @@ final class QuestModel {
 
     private init() {
         quests = [
-            Quest(spotName: "없음",
-                  questName: "없음", questDetail: "없음",
-                  bgm: "없음", isCompleted: false),
             Quest(spotName: "서동시장",
                   questName: "고구마 배달", questDetail: "시장 상인들에게 고구마를 배달하라",
                   bgm: "motivity", isCompleted: false),

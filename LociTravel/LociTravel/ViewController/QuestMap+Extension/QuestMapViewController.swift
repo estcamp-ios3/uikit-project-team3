@@ -78,6 +78,7 @@ final class QuestMapViewController: UIViewController, MKMapViewDelegate, CLLocat
 
         questView.titleLabel.text = "퀘스트: \(quest.questName)"
         questView.descriptionLabel.text = quest.questDetail
+        questView.mapView.register(SpriteAnnotationView.self, forAnnotationViewWithReuseIdentifier: SpriteAnnotationView.reuseId)
 
         setupActions()
         setupMap()
@@ -95,5 +96,5 @@ final class QuestMapViewController: UIViewController, MKMapViewDelegate, CLLocat
 }
 
 #Preview {
-    QuestMapViewController(spotName: "보석 박물관")
+    QuestMapViewController(spotName: "서동시장")
 }
