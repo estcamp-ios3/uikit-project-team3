@@ -32,6 +32,9 @@ final class MapView: UIView {
     let seodongParkLabel   = UILabel()
     let wanggungriLabel    = UILabel()
 
+    //로키 이미지
+    let lokiImageView = UIImageView()
+    
     // 진행도(텍스트)
     let progressLabel = UILabel()
 
@@ -136,12 +139,16 @@ final class MapView: UIView {
         progressLabel.textColor = .white
         progressLabel.font = .systemFont(ofSize: 22, weight: .bold)
         progressLabel.textAlignment = .center
+        
+        // 로키 이미지 설정
+        lokiImageView.image = UIImage(named: "mapview_loki")
+        lokiImageView.contentMode = .scaleAspectFit
 
         // Add subviews
         [mapImageView, backButton,
          seodongParkButton, wanggungriButton, jewelryButton, mireuksaButton, seodongMarketButton,
          seodongMarketLabel, jewelryLabel, mirueksaLabel, seodongParkLabel, wanggungriLabel,
-         topRightBar, progressLabel].forEach { addSubview($0); $0.translatesAutoresizingMaskIntoConstraints = false }
+         topRightBar, progressLabel, lokiImageView].forEach { addSubview($0); $0.translatesAutoresizingMaskIntoConstraints = false }
 
         // Constraints
         NSLayoutConstraint.activate([
@@ -164,6 +171,12 @@ final class MapView: UIView {
             progressLabel.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 10),
             progressLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
             progressLabel.heightAnchor.constraint(equalToConstant: 30),
+            
+            // loki
+            lokiImageView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -5),
+            lokiImageView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: 65),
+                lokiImageView.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 0.4),  // 기존 0.8 -> 0.45
+                lokiImageView.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 0.45) // 기존 0.6 -> 0.35
         ])
 
         // Ensure buttons don't stretch

@@ -113,9 +113,9 @@ class HomeView: UIView {
         
         NSLayoutConstraint.activate([
             startButton.centerXAnchor.constraint(equalTo: centerXAnchor),
-            startButton.bottomAnchor.constraint(equalTo: loadButton.topAnchor, constant: 60),
+            startButton.bottomAnchor.constraint(equalTo: loadButton.topAnchor, constant: 80),
             startButton.widthAnchor.constraint(equalToConstant: 200),
-            startButton.heightAnchor.constraint(equalToConstant: 160)
+            startButton.heightAnchor.constraint(equalToConstant: 180)
         ])
         
         /*
@@ -140,7 +140,7 @@ class HomeView: UIView {
             loadButton.centerXAnchor.constraint(equalTo: centerXAnchor),
             loadButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -20),
             loadButton.widthAnchor.constraint(equalToConstant: 200),
-            loadButton.heightAnchor.constraint(equalToConstant: 160)
+            loadButton.heightAnchor.constraint(equalToConstant: 180)
         ])
     }
 }

@@ -99,5 +99,5 @@ final class QuestMapViewController: UIViewController, MKMapViewDelegate, CLLocat
 }
 
 #Preview {
-    QuestMapViewController(spotName: "왕궁리 유적")
+    QuestMapViewController(spotName: "서동시장")
 }

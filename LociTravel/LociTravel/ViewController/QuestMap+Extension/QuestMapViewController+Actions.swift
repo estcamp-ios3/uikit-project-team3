@@ -8,10 +8,11 @@ extension QuestMapViewController {
     }
 
     @objc func showDetailView() {
-        bgmPlayer?.stop()
-        let vc = SpotDetailViewController()
-        vc.spotName = spotName
-        present(vc, animated: true)
+//        bgmPlayer?.stop()
+//        let vc = SpotDetailViewController()
+//        vc.spotName = spotName
+//        present(vc, animated: true)
+        self.toast("힌트가 나올 예정입니다. 😁")
     }
 
     @objc func close() {

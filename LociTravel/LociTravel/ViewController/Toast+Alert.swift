@@ -23,7 +23,8 @@ extension UIViewController {
         let textSize = toastLabel.sizeThatFits(CGSize(width: self.view.frame.width - 40, height: CGFloat.greatestFiniteMagnitude))
         toastLabel.frame = CGRect(
             x: 20,
-            y: self.view.frame.height - textSize.height - 100,
+            y: self.view.frame.height * 0.5,
+//            y: self.view.frame.height - textSize.height - 100,
             width: self.view.frame.width - 40,
             height: textSize.height + 16
         )

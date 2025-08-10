@@ -233,7 +233,6 @@ class ScenarioViewController: UIViewController {
         currentDialogueIndex += 1
         updateDialogue()
     }
-
     @objc func startQuest() {
         bgmPlayer?.stop()
         let questVC = QuestMapViewController(spotName: spotName)
@@ -248,6 +247,7 @@ class ScenarioViewController: UIViewController {
         //navigationController?.pushViewController(detailVC, animated: true)
         //detailVC.modalPresentationStyle = .fullScreen
         //present(detailVC, animated: true)
+        self.toast("힌트가 제공될 예정입니다. 😁")
     }
 }
 

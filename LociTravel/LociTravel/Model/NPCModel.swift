@@ -69,7 +69,7 @@ final class WorldModel {
                 name: "아주머니1",
                 type: .villager,
                 spotName: "서동시장",
-                coordinate: .init(latitude: 35.95319, longitude: 126.95745),
+                coordinate: .init(latitude: 35.95369, longitude: 126.95745),
                 appearance: .init(imageName: "icon_woman1", size: nil, anchorBottom: true),
                 action: .dialogue(storyKey: "market_greeting")
             ),
@@ -78,7 +78,7 @@ final class WorldModel {
                 name: "아주머니2",
                 type: .villager,
                 spotName: "서동시장",
-                coordinate: .init(latitude: 35.9533, longitude: 126.95760),
+                coordinate: .init(latitude: 35.9553, longitude: 126.95767),
                 appearance: .init(imageName: "icon_woman2", size: nil, anchorBottom: true),
                 action: .dialogue(storyKey: "market_greeting")
             ),
