@@ -116,13 +116,12 @@ final class MapViewController: UIViewController {
     }
 
     @objc private func didTapCameraButton() {
-        let cameraVC = CameraViewController()
-        if let nav = navigationController {
-            nav.pushViewController(cameraVC, animated: true)
-        } else {
-            cameraVC.modalPresentationStyle = .fullScreen
-            present(cameraVC, animated: true)
-        }
+        let overlay = UIImage(named: "bg")  // 투명 PNG 권장(없으면 nil)
+                CameraService.shared.present(from: self, overlay: overlay) { [weak self] image in
+                    // 합성된 결과 이미지 사용
+                    // self?.imageView.image = image
+                    // 또는 바로 공유/저장/다음 화면으로 전달
+                }
     }
 
     @objc private func didTapMarketButton()   { pushScenario(for: "서동시장") }

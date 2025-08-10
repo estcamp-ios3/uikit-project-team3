@@ -95,7 +95,6 @@ class EpilogueView: UIView {
 
         // 🎯 기념 촬영 버튼 스타일 설정
         // 기념 촬영 버튼 추가
-        let photoButton = UIButton(type: .system)
         photoButton.setTitle(" 기념 촬영", for: .normal) // 앞에 공백을 넣어 글자와 아이콘 간격 확보
         photoButton.setTitleColor(.white, for: .normal)
         photoButton.backgroundColor = .systemGreen
@@ -120,13 +119,13 @@ class EpilogueView: UIView {
         addSubview(fastForwardButton)
         
         // 📌 버튼들을 담을 StackView
-               let bottomButtonStack = UIStackView(arrangedSubviews: [photoButton, endButton])
-               bottomButtonStack.axis = .horizontal
-               bottomButtonStack.spacing = 20
-               bottomButtonStack.alignment = .center
-               bottomButtonStack.distribution = .equalSpacing
-               bottomButtonStack.translatesAutoresizingMaskIntoConstraints = false
-               addSubview(bottomButtonStack)
+        let bottomButtonStack = UIStackView(arrangedSubviews: [endButton, photoButton])
+        bottomButtonStack.axis = .horizontal
+        bottomButtonStack.spacing = 20
+        bottomButtonStack.alignment = .center
+        bottomButtonStack.distribution = .equalSpacing
+        bottomButtonStack.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(bottomButtonStack)
         
         // 레이블 위치 제약 조건 정의
         labelCenterYConstraint = label.centerYAnchor.constraint(equalTo: centerYAnchor)
@@ -158,14 +157,14 @@ class EpilogueView: UIView {
             fastForwardButton.heightAnchor.constraint(equalToConstant: 30),
             
             // 📌 하단 버튼 스택 가운데 정렬
-                       bottomButtonStack.centerXAnchor.constraint(equalTo: centerXAnchor),
-                       bottomButtonStack.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -50),
-                       
-                       photoButton.widthAnchor.constraint(equalToConstant: 180),
-                       photoButton.heightAnchor.constraint(equalToConstant: 50),
-                       
-                       endButton.widthAnchor.constraint(equalToConstant: 180),
-                       endButton.heightAnchor.constraint(equalToConstant: 50)
+            bottomButtonStack.centerXAnchor.constraint(equalTo: centerXAnchor),
+            bottomButtonStack.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -50),
+            
+            photoButton.widthAnchor.constraint(equalToConstant: 140),
+            photoButton.heightAnchor.constraint(equalToConstant: 50),
+            
+            endButton.widthAnchor.constraint(equalToConstant: 140),
+            endButton.heightAnchor.constraint(equalToConstant: 50)
         ])
         
         // 기본 레이아웃은 이미지 아래에 배치

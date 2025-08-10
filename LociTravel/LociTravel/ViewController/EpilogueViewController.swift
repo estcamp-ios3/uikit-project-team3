@@ -64,10 +64,14 @@ class EpilogueViewController: UIViewController {
     }
     
     @objc private func handlePhotoButtonTapped() {
-        let cameraVC = CameraViewController()
-                    cameraVC.modalPresentationStyle = .fullScreen
-                    self.present(cameraVC, animated: true)
+        let overlay = UIImage(named: "bg")  // 투명 PNG 권장(없으면 nil)
+                CameraService.shared.present(from: self, overlay: overlay) { [weak self] image in
+                    // 합성된 결과 이미지 사용
+                    // self?.imageView.image = image
+                    // 또는 바로 공유/저장/다음 화면으로 전달
+                }
     }
+    
     private func showNextDialogue() {
         guard dialogueIndex < epilogueDialogues.count else {
             epilogueView.showEndButton()
