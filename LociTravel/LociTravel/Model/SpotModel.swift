@@ -16,6 +16,7 @@ struct Spot: Identifiable {
     let spotName: String // 유적지 이름 (예: 미륵사지 석탑)
     let spotImage: [String] // 유적지 사진 파일 이름 목록 (여러 장의 이미지를 위해 배열로 변경)
     let spotDetail: String // 유적지 설명 텍스트 (긴 텍스트를 담을 수 있도록 String 타입 유지)
+    let spotSummary: String // 간략한 설명 (RecordBookVeiw 연결)
     let coordinate: CLLocationCoordinate2D // 유적지의 지도 좌표
 }
 
@@ -41,6 +42,7 @@ class SpotModel {
 
             2015년 유네스코 세계문화유산에 등재되었으며, 미륵사지 석탑의 해체 보수 과정에서 사리장엄구 등 귀중한 유물들이 발견되어 백제 시대의 문화와 역사를 생생하게 증언하고 있습니다. 넓은 터를 걸으며 천년의 시간을 거슬러 올라가는 듯한 깊은 감동을 느낄 수 있습니다.
             """,
+            spotSummary: "백제 무왕이 창건한 백제 최대의 사찰 터", 
             coordinate: CLLocationCoordinate2D(latitude: 35.9427, longitude: 126.9634) // 익산 미륵사지 실제 좌표
         ),
         Spot(
@@ -53,6 +55,7 @@ class SpotModel {
 
             특히, 해 질 녘 노을이 석탑을 비추는 풍경은 많은 방문객에게 잊지 못할 감동을 선사합니다. 왕궁리유적전시관에서는 발굴 유물과 함께 자세한 유적의 역사를 만나볼 수 있습니다.
             """,
+            spotSummary: "백제 무왕이 왕궁을 짓고 이후 사찰로 용도를 변경하여 사용했던 유적지",
             coordinate: CLLocationCoordinate2D(latitude: 35.9431, longitude: 127.0270) // 익산 왕궁리 실제 좌표
         ),
         Spot(
@@ -65,6 +68,7 @@ class SpotModel {
 
             보석박물관과 함께 운영되는 익산공룡테마공원은 다양한 공룡 조형물과 체험 시설을 갖추고 있어, 아이를 동반한 가족 방문객에게 큰 인기를 끌고 있습니다. 보석의 찬란함과 공룡의 웅장함을 동시에 경험할 수 있는 복합 문화 공간입니다.
             """,
+            spotSummary: "백제 문화유적과 보석의 아름다움을 관광자원으로 활용하기 위해 건립된 박물관",
             coordinate: CLLocationCoordinate2D(latitude: 35.990806, longitude: 127.102563)
         ),
         Spot(
@@ -77,6 +81,7 @@ class SpotModel {
 
             역사적 이야기를 담고 있는 아름다운 자연 속에서 평화로운 시간을 보낼 수 있는 익산의 대표적인 관광 명소입니다.
             """,
+            spotSummary: "백제 무왕과 선화공주의 사랑 이야기를 테마로 조성된 공원",
             coordinate: CLLocationCoordinate2D(latitude: 36.001114, longitude: 127.057518)
         ),
         Spot(
@@ -89,6 +94,7 @@ class SpotModel {
 
             익산의 역사와 함께해 온 서동시장은 단순한 쇼핑 공간을 넘어, 지역 문화와 전통을 체험할 수 있는 소중한 장소로 자리매김하고 있습니다. 전통시장의 정겨움을 느끼고 싶은 분들께 추천합니다.
             """,
+            spotSummary: "익산역과 가까운 곳에 위치한 활기찬 전통시장",
             coordinate: CLLocationCoordinate2D(latitude: 35.946904, longitude: 126.950516)
         )
     ]

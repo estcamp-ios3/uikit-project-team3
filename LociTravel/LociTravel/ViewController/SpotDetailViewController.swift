@@ -9,20 +9,25 @@ import UIKit
 
 class SpotDetailViewController: UIViewController, UIScrollViewDelegate {
     
+    // MARK: - Properties
+    
+    // UI 요소를 관리하는 커스텀 뷰
     private let spotDetailView = SpotDetailView()
     
-    // MARK: - 데이터 관련 속성
-    var spotName: String?
-    private var currentSpot: Spot?
+    // RecordBookViewController에서 직접 전달받을 Spot 객체
+    var currentSpot: Spot?
     
+    // 긴 설명을 페이지로 나누어 저장할 배열
     private var descriptionPages: [String] = []
     private var currentDescriptionPageIndex = 0
     
+    // 이미지 캐러셀 자동 스크롤을 위한 타이머
     private var imageScrollTimer: Timer?
     private var isAutoScrolling = true
     
-    // MARK: - 초기화 및 뷰 라이프사이클
+    // MARK: - View Lifecycle
     
+    // 뷰 컨트롤러의 루트 뷰를 커스텀 뷰로 설정
     override func loadView() {
         view = spotDetailView
     }
@@ -30,35 +35,38 @@ class SpotDetailViewController: UIViewController, UIScrollViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // 네비게이션 바 숨김
         navigationController?.setNavigationBarHidden(true, animated: false)
         
+        // 뷰에 데이터 바인딩 및 UI 초기 설정
+        loadSpotData()
         setupButtonActions()
         setupImageCarouselDelegate()
-        loadSpotData()
         setupDescriptionPagination()
         startImageAutoScroll()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        // 화면이 사라질 때 타이머 중지
         stopImageAutoScroll()
     }
     
-    // MARK: - 데이터 로드
+    // MARK: - Data Loading
     
+    // 전달받은 Spot 객체로 뷰를 구성
     private func loadSpotData() {
-        guard let name = spotName,
-              let spot = SpotModel.shared.getSpotData(spot: name) else {
-            print("Error: Spot data not found for name: \(spotName ?? "nil")")
+        guard let spot = self.currentSpot else {
+            print("Error: Spot data not found.")
             navigationController?.popViewController(animated: true)
             return
         }
-        self.currentSpot = spot
         spotDetailView.configure(with: spot)
     }
     
-    // MARK: - 버튼 액션 설정
+    // MARK: - Button Actions
     
+    // 버튼 액션 타겟 설정
     private func setupButtonActions() {
         spotDetailView.backButton.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
         spotDetailView.previousDescriptionButton.addTarget(self, action: #selector(didTapPreviousDescriptionButton), for: .touchUpInside)
@@ -66,13 +74,11 @@ class SpotDetailViewController: UIViewController, UIScrollViewDelegate {
         spotDetailView.playPauseButton.addTarget(self, action: #selector(didTapPlayPauseButton), for: .touchUpInside)
     }
     
-    // 뒤로가기 버튼 액션
     @objc private func didTapBackButton() {
         navigationController?.popViewController(animated: true)
-        //dismiss(animated: true)
     }
     
-    // MARK: - 이미지 캐러셀 자동 스크롤
+    // MARK: - Image Carousel Auto-Scroll
     
     private func setupImageCarouselDelegate() {
         spotDetailView.imageScrollView.delegate = self
@@ -113,14 +119,14 @@ class SpotDetailViewController: UIViewController, UIScrollViewDelegate {
         }
     }
     
-    // MARK: - UIScrollViewDelegate (이미지 캐러셀)
+    // MARK: - UIScrollViewDelegate (for Image Carousel)
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if scrollView == spotDetailView.imageScrollView {
+            guard scrollView.frame.width > 0 else { return }
             let pageIndex = round(scrollView.contentOffset.x / scrollView.frame.width)
             spotDetailView.pageControl.currentPage = Int(pageIndex)
-        }
-    }
+        }    }
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         if scrollView == spotDetailView.imageScrollView {
@@ -134,7 +140,7 @@ class SpotDetailViewController: UIViewController, UIScrollViewDelegate {
         }
     }
     
-    // MARK: - 설명 텍스트 페이지네이션
+    // MARK: - Description Text Pagination
     
     private func setupDescriptionPagination() {
         guard let description = currentSpot?.spotDetail else { return }
@@ -151,7 +157,6 @@ class SpotDetailViewController: UIViewController, UIScrollViewDelegate {
         displayCurrentDescriptionPage()
     }
     
-    // 현재 설명 페이지를 뷰에 표시합니다.
     private func displayCurrentDescriptionPage() {
         guard !descriptionPages.isEmpty else {
             spotDetailView.descriptionTextView.text = ""
@@ -165,18 +170,15 @@ class SpotDetailViewController: UIViewController, UIScrollViewDelegate {
         let activeColor = UIColor(red: 0.6, green: 0.4, blue: 0.2, alpha: 1.0)
         let disabledColor = UIColor.lightGray
         
-        // 이전 버튼 상태 업데이트
         let isPrevEnabled = (currentDescriptionPageIndex > 0)
         spotDetailView.previousDescriptionButton.isEnabled = isPrevEnabled
         spotDetailView.previousDescriptionButton.tintColor = isPrevEnabled ? activeColor : disabledColor
         
-        // 다음 버튼 상태 업데이트
         let isNextEnabled = (currentDescriptionPageIndex < descriptionPages.count - 1)
         spotDetailView.nextDescriptionButton.isEnabled = isNextEnabled
         spotDetailView.nextDescriptionButton.tintColor = isNextEnabled ? activeColor : disabledColor
     }
     
-    // "다음" 설명 페이지 버튼 액션
     @objc private func didTapNextDescriptionButton() {
         if currentDescriptionPageIndex < descriptionPages.count - 1 {
             currentDescriptionPageIndex += 1
@@ -184,7 +186,6 @@ class SpotDetailViewController: UIViewController, UIScrollViewDelegate {
         }
     }
     
-    // "이전" 설명 페이지 버튼 액션
     @objc private func didTapPreviousDescriptionButton() {
         if currentDescriptionPageIndex > 0 {
             currentDescriptionPageIndex -= 1
@@ -193,6 +194,6 @@ class SpotDetailViewController: UIViewController, UIScrollViewDelegate {
     }
 }
 
-#Preview {
+    #Preview {
     SpotDetailViewController()
 }

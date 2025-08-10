@@ -138,7 +138,7 @@ class SpotDetailView: UIView {
         // MARK: - 6. 설명 텍스트 영역 설정 (수정된 부분)
         
         // 양피지 배경 이미지 뷰 설정
-        descriptionBackgroundImageView.image = UIImage(named: "description_background_parchment")
+        descriptionBackgroundImageView.image = UIImage(named: "")
         if descriptionBackgroundImageView.image == nil {
             print("Error: description_background_parchment image not found in Assets.xcassets.")
         }
@@ -253,4 +253,9 @@ class SpotDetailView: UIView {
         pageControl.numberOfPages = imageNames.count
         pageControl.currentPage = 0
     }
+}
+
+
+#Preview {
+SpotDetailView()
 }
