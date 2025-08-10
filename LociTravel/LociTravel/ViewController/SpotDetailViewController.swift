@@ -11,23 +11,18 @@ class SpotDetailViewController: UIViewController, UIScrollViewDelegate {
     
     // MARK: - Properties
     
-    // UI 요소를 관리하는 커스텀 뷰
     private let spotDetailView = SpotDetailView()
     
-    // RecordBookViewController에서 직접 전달받을 Spot 객체
     var currentSpot: Spot?
     
-    // 긴 설명을 페이지로 나누어 저장할 배열
     private var descriptionPages: [String] = []
     private var currentDescriptionPageIndex = 0
     
-    // 이미지 캐러셀 자동 스크롤을 위한 타이머
     private var imageScrollTimer: Timer?
     private var isAutoScrolling = true
     
     // MARK: - View Lifecycle
     
-    // 뷰 컨트롤러의 루트 뷰를 커스텀 뷰로 설정
     override func loadView() {
         view = spotDetailView
     }
@@ -35,10 +30,8 @@ class SpotDetailViewController: UIViewController, UIScrollViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // 네비게이션 바 숨김
         navigationController?.setNavigationBarHidden(true, animated: false)
         
-        // 뷰에 데이터 바인딩 및 UI 초기 설정
         loadSpotData()
         setupButtonActions()
         setupImageCarouselDelegate()
@@ -48,13 +41,11 @@ class SpotDetailViewController: UIViewController, UIScrollViewDelegate {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        // 화면이 사라질 때 타이머 중지
         stopImageAutoScroll()
     }
     
     // MARK: - Data Loading
     
-    // 전달받은 Spot 객체로 뷰를 구성
     private func loadSpotData() {
         guard let spot = self.currentSpot else {
             print("Error: Spot data not found.")
@@ -66,7 +57,6 @@ class SpotDetailViewController: UIViewController, UIScrollViewDelegate {
     
     // MARK: - Button Actions
     
-    // 버튼 액션 타겟 설정
     private func setupButtonActions() {
         spotDetailView.backButton.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
         spotDetailView.previousDescriptionButton.addTarget(self, action: #selector(didTapPreviousDescriptionButton), for: .touchUpInside)
@@ -126,7 +116,8 @@ class SpotDetailViewController: UIViewController, UIScrollViewDelegate {
             guard scrollView.frame.width > 0 else { return }
             let pageIndex = round(scrollView.contentOffset.x / scrollView.frame.width)
             spotDetailView.pageControl.currentPage = Int(pageIndex)
-        }    }
+        }
+    }
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         if scrollView == spotDetailView.imageScrollView {
@@ -145,15 +136,7 @@ class SpotDetailViewController: UIViewController, UIScrollViewDelegate {
     private func setupDescriptionPagination() {
         guard let description = currentSpot?.spotDetail else { return }
         
-        let chunkSize = 300
-        var startIndex = description.startIndex
-        while startIndex < description.endIndex {
-            let endIndex = description.index(startIndex, offsetBy: chunkSize, limitedBy: description.endIndex) ?? description.endIndex
-            let chunk = String(description[startIndex..<endIndex])
-            descriptionPages.append(chunk)
-            startIndex = endIndex
-        }
-        
+        descriptionPages = description.components(separatedBy: "\n\n").filter { !$0.isEmpty }
         displayCurrentDescriptionPage()
     }
     
@@ -165,18 +148,29 @@ class SpotDetailViewController: UIViewController, UIScrollViewDelegate {
             return
         }
         
+        let currentText = descriptionPages[currentDescriptionPageIndex]
+        
+        // 줄 간격을 설정할 attributed string 생성
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = 5.0 // 원하는 줄 간격으로 설정
+        paragraphStyle.alignment = .left // 왼쪽 정렬 유지
+        
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 16),
+            .paragraphStyle: paragraphStyle
+        ]
+        
+        let attributedString = NSAttributedString(string: currentText, attributes: attributes)
+        
+        
         spotDetailView.descriptionTextView.text = descriptionPages[currentDescriptionPageIndex]
         
-        let activeColor = UIColor(red: 0.6, green: 0.4, blue: 0.2, alpha: 1.0)
-        let disabledColor = UIColor.lightGray
-        
+        // tintColor를 직접 변경하는 코드를 삭제하고 isEnabled만 변경
         let isPrevEnabled = (currentDescriptionPageIndex > 0)
         spotDetailView.previousDescriptionButton.isEnabled = isPrevEnabled
-        spotDetailView.previousDescriptionButton.tintColor = isPrevEnabled ? activeColor : disabledColor
         
         let isNextEnabled = (currentDescriptionPageIndex < descriptionPages.count - 1)
         spotDetailView.nextDescriptionButton.isEnabled = isNextEnabled
-        spotDetailView.nextDescriptionButton.tintColor = isNextEnabled ? activeColor : disabledColor
     }
     
     @objc private func didTapNextDescriptionButton() {
@@ -194,6 +188,6 @@ class SpotDetailViewController: UIViewController, UIScrollViewDelegate {
     }
 }
 
-    #Preview {
+#Preview {
     SpotDetailViewController()
 }

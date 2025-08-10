@@ -66,7 +66,7 @@ final class MapViewController: UIViewController {
         let recordIcon  = UIImage(named: "recordbookicon")
 
         let journal = UIAction(title: "탐험일지", image: journalIcon) { [weak self] _ in self?.showJournal() }
-        let record  = UIAction(title: "리코드북", image: recordIcon) { [weak self] _ in self?.showRecordBook() }
+        let record  = UIAction(title: "레코드북", image: recordIcon) { [weak self] _ in self?.showRecordBook() }
 
         let menu = UIMenu(title: "", options: .displayInline, children: [journal, record])
         customMapView.setOptionMenu(menu)
@@ -210,10 +210,16 @@ final class MapViewController: UIViewController {
     private func showJournal() {
         navigationController?.pushViewController(QuestListViewController(), animated: true)
     }
-    private func showRecordBook() {
-        let vc = SpotDetailViewController()
-        vc.spotName = UserModel.shared.getQuestProgress().last ?? "서동시장"
-        navigationController?.pushViewController(vc, animated: true)
+//    private func showRecordBook() {
+//        let vc = SpotDetailViewController()
+//        vc.spotName = UserModel.shared.getQuestProgress().last ?? "서동시장"
+//        navigationController?.pushViewController(vc, animated: true)
+//    }
+    @objc private func showRecordBook() {
+        let recordVC = RecordBookViewController()
+        
+        navigationController?.pushViewController(recordVC, animated: true)
+
     }
 }
 

@@ -29,6 +29,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // 이렇게 하면 화면 전환(push/pop) 기능을 사용할 수 있게 됩니다.
         let navigationController = UINavigationController(rootViewController: homeViewController)
         
+        
         // 5. 생성된 UINavigationController를 window의 rootViewController로 설정합니다.
         // 이제 앱이 시작될 때 이 컨트롤러가 관리하는 화면이 가장 먼저 표시됩니다.
         window?.rootViewController = navigationController

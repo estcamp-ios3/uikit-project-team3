@@ -62,7 +62,7 @@ class SpotDetailView: UIView {
         nextDescriptionButton.translatesAutoresizingMaskIntoConstraints = false
         
         // MARK: - 1. 배경 이미지 뷰 설정
-        texturedBackgroundImageView.image = UIImage(named: "old_paper_texture")
+        texturedBackgroundImageView.image = UIImage(named: "RecordBookviewbackground") // Changed background image
         texturedBackgroundImageView.contentMode = .scaleAspectFill
         texturedBackgroundImageView.clipsToBounds = true
         NSLayoutConstraint.activate([
@@ -124,7 +124,7 @@ class SpotDetailView: UIView {
         // MARK: - 5. 이미지 캐러셀 플레이/스탑 버튼 설정
         playPauseButton.setImage(UIImage(systemName: "pause.circle.fill"), for: .normal)
         playPauseButton.tintColor = UIColor(red: 0.6, green: 0.4, blue: 0.2, alpha: 1.0)
-        playPauseButton.backgroundColor = UIColor(red: 0.6, green: 0.4, blue: 0.2, alpha: 0.5)
+        playPauseButton.backgroundColor = UIColor(red: 245/255, green: 245/255, blue: 220/255, alpha: 1.0)
         playPauseButton.layer.cornerRadius = 20
         playPauseButton.setPreferredSymbolConfiguration(.init(pointSize: 30), forImageIn: .normal)
         
@@ -138,40 +138,39 @@ class SpotDetailView: UIView {
         // MARK: - 6. 설명 텍스트 영역 설정 (수정된 부분)
         
         // 양피지 배경 이미지 뷰 설정
-        descriptionBackgroundImageView.image = UIImage(named: "")
+        descriptionBackgroundImageView.image = UIImage(named: "questlistviewcell") // Changed text background image
         if descriptionBackgroundImageView.image == nil {
-            print("Error: description_background_parchment image not found in Assets.xcassets.")
+            print("Error: record_book_shell image not found in Assets.xcassets.")
         }
         
         descriptionBackgroundImageView.contentMode = .scaleToFill
         descriptionBackgroundImageView.clipsToBounds = true
         descriptionBackgroundImageView.layer.cornerRadius = 15
-        
+        descriptionBackgroundImageView.heightAnchor.constraint(equalTo: descriptionBackgroundImageView.widthAnchor, multiplier: 0.9).isActive = true
+
         NSLayoutConstraint.activate([
             descriptionBackgroundImageView.topAnchor.constraint(equalTo: pageControl.bottomAnchor, constant: 10),
             descriptionBackgroundImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             descriptionBackgroundImageView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
-            // 양피지 배경의 높이를 키우고 하단 여백을 확보
-            descriptionBackgroundImageView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -20)
+            // bottomAnchor 제거
         ])
-        
-        // 텍스트 뷰 설정 (양피지 내부 여백 추가)
+
+        // 텍스트 뷰 설정
         descriptionTextView.backgroundColor = .clear
-        descriptionTextView.textColor = UIColor(red: 245/255, green: 245/255, blue: 220/255, alpha: 1.0)
-        descriptionTextView.font = UIFont.systemFont(ofSize: 16)
+        descriptionTextView.textColor = .black
+        descriptionTextView.font = UIFont.systemFont(ofSize: 20)
         descriptionTextView.isEditable = false
         descriptionTextView.isSelectable = false
-        descriptionTextView.textAlignment = .center
+        descriptionTextView.textAlignment = .left
         descriptionTextView.layer.cornerRadius = 10
         descriptionTextView.isScrollEnabled = false
         
         NSLayoutConstraint.activate([
-            // 양피지 배경 위아래로 여백을 남기도록 수정
-            descriptionTextView.topAnchor.constraint(equalTo: descriptionBackgroundImageView.topAnchor, constant: 40),
-            descriptionTextView.bottomAnchor.constraint(equalTo: descriptionBackgroundImageView.bottomAnchor, constant: -40),
+            descriptionTextView.centerYAnchor.constraint(equalTo: descriptionBackgroundImageView.centerYAnchor),
             descriptionTextView.leadingAnchor.constraint(equalTo: descriptionBackgroundImageView.leadingAnchor, constant: 20),
             descriptionTextView.trailingAnchor.constraint(equalTo: descriptionBackgroundImageView.trailingAnchor, constant: -20)
         ])
+    
         
         // MARK: - 이전/다음 이미지 버튼 설정 (수정된 부분)
         
@@ -179,26 +178,26 @@ class SpotDetailView: UIView {
         if let prevImage = UIImage(named: "button_prev_description")?.withRenderingMode(.alwaysTemplate) {
             previousDescriptionButton.setImage(prevImage, for: .normal)
         }
-        previousDescriptionButton.tintColor = UIColor(red: 245/255, green: 245/255, blue: 220/255, alpha: 1.0)
+        previousDescriptionButton.tintColor = UIColor(red: 0.6, green: 0.4, blue: 0.2, alpha: 1.0)
         
-
         previousDescriptionButton.backgroundColor = .clear
         
         // 다음 버튼 설정
         if let nextImage = UIImage(named: "button_next_description")?.withRenderingMode(.alwaysTemplate) {
             nextDescriptionButton.setImage(nextImage, for: .normal)
         }
-        nextDescriptionButton.tintColor = UIColor(red: 245/255, green: 245/255, blue: 220/255, alpha: 1.0)
+        nextDescriptionButton.tintColor = UIColor(red: 0.6, green: 0.4, blue: 0.2, alpha: 1.0)
         nextDescriptionButton.backgroundColor = .clear
         
         // 버튼들을 양피지 배경 위에 배치
         NSLayoutConstraint.activate([
-            previousDescriptionButton.centerYAnchor.constraint(equalTo: descriptionBackgroundImageView.centerYAnchor),
+            previousDescriptionButton.topAnchor.constraint(equalTo: descriptionBackgroundImageView.bottomAnchor, constant: -30),
             previousDescriptionButton.leadingAnchor.constraint(equalTo: descriptionBackgroundImageView.leadingAnchor, constant: 10),
             previousDescriptionButton.widthAnchor.constraint(equalToConstant: 70),
             previousDescriptionButton.heightAnchor.constraint(equalToConstant: 70),
             
-            nextDescriptionButton.centerYAnchor.constraint(equalTo: descriptionBackgroundImageView.centerYAnchor),
+            // centerYAnchor 대신 topAnchor를 양피지 배경 이미지의 bottomAnchor에 연결
+            nextDescriptionButton.topAnchor.constraint(equalTo: descriptionBackgroundImageView.bottomAnchor, constant: -30),
             nextDescriptionButton.trailingAnchor.constraint(equalTo: descriptionBackgroundImageView.trailingAnchor, constant: -10),
             nextDescriptionButton.widthAnchor.constraint(equalToConstant: 70),
             nextDescriptionButton.heightAnchor.constraint(equalToConstant: 70)
@@ -254,7 +253,6 @@ class SpotDetailView: UIView {
         pageControl.currentPage = 0
     }
 }
-
 
 #Preview {
 SpotDetailView()

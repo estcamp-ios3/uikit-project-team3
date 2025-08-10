@@ -150,9 +150,6 @@
 				DEVELOPMENT_TEAM = 6R3M7VGRP2;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LociTravel/Info.plist;
-				INFOPLIST_KEY_NSCameraUsageDescription = "이 앱은 사진 촬영을 위해 카메라 접근을 요청합니다.";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "촬영 사진을 앨범에 저장하기 위해 사진 접근 권한이 필요합니다.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "촬영한 사진을 앨범에 저장하기 위해 사진 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -185,9 +182,6 @@
 				DEVELOPMENT_TEAM = 6R3M7VGRP2;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LociTravel/Info.plist;
-				INFOPLIST_KEY_NSCameraUsageDescription = "이 앱은 사진 촬영을 위해 카메라 접근을 요청합니다.";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "촬영 사진을 앨범에 저장하기 위해 사진 접근 권한이 필요합니다.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "촬영한 사진을 앨범에 저장하기 위해 사진 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
