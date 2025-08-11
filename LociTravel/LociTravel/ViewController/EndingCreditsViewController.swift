@@ -9,10 +9,15 @@ import UIKit
 
 class EndingCreditsViewController: UIViewController {
 
-    let participantNames = ["조호서", "김동우", "송서윤", "채수지"]
+    let participantNames = ["팀장 조호서", "김동우", "송서윤", "채수지"]
     var nameLabels: [UILabel] = []
-    let endLabel = UILabel()
     
+    // 추가된 라벨들
+    let thanksTitleLabel = UILabel()
+    let specialThanksLabel = UILabel()
+    let endMessageLabel = UILabel()
+    let finalEndLabel = UILabel()
+
     // 추가된 버튼들
     let backToStartButton = UIButton(type: .system)
     let photoButton = UIButton(type: .system)
@@ -21,10 +26,12 @@ class EndingCreditsViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .black
         setupLabels()
-        animateNames()
+        setupButtons()
+        animateCredits()
     }
     
     private func setupLabels() {
+        // 팀원 이름 라벨
         for name in participantNames {
             let label = UILabel()
             label.text = name
@@ -32,18 +39,74 @@ class EndingCreditsViewController: UIViewController {
             label.alpha = 0
             label.font = UIFont.systemFont(ofSize: 24, weight: .semibold)
             label.textAlignment = .center
+            label.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(label)
             nameLabels.append(label)
         }
-
-        endLabel.text = "감사합니다.  …end"
-        endLabel.textColor = .white
-        endLabel.alpha = 0
-        endLabel.font = UIFont.systemFont(ofSize: 26, weight: .bold)
-        endLabel.textAlignment = .center
-        view.addSubview(endLabel)
         
-        // 버튼 설정
+        // 추가된 감사 메시지 라벨들
+        thanksTitleLabel.text = "개발에 도움을 주신 분들"
+        thanksTitleLabel.textColor = .white
+        thanksTitleLabel.alpha = 0
+        thanksTitleLabel.font = UIFont.systemFont(ofSize: 22, weight: .bold)
+        thanksTitleLabel.textAlignment = .center
+        thanksTitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(thanksTitleLabel)
+        
+        specialThanksLabel.text = "그리고 당신"
+        specialThanksLabel.textColor = .white
+        specialThanksLabel.alpha = 0
+        specialThanksLabel.font = UIFont.systemFont(ofSize: 20, weight: .regular)
+        specialThanksLabel.textAlignment = .center
+        specialThanksLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(specialThanksLabel)
+        
+        endMessageLabel.text = "모두 감사드립니다!"
+        endMessageLabel.textColor = .white
+        endMessageLabel.alpha = 0
+        endMessageLabel.font = UIFont.systemFont(ofSize: 20, weight: .regular)
+        endMessageLabel.textAlignment = .center
+        endMessageLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(endMessageLabel)
+
+        finalEndLabel.text = "...end"
+        finalEndLabel.textColor = .white
+        finalEndLabel.alpha = 0
+        finalEndLabel.font = UIFont.systemFont(ofSize: 26, weight: .bold)
+        finalEndLabel.textAlignment = .center
+        finalEndLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(finalEndLabel)
+        
+        setupLabelConstraints()
+    }
+    
+    private func setupLabelConstraints() {
+        let spacing: CGFloat = 50
+        let startY = view.bounds.midY - spacing * CGFloat(nameLabels.count) / 2
+        
+        for (index, label) in nameLabels.enumerated() {
+            NSLayoutConstraint.activate([
+                label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                label.topAnchor.constraint(equalTo: view.topAnchor, constant: startY + CGFloat(index) * spacing)
+            ])
+        }
+        
+        NSLayoutConstraint.activate([
+            thanksTitleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            thanksTitleLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            
+            specialThanksLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            specialThanksLabel.topAnchor.constraint(equalTo: thanksTitleLabel.bottomAnchor, constant: 15),
+
+            endMessageLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            endMessageLabel.topAnchor.constraint(equalTo: specialThanksLabel.bottomAnchor, constant: 15),
+            
+            finalEndLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            finalEndLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+    }
+    
+    private func setupButtons() {
         backToStartButton.setTitle("시작 화면", for: .normal)
         backToStartButton.setTitleColor(.white, for: .normal)
         backToStartButton.backgroundColor = .systemRed.withAlphaComponent(0.8)
@@ -66,7 +129,6 @@ class EndingCreditsViewController: UIViewController {
         photoButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: -5, bottom: 0, right: 5)
         photoButton.semanticContentAttribute = .forceLeftToRight
         
-        // 버튼들을 담을 StackView
         let bottomButtonStack = UIStackView(arrangedSubviews: [backToStartButton, photoButton])
         bottomButtonStack.axis = .horizontal
         bottomButtonStack.spacing = 20
@@ -75,7 +137,6 @@ class EndingCreditsViewController: UIViewController {
         bottomButtonStack.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(bottomButtonStack)
         
-        // 버튼 스택뷰 제약 조건
         NSLayoutConstraint.activate([
             bottomButtonStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             bottomButtonStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
@@ -86,41 +147,70 @@ class EndingCreditsViewController: UIViewController {
             photoButton.heightAnchor.constraint(equalToConstant: 50)
         ])
         
-        // 버튼 액션 연결
         backToStartButton.addTarget(self, action: #selector(didTapBackToStart), for: .touchUpInside)
         photoButton.addTarget(self, action: #selector(didTapPhotoButton), for: .touchUpInside)
     }
-    
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        
-        let spacing: CGFloat = 50
-        let startY = view.bounds.midY - spacing * CGFloat(nameLabels.count) / 2
-        
-        for (index, label) in nameLabels.enumerated() {
-            label.frame = CGRect(x: 0, y: startY + CGFloat(index) * spacing, width: view.bounds.width, height: 30)
-        }
 
-        endLabel.frame = CGRect(x: 0, y: view.bounds.midY, width: view.bounds.width, height: 40)
-    }
-    
-    private func animateNames() {
+    private func animateCredits() {
+        let nameAnimationDuration: TimeInterval = 1.0
+        let nameFadeOutDuration: TimeInterval = 1.5
+        let nameInterval: TimeInterval = 1.2
+        let thanksMessageInterval: TimeInterval = 1.0
+        let endMessageDuration: TimeInterval = 2.0
+        let buttonDisplayDelay: TimeInterval = 2.0
+
+        var currentDelay: TimeInterval = 0
+
+        // 1. 이름 라벨 애니메이션
         for (i, label) in nameLabels.enumerated() {
-            let delay = Double(i) * 1.2
-            UIView.animate(withDuration: 1.0, delay: delay, options: [], animations: {
+            let labelDelay = currentDelay + Double(i) * nameInterval
+            UIView.animate(withDuration: nameAnimationDuration, delay: labelDelay, options: [], animations: {
                 label.alpha = 1.0
-                label.frame.origin.y -= 20
             }, completion: nil)
         }
 
-        // 전체 이름 페이드 아웃 후 엔딩 텍스트 표시
-        let totalDelay = Double(participantNames.count) * 1.2 + 1.5
-        DispatchQueue.main.asyncAfter(deadline: .now() + totalDelay) {
-            UIView.animate(withDuration: 1.5, animations: {
+        // 이름 라벨 전체 페이드 아웃
+        currentDelay += Double(nameLabels.count) * nameInterval + nameFadeOutDuration
+        DispatchQueue.main.asyncAfter(deadline: .now() + currentDelay) {
+            UIView.animate(withDuration: nameFadeOutDuration, animations: {
                 self.nameLabels.forEach { $0.alpha = 0 }
+            })
+        }
+        
+        // 2. "개발에 도움을 주신 분들" 애니메이션
+        currentDelay += nameFadeOutDuration
+        DispatchQueue.main.asyncAfter(deadline: .now() + currentDelay) {
+            UIView.animate(withDuration: 1.0) {
+                self.thanksTitleLabel.alpha = 1.0
+            }
+        }
+        
+        // 3. "Special Thanks" 애니메이션
+        currentDelay += thanksMessageInterval
+        DispatchQueue.main.asyncAfter(deadline: .now() + currentDelay) {
+            UIView.animate(withDuration: 1.0) {
+                self.specialThanksLabel.alpha = 1.0
+            }
+        }
+        
+        // 4. "모두 감사드립니다!" 애니메이션
+        currentDelay += thanksMessageInterval
+        DispatchQueue.main.asyncAfter(deadline: .now() + currentDelay) {
+            UIView.animate(withDuration: 1.0) {
+                self.endMessageLabel.alpha = 1.0
+            }
+        }
+        
+        // 5. "개발에 도움을 주신 분들" 섹션 페이드 아웃 후 "...end" 애니메이션
+        currentDelay += thanksMessageInterval + 1.5
+        DispatchQueue.main.asyncAfter(deadline: .now() + currentDelay) {
+            UIView.animate(withDuration: 1.5, animations: {
+                self.thanksTitleLabel.alpha = 0
+                self.specialThanksLabel.alpha = 0
+                self.endMessageLabel.alpha = 0
             }, completion: { _ in
-                UIView.animate(withDuration: 2.0) {
-                    self.endLabel.alpha = 1.0
+                UIView.animate(withDuration: endMessageDuration) {
+                    self.finalEndLabel.alpha = 1.0
                 } completion: { _ in
                     // ⭐️ 애니메이션 완료 후 버튼 표시
                     self.showEndButtons()
