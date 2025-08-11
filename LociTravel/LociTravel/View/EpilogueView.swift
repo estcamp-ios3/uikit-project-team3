@@ -85,7 +85,7 @@ class EpilogueView: UIView {
         fastForwardButton.translatesAutoresizingMaskIntoConstraints = false
         fastForwardButton.isHidden = true
         
-        endButton.setTitle("시작 화면으로", for: .normal)
+        endButton.setTitle("엔딩크레딧", for: .normal)
         endButton.setTitleColor(.white, for: .normal)
         endButton.backgroundColor = .systemBrown
         endButton.layer.cornerRadius = 25
