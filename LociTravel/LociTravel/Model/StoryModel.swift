@@ -49,10 +49,10 @@ class StoryModel {
     private init() {
         innerStories = [
             Story(spotName: "서동시장", questName: "금가락지 소동", scenarioImage: "저잣거리", characterImage: "girl", arrScenario: dialogues_Market, bgm: "market"),
-            Story(spotName: "보석 박물관", questName: "고대 퍼즐", scenarioImage: "소나무숲", characterImage: "girl", arrScenario: dialogues_Museum, bgm: "museum"),
-            Story(spotName: "미륵사지", questName: "신탁의 문장", scenarioImage: "사찰", characterImage: "girl", arrScenario: dialogues_Temple, bgm: "temple"),
-            Story(spotName: "서동공원", questName: "서동요의 비밀", scenarioImage: "호수", characterImage: "girl", arrScenario: dialogues_Park, bgm: "park"),
-            Story(spotName: "왕궁리 유적", questName: "예언의 완성", scenarioImage: "궁궐", characterImage: "girl", arrScenario: dialogues_Palace_Intro, bgm: "palace_intro"),
+            Story(spotName: "보석 박물관", questName: "고대 퍼즐", scenarioImage: "소나무숲", characterImage: "girl", arrScenario: dialogues_Museum, bgm: "market"),
+            Story(spotName: "미륵사지", questName: "신탁의 문장", scenarioImage: "사찰", characterImage: "girl", arrScenario: dialogues_Temple, bgm: "market"),
+            Story(spotName: "서동공원", questName: "서동요의 비밀", scenarioImage: "호수", characterImage: "girl", arrScenario: dialogues_Park, bgm: "market"),
+            Story(spotName: "왕궁리 유적", questName: "예언의 완성", scenarioImage: "궁궐", characterImage: "girl", arrScenario: dialogues_Palace_Intro, bgm: "market"),
             //Story(spotName: "에필로그", questName: "에필로그", scenarioImage: "background", characterImage: "girl", arrScenario: dialogues_Palace_Epilogue, bgm: "palace_epilogue")
         ]
     }
