@@ -44,13 +44,14 @@ class EpilogueViewController: UIViewController {
         epilogueView = EpilogueView()
         view = epilogueView
         
-        epilogueView.onSkipButtonTapped = { [weak self] in self?.navigateToRootView() }
+        // ⭐️ 시작 화면, 종료 버튼 액션을 엔딩 크레딧 뷰로 이동하는 함수로 변경
+        epilogueView.onSkipButtonTapped = { [weak self] in self?.navigateToEndingCreditView() }
         epilogueView.onFastForwardButtonTapped = { [weak self] in
             guard let self = self else { return }
             self.isFastForwarding.toggle()
             self.epilogueView.fastForwardButton.setTitle(self.isFastForwarding ? "정상 속도" : "빨리 감기", for: .normal)
         }
-        epilogueView.onEndButtonTapped = { [weak self] in self?.navigateToRootView() }
+        epilogueView.onEndButtonTapped = { [weak self] in self?.navigateToEndingCreditView() }
     }
     
     override func viewDidLoad() {
@@ -124,9 +125,14 @@ class EpilogueViewController: UIViewController {
         }
     }
     
-    private func navigateToRootView() {
-        print("시작 화면으로 이동합니다.")
-        navigationController?.popToRootViewController(animated: true)
+    // ⭐️ 시작 화면으로 이동하는 함수를 엔딩 크레딧 뷰로 이동하도록 수정
+    private func navigateToEndingCreditView() {
+        print("엔딩 크레딧 뷰로 이동합니다.")
+        
+        // ⭐️ EndingCreditViewController를 인스턴스화하고 푸시합니다.
+        // 이 뷰 컨트롤러가 아직 없다면 직접 생성해야 합니다.
+        let endingCreditVC = EndingCreditsViewController()
+        navigationController?.pushViewController(endingCreditVC, animated: true)
         
         //UserModel.shared.clearAll()
     }

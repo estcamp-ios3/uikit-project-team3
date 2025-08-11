@@ -8,10 +8,14 @@
 import UIKit
 
 class EndingCreditsViewController: UIViewController {
-    
-    let participantNames = ["홍길동", "김철수", "이영희", "박선화"]
+
+    let participantNames = ["조호서", "김동우", "송서윤", "채수지"]
     var nameLabels: [UILabel] = []
     let endLabel = UILabel()
+    
+    // 추가된 버튼들
+    let backToStartButton = UIButton(type: .system)
+    let photoButton = UIButton(type: .system)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,6 +42,53 @@ class EndingCreditsViewController: UIViewController {
         endLabel.font = UIFont.systemFont(ofSize: 26, weight: .bold)
         endLabel.textAlignment = .center
         view.addSubview(endLabel)
+        
+        // 버튼 설정
+        backToStartButton.setTitle("시작 화면", for: .normal)
+        backToStartButton.setTitleColor(.white, for: .normal)
+        backToStartButton.backgroundColor = .systemRed.withAlphaComponent(0.8)
+        backToStartButton.layer.cornerRadius = 25
+        backToStartButton.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
+        backToStartButton.translatesAutoresizingMaskIntoConstraints = false
+        backToStartButton.isHidden = true
+        
+        photoButton.setTitle(" 기념 촬영", for: .normal)
+        photoButton.setTitleColor(.white, for: .normal)
+        photoButton.backgroundColor = .systemGreen.withAlphaComponent(0.8)
+        photoButton.layer.cornerRadius = 25
+        photoButton.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
+        photoButton.translatesAutoresizingMaskIntoConstraints = false
+        photoButton.isHidden = true
+        
+        let cameraImage = UIImage(systemName: "camera.fill")
+        photoButton.setImage(cameraImage, for: .normal)
+        photoButton.tintColor = .white
+        photoButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: -5, bottom: 0, right: 5)
+        photoButton.semanticContentAttribute = .forceLeftToRight
+        
+        // 버튼들을 담을 StackView
+        let bottomButtonStack = UIStackView(arrangedSubviews: [backToStartButton, photoButton])
+        bottomButtonStack.axis = .horizontal
+        bottomButtonStack.spacing = 20
+        bottomButtonStack.alignment = .center
+        bottomButtonStack.distribution = .equalSpacing
+        bottomButtonStack.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(bottomButtonStack)
+        
+        // 버튼 스택뷰 제약 조건
+        NSLayoutConstraint.activate([
+            bottomButtonStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            bottomButtonStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            
+            backToStartButton.widthAnchor.constraint(equalToConstant: 140),
+            backToStartButton.heightAnchor.constraint(equalToConstant: 50),
+            photoButton.widthAnchor.constraint(equalToConstant: 140),
+            photoButton.heightAnchor.constraint(equalToConstant: 50)
+        ])
+        
+        // 버튼 액션 연결
+        backToStartButton.addTarget(self, action: #selector(didTapBackToStart), for: .touchUpInside)
+        photoButton.addTarget(self, action: #selector(didTapPhotoButton), for: .touchUpInside)
     }
     
     override func viewDidLayoutSubviews() {
@@ -70,8 +121,46 @@ class EndingCreditsViewController: UIViewController {
             }, completion: { _ in
                 UIView.animate(withDuration: 2.0) {
                     self.endLabel.alpha = 1.0
+                } completion: { _ in
+                    // ⭐️ 애니메이션 완료 후 버튼 표시
+                    self.showEndButtons()
                 }
             })
         }
     }
+    
+    // 버튼을 나타나게 하는 메서드
+    private func showEndButtons() {
+        UIView.animate(withDuration: 0.5) {
+            self.backToStartButton.isHidden = false
+            self.photoButton.isHidden = false
+        }
+    }
+    
+    // 버튼 액션 메서드
+    @objc private func didTapBackToStart() {
+        navigationController?.popToRootViewController(animated: true)
+    }
+    
+    @objc private func didTapPhotoButton() {
+        // 기존 EpilogueViewController의 기념사진 촬영 로직을 여기에 구현
+        // CameraService, PhotoSaver, toast, showAlert 함수가 필요합니다.
+        // 다음은 예시 코드입니다.
+        let overlay = UIImage(named: "bg")
+        
+        // CameraService.shared.present(from: self, overlay: overlay) { [weak self] image in
+        //     PhotoSaver.save(image, toAlbum: "LociTravel") { result in
+        //         switch result {
+        //         case .success:
+        //             self?.toast("사진이 저장되었어요 📸")
+        //         case .failure(let err):
+        //             self?.showAlert(title: "저장 실패", message: err.localizedDescription)
+        //         }
+        //     }
+        // }
+    }
+}
+
+#Preview {
+    EndingCreditsViewController()
 }
