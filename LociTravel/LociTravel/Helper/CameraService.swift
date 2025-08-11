@@ -1,9 +1,3 @@
-//
-//  CameraService.swift
-//  LociTravel
-//
-//  Created by chohoseo on 8/10/25.
-//
 import UIKit
 import AVFoundation
 import Photos
@@ -17,24 +11,14 @@ final class CameraService: NSObject {
     private var completion: ((UIImage) -> Void)?
 
     // 상태
-    private var previewImage: UIImage?                // 합성 결과(미리보기용)
-    private weak var liveOverlayView: UIView?         // 촬영 전 UI
-    private weak var previewOverlayView: UIView?      // 촬영 후 UI
+    private var previewImage: UIImage?
+    private weak var liveOverlayView: UIView?
+    private weak var previewOverlayView: UIView?
 
-    // iOS 기본 카메라 컨트롤러
-    private lazy var picker: UIImagePickerController = {
-        let p = UIImagePickerController()
-        p.delegate = self
-        p.sourceType = .camera
-        p.showsCameraControls = false      // ✅ 기본 컨트롤 끄기 (커스텀 UI 사용)
-        p.allowsEditing = false
-        p.modalPresentationStyle = .fullScreen
-        p.cameraCaptureMode = .photo
-        p.cameraDevice = .rear
-        return p
-    }()
+    // 현재 표시 중인 피커
+    private var picker: UIImagePickerController!
 
-    // MARK: - Public
+    // MARK: - Public API
     func present(from vc: UIViewController,
                  overlay: UIImage?,
                  completion: @escaping (UIImage) -> Void) {
@@ -54,27 +38,44 @@ final class CameraService: NSObject {
                     self.showAlert(on: vc, title: "카메라 사용 불가", message: "이 기기에서는 카메라를 사용할 수 없습니다.")
                     return
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    vc.present(self.picker, animated: true) { [weak self] in
-                        self?.installLiveUI()
-                    }
-                }
+                self.startNewPicker(animated: true)
             }
         }
     }
 
+    // MARK: - Picker lifecycle
+    private func startNewPicker(animated: Bool) {
+        picker = makePicker()
+        // 권한 팝업 직후 하얀 화면 이슈 회피용 소폭 지연
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.presenter?.present(self.picker, animated: animated) { [weak self] in
+                self?.installLiveUI()
+            }
+        }
+    }
+
+    private func makePicker() -> UIImagePickerController {
+        let p = UIImagePickerController()
+        p.delegate = self
+        p.sourceType = .camera
+        p.showsCameraControls = false   // 커스텀 UI 사용
+        p.allowsEditing = false
+        p.modalPresentationStyle = .fullScreen
+        p.cameraCaptureMode = .photo
+        p.cameraDevice = .rear
+        return p
+    }
+
     // MARK: - Live UI (촬영 전: 오버레이 + 셔터)
     private func installLiveUI() {
-        // 이전 미리보기 UI 제거
         previewOverlayView?.removeFromSuperview()
         previewOverlayView = nil
 
-        // 라이브 오버레이 컨테이너
         let container = UIView(frame: picker.view.bounds)
         container.backgroundColor = .clear
         container.isUserInteractionEnabled = true
 
-        // 1) 가이드 오버레이(중앙 정렬)
+        // 1) 중앙 정렬 가이드 오버레이
         if let overlay = overlayImage {
             let overlayView = UIImageView(image: overlay)
             overlayView.backgroundColor = .clear
@@ -92,7 +93,7 @@ final class CameraService: NSObject {
             container.addSubview(overlayView)
         }
 
-        // 2) 셔터 버튼 (하단 중앙)
+        // 2) 셔터 버튼
         let shutter = UIButton(type: .system)
         shutter.setImage(UIImage(systemName: "circle.inset.filled"), for: .normal)
         shutter.tintColor = .white
@@ -104,7 +105,7 @@ final class CameraService: NSObject {
         shutter.addTarget(self, action: #selector(takePicture), for: .touchUpInside)
         container.addSubview(shutter)
 
-        // 3) 닫기 버튼 (좌상단)
+        // 3) 닫기 버튼
         let close = UIButton(type: .system)
         close.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
         close.tintColor = .white
@@ -118,23 +119,21 @@ final class CameraService: NSObject {
 
     // MARK: - Preview UI (촬영 후: 이미지 + 공유/저장/다시찍기)
     private func installPreviewUI(with image: UIImage) {
-        // 라이브 UI 제거
         liveOverlayView?.removeFromSuperview()
         liveOverlayView = nil
 
-        // 합성 결과 저장 및 미리보기 구성
         previewImage = image
 
         let container = UIView(frame: picker.view.bounds)
         container.backgroundColor = .black
 
-        // 1) 미리보기 이미지 (AspectFit, 중앙)
+        // 1) 미리보기 이미지
         let imageView = UIImageView(image: image)
         imageView.contentMode = .scaleAspectFit
         imageView.frame = container.bounds.insetBy(dx: 0, dy: safeTopInset() + 80)
         container.addSubview(imageView)
 
-        // 2) 하단 바 컨테이너
+        // 2) 하단 3버튼 바
         let bar = UIStackView()
         bar.axis = .horizontal
         bar.alignment = .center
@@ -145,24 +144,16 @@ final class CameraService: NSObject {
                            width: container.bounds.width - 40,
                            height: 60)
 
-        // 왼쪽: 공유
-        let shareBtn = makeBarButton(title: "공유하기", systemImage: "square.and.arrow.up")
-        shareBtn.addTarget(self, action: #selector(tapShare), for: .touchUpInside)
-
-        // 가운데: 저장
-        let saveBtn = makeBarButton(title: "저장하기", systemImage: "tray.and.arrow.down")
-        saveBtn.addTarget(self, action: #selector(tapSave), for: .touchUpInside)
-
-        // 오른쪽: 다시찍기
-        let retakeBtn = makeBarButton(title: "다시찍기", systemImage: "gobackward")
-        retakeBtn.addTarget(self, action: #selector(tapRetake), for: .touchUpInside)
+        let shareBtn  = makeBarButton(title: "공유하기",  systemImage: "square.and.arrow.up", action: #selector(tapShare))
+        let saveBtn   = makeBarButton(title: "저장하기",  systemImage: "tray.and.arrow.down", action: #selector(tapSave))
+        let retakeBtn = makeBarButton(title: "다시찍기", systemImage: "gobackward",          action: #selector(tapRetake))
 
         bar.addArrangedSubview(shareBtn)
         bar.addArrangedSubview(saveBtn)
         bar.addArrangedSubview(retakeBtn)
         container.addSubview(bar)
 
-        // 닫기 버튼 (좌상단)
+        // 닫기
         let close = UIButton(type: .system)
         close.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
         close.tintColor = .white
@@ -174,7 +165,7 @@ final class CameraService: NSObject {
         previewOverlayView = container
     }
 
-    private func makeBarButton(title: String, systemImage: String) -> UIButton {
+    private func makeBarButton(title: String, systemImage: String, action: Selector) -> UIButton {
         let b = UIButton(type: .system)
         b.tintColor = .white
         b.setImage(UIImage(systemName: systemImage), for: .normal)
@@ -183,6 +174,7 @@ final class CameraService: NSObject {
         b.backgroundColor = UIColor.black.withAlphaComponent(0.35)
         b.layer.cornerRadius = 12
         b.contentEdgeInsets = UIEdgeInsets(top: 10, left: 12, bottom: 10, right: 12)
+        b.addTarget(self, action: action, for: .touchUpInside)
         return b
     }
 
@@ -197,30 +189,45 @@ final class CameraService: NSObject {
     }
 
     @objc private func tapShare() {
-        guard let img = previewImage, let vc = presenter else { return }
+        guard let img = previewImage else { return }
         let av = UIActivityViewController(activityItems: [img], applicationActivities: nil)
-        vc.present(av, animated: true)
+        // iPad popover anchor
+        av.popoverPresentationController?.sourceView = picker.view
+        av.popoverPresentationController?.sourceRect = CGRect(x: picker.view.bounds.midX,
+                                                              y: picker.view.bounds.maxY - 80,
+                                                              width: 1, height: 1)
+        // ✅ picker 위에 표시 (프리즈 방지)
+        picker.present(av, animated: true)
     }
 
     @objc private func tapSave() {
-        guard let img = previewImage, let vc = presenter else { return }
-        // 커스텀 앨범에 저장하고 싶다면 이름을 지정하세요 (예: "LociTravel")
-        PhotoSaver.save(img, toAlbum: "LociTravel") { [weak vc] result in
+        guard let img = previewImage else { return }
+        PhotoSaver.save(img, toAlbum: "LociTravel") { [weak self] result in
+            guard let self = self else { return }
             switch result {
             case .success:
-                vc?.toast("사진이 저장되었어요 📸")
+                // 토스트는 presenter.view에 붙이는게 자연스러움
+                self.presenter?.toast("사진이 저장되었어요 📸")
             case .failure(let err):
-                vc?.showAlert(title: "저장 실패", message: err.localizedDescription)
+                let ac = UIAlertController(title: "저장 실패",
+                                           message: err.localizedDescription,
+                                           preferredStyle: .alert)
+                ac.addAction(UIAlertAction(title: "확인", style: .default))
+                // ✅ picker 위에 표시
+                self.picker.present(ac, animated: true)
             }
         }
     }
 
     @objc private func tapRetake() {
-        // 다시 라이브 카메라로
+        // 기존 피커 완전 종료 → 새 피커로 재시작 (review 상태 꼬임 방지)
         previewImage = nil
-        installLiveUI()
+        picker.dismiss(animated: false) { [weak self] in
+            self?.startNewPicker(animated: false)
+        }
     }
 
+    // MARK: - Utils
     private func cleanup() {
         overlayImage = nil
         completion = nil
@@ -228,6 +235,7 @@ final class CameraService: NSObject {
         previewImage = nil
         liveOverlayView = nil
         previewOverlayView = nil
+        picker = nil
     }
 
     private func safeTopInset() -> CGFloat {
@@ -248,7 +256,7 @@ final class CameraService: NSObject {
             let imageW: CGFloat = 1126
             let imageH: CGFloat = 607
 
-            // 가로를 사진 너비에 맞추고 세로는 비율로 계산 → 세로 중앙 배치
+            // 사진 너비에 맞춰 세로 중앙 배치
             let targetWidth  = base.size.width
             let targetHeight = targetWidth * (imageH / imageW)
             let originY = (base.size.height - targetHeight) / 2.0
@@ -271,14 +279,13 @@ extension CameraService: UIImagePickerControllerDelegate, UINavigationController
     func imagePickerController(_ picker: UIImagePickerController,
                                didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
 
-        // 원본 → 오버레이 합성
         guard let original = info[.originalImage] as? UIImage else { return }
         let result = compose(base: original, overlay: overlayImage)
 
-        // 콜백은 즉시 넘겨주고…
+        // 외부 콜백 먼저 전달
         completion?(result)
 
-        // …화면은 미리보기 + 3버튼으로 전환
+        // 미리보기 + 3버튼 UI로 전환
         installPreviewUI(with: result)
     }
 
