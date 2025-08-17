@@ -8,7 +8,7 @@
 import UIKit
 import CoreLocation
 
-class QuestListViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class QuestListViewController: PortraitOnlyViewController, UITableViewDataSource, UITableViewDelegate {
     
     private let tableView = UITableView()
     

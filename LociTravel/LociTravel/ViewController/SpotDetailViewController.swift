@@ -7,7 +7,7 @@
 
 import UIKit
 
-class SpotDetailViewController: UIViewController, UIScrollViewDelegate {
+class SpotDetailViewController: PortraitOnlyViewController, UIScrollViewDelegate {
     
     // MARK: - Properties
     

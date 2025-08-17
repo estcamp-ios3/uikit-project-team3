@@ -14,7 +14,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // 이 메서드는 새로운 UIWindowScene이 생성될 때 호출됩니다.
         // 앱의 UI를 연결하고, 윈도우를 만들고, 뷰 계층을 설정합니다.
-        
+        print("Has NSCameraUsageDescription:", Bundle.main.object(forInfoDictionaryKey: "NSCameraUsageDescription") != nil)
+        print("Has NSPhotoLibraryAddUsageDescription:", Bundle.main.object(forInfoDictionaryKey: "NSPhotoLibraryAddUsageDescription") != nil)
+
         // 1. UIWindowScene 인스턴스를 가져옵니다.
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
@@ -27,7 +29,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         // 4. HomeViewController를 UINavigationController의 rootViewController로 설정합니다.
         // 이렇게 하면 화면 전환(push/pop) 기능을 사용할 수 있게 됩니다.
-        let navigationController = UINavigationController(rootViewController: homeViewController)
+        let navigationController = RootNavController(rootViewController: homeViewController)
         
         
         // 5. 생성된 UINavigationController를 window의 rootViewController로 설정합니다.

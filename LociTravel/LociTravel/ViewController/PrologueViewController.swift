@@ -7,7 +7,7 @@
 
 import UIKit
 
-class PrologueViewController: UIViewController {
+class PrologueViewController: PortraitOnlyViewController {
 
     // MARK: - Properties
     

@@ -4,7 +4,7 @@ import CoreLocation
 import AVFoundation
 import QuartzCore
 
-final class QuestMapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
+final class QuestMapViewController: PortraitOnlyViewController, MKMapViewDelegate, CLLocationManagerDelegate {
 
     // MARK: Inputs
     var spotName: String

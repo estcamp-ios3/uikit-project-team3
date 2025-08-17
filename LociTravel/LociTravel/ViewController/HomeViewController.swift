@@ -7,7 +7,7 @@
 
 import UIKit
 
-class HomeViewController: UIViewController {
+class HomeViewController: PortraitOnlyViewController {
     private let rootView = HomeView() // 이미 쓰는 HomeView
     
     override func loadView() { view = rootView }

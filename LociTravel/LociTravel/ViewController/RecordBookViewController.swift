@@ -6,7 +6,7 @@
 //
 import UIKit
 
-class RecordBookViewController: UIViewController {
+class RecordBookViewController: PortraitOnlyViewController {
     
     // MARK: - Properties
 

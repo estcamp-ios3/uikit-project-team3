@@ -7,7 +7,7 @@
 
 import UIKit
 
-class EndingCreditsViewController: UIViewController {
+class EndingCreditsViewController: PortraitOnlyViewController {
 
     let participantNames = ["팀장 조호서", "김동우", "송서윤", "채수지"]
     var nameLabels: [UILabel] = []

@@ -7,7 +7,7 @@
 import UIKit
 import AVFoundation
 
-class ScenarioViewController: UIViewController {
+class ScenarioViewController: PortraitOnlyViewController {
     var bgmPlayer: AVAudioPlayer?
     var isMusicOn = true
     var spotName: String

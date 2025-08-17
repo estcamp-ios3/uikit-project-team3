@@ -7,7 +7,7 @@
 
 import UIKit
 
-class EpilogueViewController: UIViewController {
+class EpilogueViewController: PortraitOnlyViewController {
     
     
     private var epilogueView: EpilogueView!

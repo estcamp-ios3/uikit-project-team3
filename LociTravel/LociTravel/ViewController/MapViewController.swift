@@ -1,7 +1,7 @@
 import UIKit
 import MapKit
 
-final class MapViewController: UIViewController {
+final class MapViewController: PortraitOnlyViewController {
 
     private let customMapView = MapView()
 
@@ -116,22 +116,35 @@ final class MapViewController: UIViewController {
     }
 
     @objc private func didTapCameraButton() {
-        let overlay = UIImage(named: "bg")  // 투명 PNG 권장(없으면 nil)
-        CameraService.shared.present(from: self, overlay: UIImage(named: "bg")) { [weak self] image in
-            guard let self = self else { return }
+        PermissionManager.ensureCameraAndAddOnly { [weak self] cam, photos in
+                guard let self else { return }
 
-            // 1) 바로 저장
-            PhotoSaver.save(image, toAlbum: "LociTravel") { [weak self] result in
-                switch result {
-                case .success: self?.toast("사진이 저장되었어요 📸")
-                case .failure(let err): self?.showAlert(title: "저장 실패", message: err.localizedDescription)
+                // 카메라 권한 필수
+                guard cam == .granted else {
+                    self.showGoToSettings("카메라")
+                    return
+                }
+
+                // 사진 추가 권한이 없으면 안내 (촬영은 가능)
+                if photos == .denied {
+                    self.showNotice("사진 보관함 권한이 없어 저장에 실패할 수 있어요.")
+                }
+
+                // 권한 확보 후 카메라 표시
+                CameraService.shared.present(from: self, overlay: UIImage(named: "bg")) { [weak self] image in
+                    guard let self else { return }
+
+                    // 반드시 dismiss 완료 후에 콜백이 온다고 가정 (아래 CameraService 참고)
+                    PhotoSaver.save(image, toAlbum: "LociTravel") { [weak self] result in
+                        switch result {
+                        case .success:
+                            self?.toast("사진이 저장되었어요 📸")
+                        case .failure(let err):
+                            self?.showAlert(title: "저장 실패", message: err.localizedDescription)
+                        }
+                    }
                 }
             }
-
-            // 2) 또는 공유 시트
-            // let av = UIActivityViewController(activityItems: [image], applicationActivities: nil)
-            // self.present(av, animated: true)
-        }
     }
 
     @objc private func didTapMarketButton()   { pushScenario(for: "서동시장") }

@@ -49,4 +49,29 @@ extension UIViewController {
         ac.addAction(UIAlertAction(title: "확인", style: .default))
         present(ac, animated: true)
     }
+    
+    func showGoToSettings(_ what: String) {
+            let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String
+                ?? (Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "앱")
+            let alert = UIAlertController(
+                title: "\(what) 권한 필요",
+                message: "설정 > \(appName)에서 \(what) 권한을 허용해주세요.",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+            alert.addAction(UIAlertAction(title: "설정으로 이동", style: .default, handler: { _ in
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            }))
+            present(alert, animated: true)
+        }
+
+        func showNotice(_ msg: String) {
+            let alert = UIAlertController(title: nil, message: msg, preferredStyle: .alert)
+            present(alert, animated: true)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { [weak self] in
+                self?.dismiss(animated: true)
+            }
+        }
 }

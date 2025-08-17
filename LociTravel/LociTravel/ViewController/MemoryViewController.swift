@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class MemoryViewController: UIViewController {
+final class MemoryViewController: PortraitOnlyViewController {
 
     // ✅ 전달받는 매개변수(지역 이름)
     private let regionName: String
