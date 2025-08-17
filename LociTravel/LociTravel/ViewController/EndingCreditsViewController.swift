@@ -233,21 +233,35 @@ class EndingCreditsViewController: PortraitOnlyViewController {
     }
     
     @objc private func didTapPhotoButton() {
-        // 기존 EpilogueViewController의 기념사진 촬영 로직을 여기에 구현
-        // CameraService, PhotoSaver, toast, showAlert 함수가 필요합니다.
-        // 다음은 예시 코드입니다.
-        let overlay = UIImage(named: "bg")
-        
-        // CameraService.shared.present(from: self, overlay: overlay) { [weak self] image in
-        //     PhotoSaver.save(image, toAlbum: "LociTravel") { result in
-        //         switch result {
-        //         case .success:
-        //             self?.toast("사진이 저장되었어요 📸")
-        //         case .failure(let err):
-        //             self?.showAlert(title: "저장 실패", message: err.localizedDescription)
-        //         }
-        //     }
-        // }
+        PermissionManager.ensureCameraAndAddOnly { [weak self] cam, photos in
+                guard let self else { return }
+
+                // 카메라 권한 필수
+                guard cam == .granted else {
+                    self.showGoToSettings("카메라")
+                    return
+                }
+
+                // 사진 추가 권한이 없으면 안내 (촬영은 가능)
+                if photos == .denied {
+                    self.showNotice("사진 보관함 권한이 없어 저장에 실패할 수 있어요.")
+                }
+
+                // 권한 확보 후 카메라 표시
+                CameraService.shared.present(from: self, overlay: UIImage(named: "bg")) { [weak self] image in
+                    guard let self else { return }
+
+                    // 반드시 dismiss 완료 후에 콜백이 온다고 가정 (아래 CameraService 참고)
+                    PhotoSaver.save(image, toAlbum: "LociTravel") { [weak self] result in
+                        switch result {
+                        case .success:
+                            self?.toast("사진이 저장되었어요 📸")
+                        case .failure(let err):
+                            self?.showAlert(title: "저장 실패", message: err.localizedDescription)
+                        }
+                    }
+                }
+            }
     }
 }
 
